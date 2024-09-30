@@ -11,14 +11,8 @@ const ProdList = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [starClicked, setStarClicked] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [label, setLabel] = useState("");
-  const [image, setImage] = useState(null);
-  const [initialStock, setInitialStock] = useState("");
-  const [currentStock, setCurrentStock] = useState("");
-  const [color, setColor] = useState("#ffffff");
-  const [description, setDescription] = useState("");
+  const [currentProduct, setCurrentProduct] = useState(null);
   const [products, setProducts] = useState([]); // State to hold product data
-  const { Products } = useContext(GlobalState);
 
   useEffect(() => {
     const handleResize = () => {
@@ -45,12 +39,12 @@ const ProdList = () => {
     fetchProducts(); // Call the function to fetch products
   }, []);
 
-  const deleteItem = () => {
-    // Implement your delete logic here
-    console.log("Item deleted");
+  const deleteItem = (productId) => {
+    // Implement your delete logic here using productId
+    console.log("Item deleted:", productId);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (productId) => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
       text: t("Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"),
@@ -61,10 +55,10 @@ const ProdList = () => {
       cancelButtonText: t("Non, annuler !")
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteItem();
+        deleteItem(productId);
         Swal.fire({
           title: "Supprimer",
-          text: "Votre élément est Supprimer :)",
+          text: "Votre élément est Supprimé :)",
           icon: "success",
           confirmButtonColor: "#b0210e",
         });
@@ -79,90 +73,21 @@ const ProdList = () => {
     });
   };
 
-  const handleBan = () => {
-    Swal.fire({
-      title: t("Êtes-vous sûr(e) ?"),
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#b0210e",
-      confirmButtonText: t("Oui, désactivez-le !"),
-      cancelButtonText: t("Non, annuler !")
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteItem(); // Replace with your deactivate logic
-        Swal.fire({
-          title: "Desactiver",
-          text: "Votre élément est Desactiver :)",
-          icon: "success",
-          confirmButtonColor: "#b0210e",
-        });
-      } else {
-        Swal.fire({
-          title: "Annulé",
-          text: "Votre élément est en sécurité :)",
-          icon: "error",
-          confirmButtonColor: "#b0210e",
-        });
-      }
-    });
+  const handleEditClick = (product) => {
+    setCurrentProduct(product); // Set the current product for editing
+    setShowEditModal(true);
   };
 
-  const handleArrowClick = () => {
-    Swal.fire({
-      title: t("Êtes-vous sûr(e) ?"),
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#b0210e",
-      confirmButtonText: t("Oui, mettre à l'une !"),
-      cancelButtonText: t("Non, annuler !")
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Toggle starClicked state
-        setStarClicked(!starClicked);
-        Swal.fire({
-          title: "Effectuer",
-          text: "Votre élément est Effectuer :)",
-          icon: "success",
-          confirmButtonColor: "#b0210e",
-        });
-      } else {
-        Swal.fire({
-          title: "Annulé",
-          text: "Votre élément est en sécurité :)",
-          icon: "error",
-          confirmButtonColor: "#b0210e",
-        });
-      }
-    });
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setCurrentProduct(null); // Clear the current product
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Here you would typically handle the form submission,
-    // like sending data to a server.
-    console.log({
-      label,
-      image,
-      initialStock,
-      currentStock,
-      color,
-      description,
-    });
-    // You can add further logic here, like closing the modal after successful submission
-    setShowEditModal(false);
-  };
-
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
-  };
-
-  const handleEditClick = () => {
-    // Show the edit modal
-    setShowEditModal(true);
-  };
-
-  const handleCloseEditModal = () => {
-    // Close the edit modal
+    // like sending updated data to a server.
+    console.log(currentProduct);
     setShowEditModal(false);
   };
 
@@ -175,30 +100,30 @@ const ProdList = () => {
           </div>
           <div className="card-body">
             {isMobile ? (
-              products.map((product, index) => ( // Display each product in mobile view
+              products.map((product, index) => (
                 <Table responsive="sm" key={index}>
                   <tbody>
                     <tr>
                       <td>{t("Image")}</td>
                       <td>
-                        <img className="imgtable" src={product.image || "./Mazed.jpg"} alt="img" />
+                        <img className="imgtable" src={product.galerie[0] || "./Mazed.jpg"} alt="img" />
                       </td>
                     </tr>
                     <tr>
                       <td>{t("Réf")}</td>
-                      <td>{product.ref}</td>
+                      <td>{product.reference}</td>
                     </tr>
                     <tr>
                       <td>{t("Libellé")}</td>
-                      <td>{product.label}</td>
+                      <td>{product.libelleProductFr}</td>
                     </tr>
                     <tr>
                       <td>{t("Stock initial")}</td>
-                      <td>{product.initialStock}</td>
+                      <td>{product.stockInitiale}</td>
                     </tr>
                     <tr>
-                      <td>{t("Stock actuel")}</td>
-                      <td>{product.currentStock}</td>
+                      <td>{t("Prix")}</td>
+                      <td>{product.prixPrincipale}</td>
                     </tr>
                     <tr>
                       <td>{t("Statut")}</td>
@@ -217,7 +142,7 @@ const ProdList = () => {
                     <tr>
                       <td>{t("Modifier")}</td>
                       <td>
-                        <button className="btn btn-outline block" onClick={handleEditClick}>
+                        <button className="btn btn-outline block" onClick={() => handleEditClick(product)}>
                           <i className="fa-solid fa-pen-to-square font-medium-1"></i>
                         </button>
                       </td>
@@ -225,22 +150,22 @@ const ProdList = () => {
                     <tr>
                       <td>{t("Supprimer")}</td>
                       <td>
-                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={handleDelete}></i>
+                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product.id)}></i>
                       </td>
                     </tr>
                     <tr>
                       <td>{t("Désactiver")}</td>
                       <td>
-                        <i className="fa-solid fa-ban blockIcon" onClick={handleBan}></i>
+                        <i className="fa-solid fa-ban blockIcon"></i>
                       </td>
                     </tr>
                     <tr>
                       <td>{t("Mettre à l'une")}</td>
                       <td>
                         {starClicked ? (
-                          <i className="fa-solid fa-star arrowIcon" onClick={handleArrowClick}></i>
+                          <i className="fa-solid fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
                         ) : (
-                          <i className="fa-regular fa-star arrowIcon" onClick={handleArrowClick}></i>
+                          <i className="fa-regular fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
                         )}
                       </td>
                     </tr>
@@ -255,7 +180,7 @@ const ProdList = () => {
                     <th>{t("Réf")}</th>
                     <th>{t("Libellé")}</th>
                     <th>{t("Stock initial")}</th>
-                    <th>{t("Stock actuel")}</th>
+                    <th>{t("Prix")}</th>
                     <th>{t("Statut")}</th>
                     <th>{t("Détail")}</th>
                     <th>{t("Modifier")}</th>
@@ -268,12 +193,12 @@ const ProdList = () => {
                   {products.map((product, index) => (
                     <tr key={index}>
                       <td>
-                        <img className="imgtable" src={product.image || "./Mazed.jpg"} alt="img" />
+                        <img className="imgtable" src={product.galerie[0] || "./Mazed.jpg"} alt="img" />
                       </td>
-                      <td>{product.ref}</td>
-                      <td>{product.label}</td>
-                      <td>{product.initialStock}</td>
-                      <td>{product.currentStock}</td>
+                      <td>{product.reference}</td>
+                      <td>{product.libelleProductFr}</td>
+                      <td>{product.stockInitiale}</td>
+                      <td>{product.prixPrincipale}</td>
                       <td>
                         <button className="btn btn-secondary">{t("Publié")}</button>
                       </td>
@@ -283,21 +208,21 @@ const ProdList = () => {
                         </Link>
                       </td>
                       <td>
-                        <button className="btn btn-outline block" onClick={handleEditClick}>
+                        <button className="btn btn-outline block" onClick={() => handleEditClick(product)}>
                           <i className="fa-solid fa-pen-to-square font-medium-1"></i>
                         </button>
                       </td>
                       <td>
-                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={handleDelete}></i>
+                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product.id)}></i>
                       </td>
                       <td>
-                        <i className="fa-solid fa-ban blockIcon" onClick={handleBan}></i>
+                        <i className="fa-solid fa-ban blockIcon"></i>
                       </td>
                       <td>
                         {starClicked ? (
-                          <i className="fa-solid fa-star arrowIcon" onClick={handleArrowClick}></i>
+                          <i className="fa-solid fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
                         ) : (
-                          <i className="fa-regular fa-star arrowIcon" onClick={handleArrowClick}></i>
+                          <i className="fa-regular fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
                         )}
                       </td>
                     </tr>
@@ -314,69 +239,32 @@ const ProdList = () => {
           <Modal.Title>{t("Modifier le produit")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="label" className="form-label">{t("Libellé")}</label>
-              <input
-                type="text"
-                className="form-control"
-                id="label"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="image" className="form-label">{t("Image")}</label>
-              <input
-                type="file"
-                className="form-control"
-                id="image"
-                onChange={handleImageChange}
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="initialStock" className="form-label">{t("Stock initial")}</label>
-              <input
-                type="number"
-                className="form-control"
-                id="initialStock"
-                value={initialStock}
-                onChange={(e) => setInitialStock(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="currentStock" className="form-label">{t("Stock actuel")}</label>
-              <input
-                type="number"
-                className="form-control"
-                id="currentStock"
-                value={currentStock}
-                onChange={(e) => setCurrentStock(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="color" className="form-label">{t("Couleur")}</label>
-              <input
-                type="color"
-                className="form-control"
-                id="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="description" className="form-label">{t("Description")}</label>
-              <textarea
-                className="form-control"
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <Button variant="primary" type="submit">
-              {t("Soumettre")}
-            </Button>
-          </form>
+          {currentProduct && (
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="libelleProductFr" className="form-label">{t("Libellé")}</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="libelleProductFr"
+                  value={currentProduct.libelleProductFr}
+                  onChange={(e) => setCurrentProduct({ ...currentProduct, libelleProductFr: e.target.value })}
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="prixPrincipale" className="form-label">{t("Prix")}</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  id="prixPrincipale"
+                  value={currentProduct.prixPrincipale}
+                  onChange={(e) => setCurrentProduct({ ...currentProduct, prixPrincipale: e.target.value })}
+                />
+              </div>
+              {/* Add more fields as necessary */}
+              <Button variant="primary" type="submit">{t("Sauvegarder")}</Button>
+            </form>
+          )}
         </Modal.Body>
       </Modal>
     </div>

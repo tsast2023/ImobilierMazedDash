@@ -255,7 +255,7 @@ const CatCreate = () => {
             </div>
           </div>
         </div>
-        <div className="card-footer d-flex justify-content-end">
+        <div className="card-footer d-flex justify-content-end"> 
           <button type="button" className="btn btn-secondary me-3" onClick={goBack}>
             {t("Annuler")}
           </button>
