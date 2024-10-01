@@ -24,7 +24,7 @@ const ProdCreate = () => {
   });
 
   const goBack = () => {
-    window.history.back(); // Simulate a browser back button
+    window.history.back();
   };
 
   useEffect(() => {

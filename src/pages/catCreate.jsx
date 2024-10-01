@@ -1,33 +1,24 @@
-import React, { useContext, useEffect, useState } from "react";
-import Choices from "choices.js";
-import "choices.js/public/assets/styles/choices.css";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { GlobalState } from "../GlobalState";
-import { useTranslation } from "react-i18next";
 import axios from "axios";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 const CatCreate = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
   const [data, setData] = useState({
     libCategorie: "",
     libCategorieEN: "",
     libCategorieAR: "",
-    parentCategoryNames: [],
-    criteres: [],
+    parentCategoryId: "",
   });
 
-  const [inputs, setInputs] = useState([]);
+  const [inputs, setInputs] = useState([
+    { criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" },
+  ]);
   const [icon, setIcon] = useState(null);
   const [parentCategories, setParentCategories] = useState([]);
   const state = useContext(GlobalState);
-  const categoriess = state.Categories;
-  const { t } = useTranslation();
 
-  const goBack = () => {
-    window.history.back();
-  };
-
-  // Fetch parent categories
+  // Fetch parent categories on component mount
   useEffect(() => {
     const fetchParentCategories = async () => {
       try {
@@ -41,39 +32,16 @@ const CatCreate = () => {
     fetchParentCategories();
   }, []);
 
-  // Initialize Choices.js for category selects
-  useEffect(() => {
-    const categorySelect = new Choices("#category-select", {
-      removeItemButton: true,
-      placeholder: true,
-      placeholderValue: "Select an option",
-      shouldSort: false,
-    });
+  const handleSelectChange = (e) => {
+    const selectedValue = e.target.value;
+    setData({ ...data, parentCategoryId: selectedValue });
 
-    const handleSelectChange = () => {
-      const hasSelection = categorySelect.getValue().length > 0;
-      setIsEnabled(hasSelection);
-      if (!hasSelection) {
-        setInputs([]);
-      }
-    };
-
-    // Event listener for select changes
-    categorySelect.passedElement.element.addEventListener("change", handleSelectChange);
-
-    return () => {
-      categorySelect.passedElement.element.removeEventListener("change", handleSelectChange);
-      categorySelect.destroy();
-    };
-  }, [categoriess]);
-
-  const handleAddInput = () => {
-    const newInput = {
-      criteresNames: "",
-      criteresNamesEn: "",
-      criteresNamesAr: "",
-    };
-    setInputs([...inputs, newInput]);
+    // Reset criteria inputs if a category is selected
+    if (selectedValue) {
+      setInputs([{ criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" }]);
+    } else {
+      setInputs([]); // Clear inputs if no category is selected
+    }
   };
 
   const submitCat = async (e) => {
@@ -84,46 +52,71 @@ const CatCreate = () => {
     formData.append("libCategorie", data.libCategorie);
     formData.append("libCategorieAR", data.libCategorieAR);
     formData.append("libCategorieEN", data.libCategorieEN);
-    formData.append("parentCategoryNames", data.parentCategoryNames.join(","));
+    
+    // Append parentCategoryId only if it exists
+    if (data.parentCategoryId) {
+      formData.append("parentCategoryId", data.parentCategoryId);
+    } else {
+      // If no parent category is selected, we are creating a top-level category
+      formData.append("type", "CATEGORYPARENTE"); // This could be used by your API to determine the type
+    }
 
-    // Append criteria data
-    inputs.forEach((item) => {
-      formData.append("criteresNames", item.criteresNames);
-      formData.append("criteresNamesEn", item.criteresNamesEn);
-      formData.append("criteresNamesAr", item.criteresNamesAr);
-    });
+    // Check if criteria are filled
+    if (data.parentCategoryId && inputs.length > 0) {
+      inputs.forEach((item) => {
+        if (item.criteresNames || item.criteresNamesEn || item.criteresNamesAr) {
+          // Append each criterion to the form data
+          formData.append("criteresNames[]", item.criteresNames);
+          formData.append("criteresNamesEn[]", item.criteresNamesEn);
+          formData.append("criteresNamesAr[]", item.criteresNamesAr);
+        }
+      });
+    } else {
+      // If no criteria provided, show an alert
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Please select a parent category and provide at least one criterion to create a child category.",
+      });
+      return;
+    }
 
     // Append the icon file if it's selected
     if (icon) {
       formData.append("icon", icon);
     }
 
+    // Debugging output
+    console.log("Submitting form data:", {
+      libCategorie: data.libCategorie,
+      libCategorieAR: data.libCategorieAR,
+      libCategorieEN: data.libCategorieEN,
+      parentCategoryId: data.parentCategoryId,
+      criteres: inputs,
+      icon,
+    });
+
     try {
-      const res = await axios.post(
-        "http://localhost:8082/api/categories/create",
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const res = await axios.post("http://localhost:8082/api/categories/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Category created successfully!',
+        icon: "success",
+        title: "Success!",
+        text: "Category created successfully!",
       });
       console.log("Response data:", res.data);
     } catch (error) {
       if (error.response) {
-        console.log("Error data:", error.response.data);
-        console.log("Error status:", error.response.status);
+        console.log("Error response data:", error.response.data);
+        console.log("Error response status:", error.response.status);
       } else if (error.request) {
         console.log("Error request:", error.request);
       } else {
         console.log("Error message:", error.message);
       }
-      console.log("Config:", error.config);
     }
   };
 
@@ -135,22 +128,13 @@ const CatCreate = () => {
     <div className="content-container">
       <form onSubmit={submitCat} className="card">
         <div className="card-header d-flex justify-content-between align-items-center">
-          <h2 className="card-title">{t("Créer une catégorie")}</h2>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleAddInput}
-            disabled={!isEnabled}
-            style={{ backgroundColor: !isEnabled ? "#b0210e" : "" }}
-          >
-            +
-          </button>
+          <h2 className="card-title">Créer une catégorie</h2>
         </div>
         <div className="card-body">
           <div className="row">
             <div className="col-md-12">
               <div className="form-group">
-                <label htmlFor="basicInput">{t("Libellé")}</label>
+                <label htmlFor="basicInput">Libellé</label>
                 <input
                   onChange={(e) => {
                     setData({ ...data, libCategorie: e.target.value });
@@ -158,10 +142,11 @@ const CatCreate = () => {
                   type="text"
                   className="form-control"
                   id="basicInput"
+                  required
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="libelleEng">{t("Libellé en Anglais")}</label>
+                <label htmlFor="libelleEng">Libellé en Anglais</label>
                 <input
                   onChange={(e) => {
                     setData({ ...data, libCategorieEN: e.target.value });
@@ -169,10 +154,11 @@ const CatCreate = () => {
                   type="text"
                   className="form-control"
                   id="libelleEng"
+                  required
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="libelleArab">{t("Libellé en Arabe")}</label>
+                <label htmlFor="libelleArab">Libellé en Arabe</label>
                 <input
                   onChange={(e) => {
                     setData({ ...data, libCategorieAR: e.target.value });
@@ -180,71 +166,88 @@ const CatCreate = () => {
                   type="text"
                   className="form-control"
                   id="libelleArab"
+                  required
                 />
               </div>
               <div className="form-group" style={{ marginBottom: "15px" }}>
-                <label htmlFor="category-select">{t("Catégories")}</label>
+                <label htmlFor="category-select">Catégories</label>
                 <select
                   id="category-select"
-                  className="choices form-select multiple-remove"
-                  multiple
+                  className="form-select"
+                  value={data.parentCategoryId}
+                  onChange={handleSelectChange}
+                  required
                 >
-                  <optgroup>
-                    {categoriess ? (
-                      categoriess.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.libCategorie}
-                        </option>
-                      ))
-                    ) : (
-                      <option>loading</option>
-                    )}
-                  </optgroup>
+                  <option value="">Select a parent category</option>
+                  {parentCategories.length > 0 ? (
+                    parentCategories.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.libCategorie}
+                      </option>
+                    ))
+                  ) : (
+                    <option>Loading...</option>
+                  )}
                 </select>
               </div>
 
-              {inputs.map((input, index) => (
-                <div key={index} className="form-group" style={{ marginTop: "15px" }}>
-                  <label htmlFor={`criteresNames-${index}`}>{t("Critère en Français")}</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={input.criteresNames}
-                    onChange={(e) => {
-                      const newInputs = [...inputs];
-                      newInputs[index].criteresNames = e.target.value;
-                      setInputs(newInputs);
-                    }}
-                    style={{ marginTop: "10px" }}
-                  />
-                  <label htmlFor={`criteresNamesEn-${index}`}>{t("Critère en Anglais")}</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={input.criteresNamesEn}
-                    onChange={(e) => {
-                      const newInputs = [...inputs];
-                      newInputs[index].criteresNamesEn = e.target.value;
-                      setInputs(newInputs);
-                    }}
-                    style={{ marginTop: "10px" }}
-                  />
-                  <label htmlFor={`criteresNamesAr-${index}`}>{t("Critère en Arabe")}</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={input.criteresNamesAr}
-                    onChange={(e) => {
-                      const newInputs = [...inputs];
-                      newInputs[index].criteresNamesAr = e.target.value;
-                      setInputs(newInputs);
-                    }}
-                    style={{ marginTop: "10px" }}
-                  />
+              {data.parentCategoryId && (
+                <div>
+                  {inputs.map((input, index) => (
+                    <div
+                      key={index}
+                      className="form-group"
+                      style={{ marginTop: "15px" }}
+                    >
+                      <label htmlFor={`criteresNames-${index}`}>
+                        Critère en Français
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={input.criteresNames}
+                        onChange={(e) => {
+                          const newInputs = [...inputs];
+                          newInputs[index].criteresNames = e.target.value;
+                          setInputs(newInputs);
+                        }}
+                        required
+                      />
+                      <label htmlFor={`criteresNamesEn-${index}`}>
+                        Critère en Anglais
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={input.criteresNamesEn}
+                        onChange={(e) => {
+                          const newInputs = [...inputs];
+                          newInputs[index].criteresNamesEn = e.target.value;
+                          setInputs(newInputs);
+                        }}
+                        required
+                      />
+                      <label htmlFor={`criteresNamesAr-${index}`}>
+                        Critère en Arabe
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={input.criteresNamesAr}
+                        onChange={(e) => {
+                          const newInputs = [...inputs];
+                          newInputs[index].criteresNamesAr = e.target.value;
+                          setInputs(newInputs);
+                        }}
+                        required
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
               <div className="form-group" style={{ marginTop: "15px" }}>
-                <label htmlFor="iconInput">{t("Icon")}</label>
+                <label htmlFor="iconInput">Icon</label>
                 <input
                   type="file"
                   className="form-control"
@@ -254,14 +257,9 @@ const CatCreate = () => {
               </div>
             </div>
           </div>
-        </div>
-        <div className="card-footer d-flex justify-content-end"> 
-          <button type="button" className="btn btn-secondary me-3" onClick={goBack}>
-            {t("Annuler")}
-          </button>
-          <button type="submit" className="btn btn-primary">
-            {t("Enregistrer")}
-          </button>
+          <div className="d-flex justify-content-end" style={{ marginTop: "20px" }}>
+            <button type="submit" className="btn btn-primary">Créer</button>
+          </div>
         </div>
       </form>
     </div>
