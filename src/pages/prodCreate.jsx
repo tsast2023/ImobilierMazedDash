@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios"; // Import axios for API calls
-import Choices from "choices.js";
-import "choices.js/public/assets/styles/choices.css";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const ProdCreate = () => {
   const [withColor, setWithColor] = useState(null); // null initially, then true for "Yes" and false for "No"
   const [inputs, setInputs] = useState([{ color: "", image: "" }]); // Dynamic inputs
-  const [categories, setCategories] = useState([]); // State to store categories
+  const [parentCategories, setParentCategories] = useState([]); // State to store parent categories
+  const [categoriesFille, setCategoriesFille] = useState([]); // State to store child categories
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     libelle: "",
@@ -20,7 +19,8 @@ const ProdCreate = () => {
     description: "",
     descriptionAnglais: "",
     descriptionArab: "",
-    selectedCategories: []
+    parentCategoryId: "", // For the selected parent category
+    selectedCategoriesFille: [],
   });
 
   const goBack = () => {
@@ -28,25 +28,23 @@ const ProdCreate = () => {
   };
 
   useEffect(() => {
-    // Fetch categories from the backend API
+    // Fetch parent categories from the backend API
+    axios.get("http://localhost:8082/api/categories/parents")
+      .then(response => {
+        setParentCategories(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching parent categories:", error);
+      });
+
+    // Fetch all categories for child categories
     axios.get("http://localhost:8082/api/categories/getAll")
       .then(response => {
-        setCategories(response.data);
+        setCategoriesFille(response.data);
       })
       .catch(error => {
         console.error("Error fetching categories:", error);
       });
-
-    // Apply Choices.js only to select elements
-    const categoryChoices = new Choices(".category-choices", {
-      removeItemButton: true,
-      maxItemCount: 5, // Maximum number of items allowed to select
-    });
-
-    // Cleanup function
-    return () => {
-      categoryChoices.destroy();
-    };
   }, []);
 
   const handleImageChange = (e, index) => {
@@ -79,17 +77,18 @@ const ProdCreate = () => {
     });
   };
 
-  const handleCategoryChange = (e) => {
-    const options = e.target.options;
-    const selected = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value);
-      }
-    }
+  const handleCategoryFilleChange = (e) => {
+    const selected = Array.from(e.target.selectedOptions).map(option => option.value);
     setFormData({
       ...formData,
-      selectedCategories: selected,
+      selectedCategoriesFille: selected,
+    });
+  };
+
+  const handleSelectChange = (e) => {
+    setFormData({
+      ...formData,
+      parentCategoryId: e.target.value, // Set the selected parent category ID
     });
   };
 
@@ -104,7 +103,8 @@ const ProdCreate = () => {
     data.append("description", formData.description);
     data.append("descriptionAnglais", formData.descriptionAnglais);
     data.append("descriptionArab", formData.descriptionArab);
-    data.append("categories", formData.selectedCategories);
+    data.append("parentCategoryId", formData.parentCategoryId);
+    data.append("categoriesFille", formData.selectedCategoriesFille);
 
     // Append dynamic inputs (colors and images)
     inputs.forEach((input, index) => {
@@ -274,102 +274,105 @@ const ProdCreate = () => {
                       </div>
                     </div>
 
-                    {/* Category Selection */}
+                    {/* Parent Category Selection */}
                     <div className="col-12">
-                      <label>{t("Catégories")}</label>
-                      <div className="form-group">
+                      <div className="form-group" style={{ marginBottom: "15px" }}>
+                        <label htmlFor="category-select">{t("Catégorie Parent")}</label>
                         <select
-                          name="categories"
-                          className="choices category-choices form-select multiple-remove"
-                          multiple="multiple"
-                          value={formData.selectedCategories}
-                          onChange={handleCategoryChange}
+                          id="category-select"
+                          className="form-select"
+                          value={formData.parentCategoryId}
+                          onChange={handleSelectChange}
+                          required
                         >
-                          {categories.map(category => (
+                          <option value="">Select a parent category</option>
+                          {parentCategories.length > 0 ? (
+                            parentCategories.map((item) => (
+                              <option key={item.id} value={item.id}>
+                                {item.libCategorie}
+                              </option>
+                            ))
+                          ) : (
+                            <option>Loading...</option>
+                          )}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Child Category Selection */}
+                    <div className="col-12">
+                      <div className="form-group">
+                        <label htmlFor="categoriesFille">{t("Catégorie Fille")}</label>
+                        <select
+                          multiple
+                          className="form-control"
+                          onChange={handleCategoryFilleChange}
+                          id="categoriesFille"
+                        >
+                          {categoriesFille.map((category) => (
                             <option key={category.id} value={category.id}>
-                              {category.name}
+                              {category.libelle}
                             </option>
                           ))}
                         </select>
                       </div>
                     </div>
 
-                    {/* With Color Selection */}
+                    {/* Handle Color Inputs */}
                     <div className="col-12">
                       <div className="form-group">
-                        <label>{t("Avec Couleur ?")}</label>
-                        <select
-                          name="withColor"
-                          className="form-select"
-                          value={withColor === true ? "yes" : withColor === false ? "no" : ""}
-                          onChange={handleWithColorChange}
-                        >
-                          <option value="">{t("Sélectionnez une option")}</option>
-                          <option value="yes">{t("Oui")}</option>
-                          <option value="no">{t("Non")}</option>
-                        </select>
+                        <label>{t("Utiliser des couleurs ?")}</label>
+                        <div>
+                          <select onChange={handleWithColorChange} className="form-control">
+                            <option value="no">{t("Non")}</option>
+                            <option value="yes">{t("Oui")}</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Dynamic Inputs (Color and Image) */}
-                    {withColor &&
-                      inputs.map((input, index) => (
-                        <div className="row" key={index}>
-                          <div className="col-6">
-                            <label>{t("Couleur")}</label>
-                            <input
-                              type="text"
-                              value={input.color}
-                              onChange={(e) => handleColorChange(e, index)}
-                              className="form-control"
-                            />
-                          </div>
-                          <div className="col-6">
-                            <label>{t("Image")}</label>
-                            <input
-                              type="file"
-                              onChange={(e) => handleImageChange(e, index)}
-                              className="form-control"
-                            />
-                          </div>
-                        </div>
-                      ))}
-
-                    {/* Add More Inputs Button */}
-                    {withColor && (
+                    {withColor !== null && (
                       <div className="col-12">
-                        <button
-                          type="button"
-                          className="btn btn-secondary"
-                          onClick={addInput}
-                        >
-                          +
-                        </button>
+                        <div className="form-group">
+                          <label>{t("Couleurs")}</label>
+                          {inputs.map((input, index) => (
+                            <div key={index} className="row">
+                              <div className="col-6">
+                                <input
+                                  type="text"
+                                  placeholder={t("Couleur")}
+                                  value={input.color}
+                                  onChange={(e) => handleColorChange(e, index)}
+                                  className="form-control"
+                                />
+                              </div>
+                              <div className="col-6">
+                                <input
+                                  type="file"
+                                  onChange={(e) => handleImageChange(e, index)}
+                                  className="form-control"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                          <button type="button" onClick={addInput} className="btn btn-secondary">
+                            {t("Ajouter une couleur")}
+                          </button>
+                        </div>
                       </div>
                     )}
 
-                    {/* Form Footer */}
-                    <div className="modal-footer">
-                      <button
-                        type="button"
-                        className="btn btn-light-secondary me-2"
-                        data-bs-dismiss="modal"
-                      >
-                        <i className="bx bx-x d-block d-sm-none"></i>
-                        <span
-                          className="d-none d-sm-block btn btn-secondary me-3"
-                          onClick={goBack}
-                        >
-                          {t("Annuler")}
-                        </span>
+                    {/* Submit Button */}
+                    <div className="col-12 d-flex justify-content-end">
+                      <button type="button" onClick={handleSubmit} className="btn btn-primary">
+                        {t("Créer le produit")}
                       </button>
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        id="suivantBtn"
-                        onClick={handleSubmit}
-                      >
-                        {t("Suivant")}
+                    </div>
+
+                    {/* Go Back Button */}
+                    <div className="col-12 d-flex justify-content-start">
+                      <button type="button" onClick={goBack} className="btn btn-danger">
+                        {t("Retour")}
                       </button>
                     </div>
                   </div>
