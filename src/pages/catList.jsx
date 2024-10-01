@@ -13,6 +13,7 @@ function CategoryList() {
   const navigate = useNavigate();
   const state = useContext(GlobalState);
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]); // New state for filtered categories
   const [isMobile, setIsMobile] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -20,6 +21,11 @@ function CategoryList() {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
   const [pageCount, setPageCount] = useState(0);
+  
+  // Filter states
+  const [filterType, setFilterType] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterEtat, setFilterEtat] = useState("");
 
   useEffect(() => {
     const handleResize = () => {
@@ -39,6 +45,7 @@ function CategoryList() {
           "http://localhost:8082/api/categories/getAll"
         );
         setCategories(response.data);
+        setFilteredCategories(response.data); // Initialize filtered categories
         setPageCount(Math.ceil(response.data.length / itemsPerPage)); // Set total page count
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -47,6 +54,19 @@ function CategoryList() {
 
     fetchCategories();
   }, [itemsPerPage]);
+
+  useEffect(() => {
+    // Update the filtered categories whenever filters change
+    const filtered = categories.filter((cat) => {
+      const matchesType = filterType ? cat.type === filterType : true;
+      const matchesStatus = filterStatus ? cat.status === filterStatus : true;
+      const matchesEtat = filterEtat ? cat.etat === filterEtat : true;
+      return matchesType && matchesStatus && matchesEtat;
+    });
+    setFilteredCategories(filtered);
+    setPageCount(Math.ceil(filtered.length / itemsPerPage)); // Update page count
+    setCurrentPage(0); // Reset to first page on filter change
+  }, [filterType, filterStatus, filterEtat, categories, itemsPerPage]);
 
   const handlePageChange = (selectedPage) => {
     setCurrentPage(selectedPage.selected); // Update current page
@@ -57,7 +77,7 @@ function CategoryList() {
     setCurrentPage(0); // Reset to first page when items per page changes
   };
 
-  const currentItems = categories.slice(
+  const currentItems = filteredCategories.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
@@ -249,18 +269,20 @@ function CategoryList() {
                 </button>
               </td>
               <td>
-                <i
-                  className="fa-solid fa-circle-check"
-                  style={{ color: "green" }}
+                <button
                   onClick={() => activateCategory(cat.id)}
-                ></i>
+                  className="btn"
+                >
+                  <i className="fa-solid fa-check"></i>
+                </button>
               </td>
-
               <td>
-                <i
-                  className="fa-solid fa-ban"
+                <button
                   onClick={() => deactivateCategory(cat.id)}
-                ></i>
+                  className="btn"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
               </td>
               <td>
                 <i
@@ -272,7 +294,7 @@ function CategoryList() {
           ))
         ) : (
           <tr>
-            <td colSpan="5">No categories available</td>
+            <td colSpan="7">No categories available</td>
           </tr>
         )}
       </tbody>
@@ -281,131 +303,100 @@ function CategoryList() {
 
   return (
     <div className="content-container">
-      <div id="main">
-        <header className="mb-3">
-          <a href="#" className="burger-btn d-block d-xl-none">
-            <i className="bi bi-justify fs-3"></i>
-          </a>
-        </header>
-        <section className="section">
-          <div className="row" id="table-head">
-            <div className="col-12">
-              <div className="card">
-                <div className="card-header">
-                  <h2 className="new-price">{t("Liste de catégories")}</h2>
-                </div>
-                <div className="card-content">
-                  <div className="row" style={{ padding: "0 20px" }}>
-                    <div className="col-md-4 mb-4">
-                      <h6>{t("Type")}</h6>
-                      <fieldset className="form-group">
-                        <select className="form-select" id="basicSelect1">
-                          <option disabled selected>
-                            {t("Choisissez le type")}
-                          </option>
-                          <option> {t("Parente")} </option>
-                          <option> {t("Fille")} </option>
-                        </select>
-                      </fieldset>
-                    </div>
-                    <div className="col-md-4 mb-4">
-                      <h6>{t("Statut")}</h6>
-                      <fieldset className="form-group">
-                        <select className="form-select" id="basicSelect2">
-                          <option disabled selected>
-                            {t("Choisissez le statut")}
-                          </option>
-                          <option> {t("Actif")} </option>
-                          <option> {t("Inactif")} </option>
-                        </select>
-                      </fieldset>
-                    </div>
-                    <div className="col-md-4 mb-4">
-                      <h6>{t("Etat")}</h6>
-                      <fieldset className="form-group">
-                        <select className="form-select" id="basicSelect2">
-                          <option disabled selected>
-                            {t("Choisissez le statut")}
-                          </option>
-                          <option> {t("Actif")} </option>
-                          <option> {t("Inactif")} </option>
-                        </select>
-                      </fieldset>
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      marginBottom: "10px",
-                      marginRight: "20px",
-                    }}
-                  >
-                    <label
-                      htmlFor="itemsPerPage"
-                      style={{ marginRight: "10px" }}
-                    >
-                      <h6>{t("Items par page:")}</h6>
-                    </label>
-                    <select
-                      id="itemsPerPage"
-                      value={itemsPerPage}
-                      onChange={handleItemsPerPageChange}
-                    >
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={15}>15</option>
-                      <option value={20}>20</option>
-                    </select>
-                  </div>
-                  <div className="row" style={{ padding: "0 20px" }}>
-                    <div style={{ textAlign: "center" }}>
-                      {isMobile ? renderMobileTable() : renderDesktopTable()}
-                    </div>
-                  </div>
-                  <ReactPaginate
-                    previousLabel={"← Previous"}
-                    nextLabel={"Next →"}
-                    breakLabel={"..."}
-                    pageCount={pageCount}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={3}
-                    onPageChange={handlePageChange}
-                    containerClassName={"pagination"}
-                    activeClassName={"active"}
-                    className="react-paginate"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+      <h1 className="text-center">{t("Liste des Catégories")}</h1>
+      <div className="form-group">
+        <label htmlFor="itemsPerPage">{t("Items par page:")}</label>
+        <select
+          className="form-select"
+          id="itemsPerPage"
+          value={itemsPerPage}
+          onChange={handleItemsPerPageChange}
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+        </select>
       </div>
+
+      <div className="row" style={{ padding: "0 20px" }}>
+        <div className="col-md-4 mb-4">
+          <h6>{t("Type")}</h6>
+          <fieldset className="form-group">
+            <select
+              className="form-select"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="">{t("Choisissez le type")}</option>
+              <option value="CATEGORYPARENTE">{t("Parente")}</option>
+              <option value="CATEGORYFILLE">{t("Fille")}</option>
+            </select>
+          </fieldset>
+        </div>
+        <div className="col-md-4 mb-4">
+          <h6>{t("Statut")}</h6>
+          <fieldset className="form-group">
+            <select
+              className="form-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">{t("Choisissez le statut")}</option>
+              <option value="ACTIVER">{t("Activer")}</option>
+              <option value="DESACTIVER">{t("Desactiver")}</option>
+            </select>
+          </fieldset>
+        </div>
+        <div className="col-md-4 mb-4">
+          <h6>{t("Etat")}</h6>
+          <fieldset className="form-group">
+            <select
+              className="form-select"
+              value={filterEtat}
+              onChange={(e) => setFilterEtat(e.target.value)}
+            >
+              <option value="">{t("Choisissez le Etat")}</option>
+              <option value="PUBLIER">{t("Publier")}</option>
+              <option value="BROUILLON">{t("Brouillon")}</option>
+            </select>
+          </fieldset>
+        </div>
+      </div>
+
+      {isMobile ? renderMobileTable() : renderDesktopTable()}
+
+      <ReactPaginate
+        previousLabel={"⏮"}
+        nextLabel={"⏭"}
+        breakLabel={"..."}
+        pageCount={pageCount}
+        marginPagesDisplayed={2}
+        pageRangeDisplayed={5}
+        onPageChange={handlePageChange}
+        containerClassName={"pagination"}
+        pageClassName={"page-item"}
+        pageLinkClassName={"page-link"}
+        previousClassName={"page-item"}
+        previousLinkClassName={"page-link"}
+        nextClassName={"page-item"}
+        nextLinkClassName={"page-link"}
+        breakClassName={"page-item"}
+        breakLinkClassName={"page-link"}
+        activeClassName={"active"}
+      />
 
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
-          <Modal.Title>{t("Modifier la catégorie")}</Modal.Title>
+          <Modal.Title>{t("Modifier Catégorie")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="form-group">
-            <label>{t("Libellé")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.libCategorie : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  libCategorie: e.target.value,
-                })
-              }
-            />
-          </div>
+          {/* Add your modal body contents here */}
+          <p>{t("Modifier les détails de la catégorie :")}</p>
+          <p>{selectedCategory ? selectedCategory.libCategorie : ""}</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleModalClose}>
-            {t("Fermer")}
+            {t("Annuler")}
           </Button>
           <Button variant="primary" onClick={handleModalSave}>
             {t("Sauvegarder")}

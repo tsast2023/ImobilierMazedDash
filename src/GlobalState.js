@@ -183,11 +183,29 @@ export const DataProvider = ({ children }) => {
     getAllRoles();
   }, [token]);
 
+  // New function for fetching filtered categories
+  const fetchFilteredCategories = async (filters) => {
+    try {
+      const { type, status, etat } = filters;
+      const res = await axios.get(`http://localhost:8082/api/categories/filtred`, {
+        params: { type, status, etat },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Filtered Categories:", res.data);
+      setCategories(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const state = {
-    Categories: Categories,
-    Products: Products,
+    Categories,
+    fetchFilteredCategories, // Add the new method to the global state
+    Products,
     tutorials: tutoriel,
-    bids: bids,
+    bids,
     cartes: carteRech,
     Permissions: permissions,
     Roles: roles,
