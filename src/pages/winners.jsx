@@ -1,19 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Modal, Button, Form } from "react-bootstrap";
+import Swal from "sweetalert2";
+import { GlobalState } from "../GlobalState";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Modal, Button } from "react-bootstrap";
+import axios from "axios";
+import ReactPaginate from "react-paginate";
 
-function Winners() {
+function CategoryList() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const state = useContext(GlobalState);
+  const [categories, setCategories] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [additionalTables, setAdditionalTables] = useState([]);
-  const [newTableData, setNewTableData] = useState({
-    date: "",
-    montantPayer: "",
-    montantRestant: "",
-    montantChaqueMois: "",
-  });
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [starClickedMap, setStarClickedMap] = useState({});
+  const [currentPage, setCurrentPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -21,53 +27,254 @@ function Winners() {
     };
 
     window.addEventListener("resize", handleResize);
-
-    // Initial check
     handleResize();
 
-    // Clean up the event listener on component unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleAddTable = () => {
-    setAdditionalTables([
-      ...additionalTables,
-      {
-        id: additionalTables.length + 1,
-        data: [
-          { label: t("Date de paiement"), value: newTableData.date },
-          { label: t("Montant à payer"), value: newTableData.montantPayer },
-          { label: t("Montant restant"), value: newTableData.montantRestant },
-          {
-            label: t("Montant à payer chaque mois"),
-            value: newTableData.montantChaqueMois,
-          },
-        ],
-      },
-    ]);
-    setShowModal(false);
-    setNewTableData({
-      date: "",
-      montantPayer: "",
-      montantRestant: "",
-      montantChaqueMois: "",
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8082/api/categories/getAll"
+        );
+        setCategories(response.data);
+        setPageCount(Math.ceil(response.data.length / itemsPerPage)); // Set total page count
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, [itemsPerPage]);
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
+
+  const currentItems = categories.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
+
+  const handleDeleteModal = (catId) => {
+    Swal.fire({
+      title: t("Êtes-vous sûr(e) ?"),
+      text: t(
+        "Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"
+      ),
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: t("Oui, supprimez-le !"),
+      cancelButtonText: t("Non, annuler !"),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteC(catId);
+        Swal.fire({
+          text: "Supprimé(e) ! Votre élément a été supprimé.",
+          icon: "success",
+          confirmButtonColor: "#b0210e",
+        });
+      } else {
+        Swal.fire({
+          text: "Annulé, Votre élément est en sécurité :)",
+          icon: "error",
+          confirmButtonColor: "#b0210e",
+        });
+      }
     });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTableData({ ...newTableData, [name]: value });
+  const deleteC = async (id) => {
+    try {
+      const res = await axios.delete(
+        `http://localhost:8082/api/categories/delete/${id}`
+      );
+      console.log(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const renderTable = (tableData) => (
-    <table className="table">
+  const handleEdit = (cat) => {
+    setSelectedCategory(cat);
+    setShowModal(true);
+  };
+
+  const handleModalClose = () => {
+    setSelectedCategory(null);
+    setShowModal(false);
+  };
+
+  const handleModalSave = () => {
+    // Implement save logic for edited category
+    setShowModal(false);
+  };
+
+  // New function to handle deactivating a category
+  const deactivateCategory = async (categoryId) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8082/api/categories/desactiver/${categoryId}`
+      );
+      console.log(response.data);
+      Swal.fire({
+        text: t("La catégorie a été désactivée avec succès !"),
+        icon: "success",
+        confirmButtonColor: "#b0210e",
+      });
+    } catch (error) {
+      console.error("Error deactivating category:", error);
+      Swal.fire({
+        text: t("Une erreur s'est produite lors de la désactivation."),
+        icon: "error",
+        confirmButtonColor: "#b0210e",
+      });
+    }
+  };
+
+  const activateCategory = async (categoryId) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8082/api/categories/Activer/${categoryId}`
+      );
+      console.log(response.data);
+      Swal.fire({
+        text: t("La catégorie a été activée avec succès !"),
+        icon: "success",
+        confirmButtonColor: "#b0210e",
+      });
+    } catch (error) {
+      console.error("Error activating category:", error);
+      Swal.fire({
+        text: t("Une erreur s'est produite lors de l' activation."),
+        icon: "error",
+        confirmButtonColor: "#b0210e",
+      });
+    }
+  };
+
+  const renderMobileTable = () => (
+    <table className="table" style={{ width: "100%", textAlign: "center" }}>
       <tbody>
-        {tableData.map((row, index) => (
-          <tr key={index}>
-            <td>{row.label}</td>
-            <td>{row.value}</td>
+        {currentItems.length > 0 ? (
+          currentItems.map((cat, index) => (
+            <React.Fragment key={index}>
+              <tr>
+                <td>{t("Libellé")}</td>
+                <td>{cat.libCategorie}</td>
+              </tr>
+              <tr>
+                <td>{t("Détail")}</td>
+                <td>
+                  <a
+                    onClick={() =>
+                      navigate(`/catdetail/${cat.id}`, { state: { cat } })
+                    }
+                  >
+                    <i className="fa-solid fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <td>{t("Modifier")}</td>
+                <td>
+                  <button className="btn" onClick={() => handleEdit(cat)}>
+                    <i className="fa-solid fa-pen-to-square"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>{t("Supprimer")}</td>
+                <td>
+                  <i
+                    className="fa-solid fa-trash deleteIcon"
+                    onClick={() => handleDeleteModal(cat.id)}
+                  ></i>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <hr />
+                </td>
+              </tr>
+            </React.Fragment>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="2">No categories available</td>
           </tr>
-        ))}
+        )}
+      </tbody>
+    </table>
+  );
+
+  const renderDesktopTable = () => (
+    <table className="table">
+      <thead>
+        <tr>
+          <th>{t("Libellé")}</th>
+          <th>{t("Status")}</th>
+          <th>{t("Détail")}</th>
+          <th>{t("Modifier")}</th>
+          <th>{t("Activer")}</th>
+          <th>{t("Désactiver")}</th>
+          <th>{t("Supprimer")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentItems.length > 0 ? (
+          currentItems.map((cat, index) => (
+            <tr key={index}>
+              <td className="text-bold-500">{cat.libCategorie}</td>
+              <td className="text-bold-500">{cat.status}</td>
+              <td>
+                <a
+                  onClick={() =>
+                    navigate(`/catdetail/${cat.id}`, { state: { cat } })
+                  }
+                >
+                  <i className="fa-solid fa-eye"></i>
+                </a>
+              </td>
+              <td>
+                <button className="btn" onClick={() => handleEdit(cat)}>
+                  <i className="fa-solid fa-pen-to-square"></i>
+                </button>
+              </td>
+              <td>
+                <i
+                  className="fa-solid fa-circle-check"
+                  style={{ color: "green" }}
+                  onClick={() => activateCategory(cat.id)}
+                ></i>
+              </td>
+
+              <td>
+                <i
+                  className="fa-solid fa-ban"
+                  onClick={() => deactivateCategory(cat.id)}
+                ></i>
+              </td>
+              <td>
+                <i
+                  className="fa-solid fa-trash deleteIcon"
+                  onClick={() => handleDeleteModal(cat.id)}
+                ></i>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="5">No categories available</td>
+          </tr>
+        )}
       </tbody>
     </table>
   );
@@ -81,127 +288,94 @@ function Winners() {
           </a>
         </header>
         <section className="section">
-          <div className="row" id="table-contexual">
+          <div className="row" id="table-head">
             <div className="col-12">
               <div className="card">
                 <div className="card-header">
-                  <h2 className="new-price">{t("Liste des gagnants")}</h2>
+                  <h2 className="new-price">{t("Liste de catégories")}</h2>
                 </div>
                 <div className="card-content">
-                  <div className="table-responsive">
-                    {isMobile ? (
-                      <table className="table">
-                        <tbody>
-                          <tr></tr>
-                          <tr>
-                            <td>{t("User")}</td>
-                            <td>
-                              <img
-                                style={{ borderRadius: "50px" }}
-                                className="imgtable"
-                                src="./Mazed.jpg"
-                                alt="img"
-                              />
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>{t("Nom")}</td>
-                            <td>Lorem</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Prénom")}</td>
-                            <td>{t("Lorem Lorem")}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Pseudo")}</td>
-                            <td>{t("Lorem Lorem")}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Email")}</td>
-                            <td>Lorem@Lorem.Lorem</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Enchère")}</td>
-                            <td>
-                              <Link
-                                to="/DetailEnchere"
-                                className="btn btn-outline block"
-                              >
-                                <i className="fa-solid fa-eye font-medium-1"></i>
-                              </Link>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>{t("Type de payement")}</td>
-                            <td>type de payement</td>
-                          </tr>
-                          {/* <tr>
-                            <td>{t("Echéance")}</td>
-                            <td>
-                              <i
-                                className="fa-solid fa-plus"
-                                onClick={() => setShowModal(true)}
-                              ></i>
-                            </td>
-                          </tr> */}
-                          <td colSpan="2">
-                            <hr />
-                          </td>
-                        </tbody>
-                      </table>
-                    ) : (
-                      <table className="table">
-                        <thead>
-                          <tr>
-                            <th>{t("User")}</th>
-                            <th>{t("Nom")}</th>
-                            <th>{t("Prénom")}</th>
-                            <th>{t("Pseudo")}</th>
-                            <th>{t("Enchère")}</th>
-                            <th>{t("Type de paiement")}</th>
-                            <th>{t("Liste echéance")}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>
-                              <img
-                                style={{ borderRadius: "50px" }}
-                                className="imgtable"
-                                src="./Mazed.jpg"
-                                alt="img"
-                              />
-                            </td>
-                            <td>{t("Lorem Lorem")}</td>
-                            <td className="text-bold-500">
-                              {t("Lorem Lorem")}
-                            </td>
-                            <td>Lorem Lorem</td>
-                            <td>
-                              <Link
-                                to="/DetailEnchere"
-                                className="btn btn-outline block"
-                              >
-                                <i className="fa-solid fa-eye font-medium-1"></i>
-                              </Link>
-                            </td>
-                            <td>Payement</td>
-                            {/* <td>
-                              <i
-                                className="fa-solid fa-plus"
-                                onClick={() => setShowModal(true)}
-                              ></i>
-                            </td> */}
-                            <td>
-                              <Link to="/Echéance">
-                              <i className="fa-solid fa-eye"></i>
-                              </Link>
-                              </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    )}
+                  <div className="row" style={{ padding: "0 20px" }}>
+                    <div className="col-md-4 mb-4">
+                      <h6>{t("Type")}</h6>
+                      <fieldset className="form-group">
+                        <select className="form-select" id="basicSelect1">
+                          <option disabled selected>
+                            {t("Choisissez le type")}
+                          </option>
+                          <option> {t("Parente")} </option>
+                          <option> {t("Fille")} </option>
+                        </select>
+                      </fieldset>
+                    </div>
+                    <div className="col-md-4 mb-4">
+                      <h6>{t("Statut")}</h6>
+                      <fieldset className="form-group">
+                        <select className="form-select" id="basicSelect2">
+                          <option disabled selected>
+                            {t("Choisissez le statut")}
+                          </option>
+                          <option> {t("Activer")} </option>
+                          <option> {t("Desactiver")} </option>
+                        </select>
+                      </fieldset>
+                    </div>
+                    <div className="col-md-4 mb-4">
+                      <h6>{t("Etat")}</h6>
+                      <fieldset className="form-group">
+                        <select className="form-select" id="basicSelect2">
+                          <option disabled selected>
+                            {t("Choisissez le Etat")}
+                          </option>
+                          <option> {t("Publier")} </option>
+                          <option> {t("Brouillon")} </option>
+                        </select>
+                      </fieldset>
+                    </div>
                   </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      marginBottom: "10px",
+                      marginRight: "20px",
+                    }}
+                  >
+                    <label
+                      htmlFor="itemsPerPage"
+                      style={{ marginRight: "10px" }}
+                    >
+                      <h6>{t("Items par page:")}</h6>
+                    </label>
+                    <select
+                      id="itemsPerPage"
+                      value={itemsPerPage}
+                      onChange={handleItemsPerPageChange}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={15}>15</option>
+                      <option value={20}>20</option>
+                    </select>
+                  </div>
+                  <div className="row" style={{ padding: "0 20px" }}>
+                    <div style={{ textAlign: "center" }}>
+                      {isMobile ? renderMobileTable() : renderDesktopTable()}
+                    </div>
+                  </div>
+                  <ReactPaginate
+                    previousLabel={"← Previous"}
+                    nextLabel={"Next →"}
+                    breakLabel={"..."}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={3}
+                    onPageChange={handlePageChange}
+                    containerClassName={"pagination"}
+                    activeClassName={"active"}
+                    className="react-paginate"
+                  />
                 </div>
               </div>
             </div>
@@ -209,57 +383,32 @@ function Winners() {
         </section>
       </div>
 
-      {/* Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
-          <Modal.Title>{t("Ajouter Echéance")}</Modal.Title>
+          <Modal.Title>{t("Modifier la catégorie")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>{t("Date de paiement")}</Form.Label>
-              <Form.Control
-                type="date"
-                name="date"
-                value={newTableData.date}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>{t("Montant à payer")}</Form.Label>
-              <Form.Control
-                type="text"
-                name="montantPayer"
-                value={newTableData.montantPayer}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>{t("Montant restant")}</Form.Label>
-              <Form.Control
-                type="text"
-                name="montantRestant"
-                value={newTableData.montantRestant}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>{t("Montant à payer chaque mois")}</Form.Label>
-              <Form.Control
-                type="text"
-                name="montantChaqueMois"
-                value={newTableData.montantChaqueMois}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-          </Form>
+          <div className="form-group">
+            <label>{t("Libellé")}</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedCategory ? selectedCategory.libCategorie : ""}
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  libCategorie: e.target.value,
+                })
+              }
+            />
+          </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            {t("Annuler")}
+          <Button variant="secondary" onClick={handleModalClose}>
+            {t("Fermer")}
           </Button>
-          <Button variant="primary" onClick={handleAddTable}>
-            {t("Ajouter")}
+          <Button variant="primary" onClick={handleModalSave}>
+            {t("Sauvegarder")}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -267,4 +416,4 @@ function Winners() {
   );
 }
 
-export default Winners;
+export default CategoryList;
