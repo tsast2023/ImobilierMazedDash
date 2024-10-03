@@ -21,6 +21,8 @@ function CategoryList() {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
   const [pageCount, setPageCount] = useState(0);
+  const [data, setData] = useState({ parentCategoryId: "" });
+  const [parentCategories, setParentCategories] = useState([]);
 
   // Filter states
   const [filterType, setFilterType] = useState("");
@@ -132,9 +134,28 @@ function CategoryList() {
     setShowModal(false);
   };
 
-  const handleModalSave = () => {
-    // Implement save logic for edited category
-    setShowModal(false);
+  const handleModalSave = async () => {
+    const formData = new FormData();
+    formData.append("id", selectedCategory.id);
+    formData.append("libCategorie", selectedCategory.libCategorie);
+    formData.append("libCategorieAR", selectedCategory.libCategorieAR);
+    formData.append("libCategorieEN", selectedCategory.libCategorieEN);
+    formData.append("icon", selectedCategory.icon);
+    formData.append("parentCategoryNames", selectedCategory.parentCategoryNames);
+    formData.append("criteresNames", selectedCategory.criteresNames);
+    formData.append("criteresNamesEn", selectedCategory.criteresNamesEn);
+    formData.append("criteresNamesAr", selectedCategory.criteresNamesAr);
+  
+    try {
+      const response = await axios.put(
+        "http://localhost:8082/api/categories/update",
+        formData
+      );
+      // Handle successful update
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error updating category:", error);
+    }
   };
 
   // New function to handle deactivating a category
@@ -178,6 +199,22 @@ function CategoryList() {
         confirmButtonColor: "#b0210e",
       });
     }
+  };
+
+  useEffect(() => {
+    // Fetch parent categories from the API
+    axios
+      .get('http://localhost:8082/api/categories/parents')
+      .then((response) => {
+        setParentCategories(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching categories:', error);
+      });
+  }, []);
+
+  const handleSelectChange = (event) => {
+    setData({ ...data, parentCategoryId: event.target.value });
   };
 
   const renderMobileTable = () => (
@@ -405,34 +442,142 @@ function CategoryList() {
       </div>
 
       <Modal show={showModal} onHide={handleModalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t("Modifier la catégorie")}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="form-group">
-            <label>{t("Libellé")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.libCategorie : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  libCategorie: e.target.value,
-                })
-              }
-            />
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleModalClose}>
-            {t("Fermer")}
-          </Button>
-          <Button variant="primary" onClick={handleModalSave}>
-            {t("Sauvegarder")}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+  <Modal.Header closeButton>
+    <Modal.Title>{t("Modifier la catégorie")}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <div className="form-group">
+      <label>{t("Libellé (FR)")}</label>
+      <input
+        type="text"
+        className="form-control"
+        value={selectedCategory ? selectedCategory.libCategorie : ""}
+        onChange={(e) =>
+          setSelectedCategory({
+            ...selectedCategory,
+            libCategorie: e.target.value,
+          })
+        }
+      />
+    </div>
+
+    <div className="form-group">
+      <label>{t("Libellé (AR)")}</label>
+      <input
+        type="text"
+        className="form-control"
+        value={selectedCategory ? selectedCategory.libCategorieAR : ""}
+        onChange={(e) =>
+          setSelectedCategory({
+            ...selectedCategory,
+            libCategorieAR: e.target.value,
+          })
+        }
+      />
+    </div>
+
+    <div className="form-group">
+      <label>{t("Libellé (EN)")}</label>
+      <input
+        type="text"
+        className="form-control"
+        value={selectedCategory ? selectedCategory.libCategorieEN : ""}
+        onChange={(e) =>
+          setSelectedCategory({
+            ...selectedCategory,
+            libCategorieEN: e.target.value,
+          })
+        }
+      />
+    </div>
+
+    <div className="form-group">
+      <label>{t("Icon")}</label>
+      <input
+        type="file"
+        className="form-control"
+        onChange={(e) => setSelectedCategory({ ...selectedCategory, icon: e.target.files[0] })}
+      />
+    </div>
+
+    <div className="form-group" style={{ marginBottom: "15px" }}>
+  <label htmlFor="category-select">Catégories</label>
+  <select
+    id="category-select"
+    className="form-select"
+    value={data.parentCategoryId}
+    onChange={handleSelectChange}
+    required
+  >
+    <option value="">Select a parent category</option>
+    {parentCategories.length > 0 ? (
+      parentCategories.map((item) => (
+        <option key={item.id} value={item.id}>
+          {item.libCategorie}
+        </option>
+      ))
+    ) : (
+      <option>Loading...</option>
+    )}
+  </select>
+</div>
+
+
+    <div className="form-group">
+      <label>{t("Criteres (FR)")}</label>
+      <input
+        type="text"
+        className="form-control"
+        value={selectedCategory ? selectedCategory.criteresNames : ""}
+        onChange={(e) =>
+          setSelectedCategory({
+            ...selectedCategory,
+            criteresNames: e.target.value.split(","),
+          })
+        }
+      />
+    </div>
+
+    <div className="form-group">
+      <label>{t("Criteres (EN)")}</label>
+      <input
+        type="text"
+        className="form-control"
+        value={selectedCategory ? selectedCategory.criteresNamesEn : ""}
+        onChange={(e) =>
+          setSelectedCategory({
+            ...selectedCategory,
+            criteresNamesEn: e.target.value.split(","),
+          })
+        }
+      />
+    </div>
+
+    <div className="form-group">
+      <label>{t("Criteres (AR)")}</label>
+      <input
+        type="text"
+        className="form-control"
+        value={selectedCategory ? selectedCategory.criteresNamesAr : ""}
+        onChange={(e) =>
+          setSelectedCategory({
+            ...selectedCategory,
+            criteresNamesAr: e.target.value.split(","),
+          })
+        }
+      />
+    </div>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleModalClose}>
+      {t("Fermer")}
+    </Button>
+    <Button variant="primary" onClick={handleModalSave}>
+      {t("Sauvegarder")}
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </div>
   );
 }
