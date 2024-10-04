@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios"; // Import axios for API calls
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Modal } from "react-bootstrap";
+import { GlobalState } from "../GlobalState";
 
 const ProdCreate = () => {
   const [withColor, setWithColor] = useState(null); // null initially, then true for "Yes" and false for "No"
   const [inputs, setInputs] = useState([{ color: "", image: "" }]); // Dynamic inputs
-  const [parentCategories, setParentCategories] = useState([]); // State to store parent categories
-  const [categoriesFille, setCategoriesFille] = useState([]); // State to store child categories
+  const [parentCategories, setParentCategories] = useState([]);
+  const [selectedParentCategoryId, setSelectedParentCategoryId] =
+    useState(null);
+  const [filteredCategoriesFille, setFilteredCategoriesFille] = useState([]);
   const { t } = useTranslation();
+  const state = useContext(GlobalState);
   const [formData, setFormData] = useState({
     libelle: "",
     libelleAnglais: "",
@@ -27,25 +31,41 @@ const ProdCreate = () => {
     window.history.back();
   };
 
+  // Fetching parent categories from backend
   useEffect(() => {
-    // Fetch parent categories from the backend API
-    axios.get("http://localhost:8082/api/categories/parents")
-      .then(response => {
+    const fetchParentCategories = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8082/api/categories/parents"
+        );
         setParentCategories(response.data);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Error fetching parent categories:", error);
-      });
+      }
+    };
 
-    // Fetch all categories for child categories
-    axios.get("http://localhost:8082/api/categories/getAll")
-      .then(response => {
-        setCategoriesFille(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching categories:", error);
-      });
+    fetchParentCategories();
   }, []);
+
+  // Handle parent category selection
+  const onParentCategoryChange = (e) => {
+    const selectedParentId = e.target.value;
+    setSelectedParentCategoryId(selectedParentId);
+
+    const selectedParentCategory = parentCategories.find(
+      (category) => category.id === selectedParentId
+    );
+
+    if (selectedParentCategory && selectedParentCategory.categoriesFille) {
+      setFilteredCategoriesFille(selectedParentCategory.categoriesFille);
+    } else {
+      setFilteredCategoriesFille([]);
+    }
+
+    // Debugging log
+    console.log("Selected Parent Category:", selectedParentCategory);
+    console.log("Filtered Categories Fille:", filteredCategoriesFille);
+  };
 
   const handleImageChange = (e, index) => {
     const files = e.target.files;
@@ -78,7 +98,9 @@ const ProdCreate = () => {
   };
 
   const handleCategoryFilleChange = (e) => {
-    const selected = Array.from(e.target.selectedOptions).map(option => option.value);
+    const selected = Array.from(e.target.selectedOptions).map(
+      (option) => option.value
+    );
     setFormData({
       ...formData,
       selectedCategoriesFille: selected,
@@ -92,7 +114,7 @@ const ProdCreate = () => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const data = new FormData();
     data.append("libelle", formData.libelle);
     data.append("libelleAnglais", formData.libelleAnglais);
@@ -112,13 +134,16 @@ const ProdCreate = () => {
       data.append(`images[${index}]`, input.image);
     });
 
-    axios.post("http://localhost:8082/api/products/create", data)
-      .then(response => {
-        console.log("Product created successfully:", response.data);
-      })
-      .catch(error => {
-        console.error("Error creating product:", error);
-      });
+    try {
+      const response = await axios.post(
+        "http://localhost:8082/api/products/create",
+        data
+      );
+      console.log("Product created successfully:", response.data);
+      // Optionally reset form after successful submission
+    } catch (error) {
+      console.error("Error creating product:", error);
+    }
   };
 
   return (
@@ -159,7 +184,9 @@ const ProdCreate = () => {
                     {/* Other Inputs ... */}
                     <div className="col-12">
                       <div className="form-group">
-                        <label htmlFor="libelleAnglais">{t("Libellé Anglais")}</label>
+                        <label htmlFor="libelleAnglais">
+                          {t("Libellé Anglais")}
+                        </label>
                         <div className="position-relative">
                           <input
                             type="text"
@@ -174,7 +201,9 @@ const ProdCreate = () => {
 
                     <div className="col-12">
                       <div className="form-group">
-                        <label htmlFor="libelleArab">{t("Libellé Arabe")}</label>
+                        <label htmlFor="libelleArab">
+                          {t("Libellé Arabe")}
+                        </label>
                         <div className="position-relative">
                           <input
                             type="text"
@@ -241,79 +270,89 @@ const ProdCreate = () => {
                             value={formData.description}
                             onChange={handleFormChange}
                             className="form-control"
-                          ></textarea>
+                          />
                         </div>
                       </div>
                     </div>
 
                     <div className="col-12">
                       <div className="form-group">
-                        <label htmlFor="descriptionAnglais">{t("Description Anglais")}</label>
+                        <label htmlFor="descriptionAnglais">
+                          {t("Description Anglaise")}
+                        </label>
                         <div className="position-relative">
                           <textarea
                             name="descriptionAnglais"
                             value={formData.descriptionAnglais}
                             onChange={handleFormChange}
                             className="form-control"
-                          ></textarea>
+                          />
                         </div>
                       </div>
                     </div>
 
                     <div className="col-12">
                       <div className="form-group">
-                        <label htmlFor="descriptionArab">{t("Description Arabe")}</label>
+                        <label htmlFor="descriptionArab">
+                          {t("Description Arabe")}
+                        </label>
                         <div className="position-relative">
                           <textarea
                             name="descriptionArab"
                             value={formData.descriptionArab}
                             onChange={handleFormChange}
                             className="form-control"
-                          ></textarea>
+                          />
                         </div>
                       </div>
                     </div>
 
-                    {/* Parent Category Selection */}
                     <div className="col-12">
-                      <div className="form-group" style={{ marginBottom: "15px" }}>
-                        <label htmlFor="category-select">{t("Catégorie Parent")}</label>
+                      <div className="form-group">
+                        <label htmlFor="parentCategory">
+                          {t("Parent Category")}
+                        </label>
                         <select
-                          id="category-select"
-                          className="form-select"
-                          value={formData.parentCategoryId}
-                          onChange={handleSelectChange}
-                          required
+                          className="form-control"
+                          onChange={onParentCategoryChange}
+                          id="parentCategory"
                         >
-                          <option value="">Select a parent category</option>
-                          {parentCategories.length > 0 ? (
-                            parentCategories.map((item) => (
-                              <option key={item.id} value={item.id}>
-                                {item.libCategorie}
-                              </option>
-                            ))
-                          ) : (
-                            <option>Loading...</option>
-                          )}
+                          <option value="">
+                            {t("Select Parent Category")}
+                          </option>
+                          {parentCategories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.libCategorie}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
 
-                    {/* Child Category Selection */}
+                    {/* Categories Fille (Child Categories) Dropdown */}
                     <div className="col-12">
                       <div className="form-group">
-                        <label htmlFor="categoriesFille">{t("Catégorie Fille")}</label>
+                        <label htmlFor="categoriesFille">
+                          {t("Catégorie Fille")}
+                        </label>
                         <select
                           multiple
                           className="form-control"
                           onChange={handleCategoryFilleChange}
                           id="categoriesFille"
                         >
-                          {categoriesFille.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.libelle}
+                          {/* Display filtered child categories */}
+                          {filteredCategoriesFille.length > 0 ? (
+                            filteredCategoriesFille.map((category) => (
+                              <option key={category.id} value={category.id}>
+                                {category.libCategorie}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="">
+                              {t("No child categories found")}
                             </option>
-                          ))}
+                          )}
                         </select>
                       </div>
                     </div>
@@ -323,7 +362,13 @@ const ProdCreate = () => {
                       <div className="form-group">
                         <label>{t("Utiliser des couleurs ?")}</label>
                         <div>
-                          <select onChange={handleWithColorChange} className="form-control">
+                          <select
+                            onChange={handleWithColorChange}
+                            className="form-control"
+                          >
+                            <option value="">
+                              {t("Sélectionner une option")}
+                            </option>
                             <option value="no">{t("Non")}</option>
                             <option value="yes">{t("Oui")}</option>
                           </select>
@@ -334,19 +379,23 @@ const ProdCreate = () => {
                     {withColor !== null && (
                       <div className="col-12">
                         <div className="form-group">
-                          <label>{t("Couleurs")}</label>
                           {inputs.map((input, index) => (
                             <div key={index} className="row">
+                              {withColor ? (
+                                <div className="col-6">
+                                  <label>{t("Coulour")}</label>
+                                  <input
+                                    type="color"
+                                    value={input.color}
+                                    onChange={(e) =>
+                                      handleColorChange(e, index)
+                                    }
+                                    className="form-control"
+                                  />
+                                </div>
+                              ) : null}
                               <div className="col-6">
-                                <input
-                                  type="text"
-                                  placeholder={t("Couleur")}
-                                  value={input.color}
-                                  onChange={(e) => handleColorChange(e, index)}
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-6">
+                                <label>{t("Image")}</label>
                                 <input
                                   type="file"
                                   onChange={(e) => handleImageChange(e, index)}
@@ -355,26 +404,35 @@ const ProdCreate = () => {
                               </div>
                             </div>
                           ))}
-                          <button type="button" onClick={addInput} className="btn btn-secondary">
-                            {t("Ajouter une couleur")}
+                          <button
+                            type="button"
+                            onClick={addInput}
+                            className="btn btn-secondary"
+                          >
+                            {t("Ajouter une couleur ou image")}
                           </button>
                         </div>
                       </div>
                     )}
-
-                    {/* Submit Button */}
-                    <div className="col-12 d-flex justify-content-end">
-                      <button type="button" onClick={handleSubmit} className="btn btn-primary">
-                        {t("Créer le produit")}
-                      </button>
-                    </div>
-
                     {/* Go Back Button */}
-                    <div className="col-12 d-flex justify-content-start">
-                      <button type="button" onClick={goBack} className="btn btn-danger">
-                        {t("Retour")}
-                      </button>
-                    </div>
+                    <Modal.Footer>
+                      <div className="col-12 d-flex justify-content-end">
+                        <button
+                          type="button"
+                          onClick={goBack}
+                          className="btn btn-secondary me-3"
+                        >
+                          {t("Retour")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          className="btn btn-primary"
+                        >
+                          {t("Créer le produit")}
+                        </button>
+                      </div>
+                    </Modal.Footer>
                   </div>
                 </div>
               </form>

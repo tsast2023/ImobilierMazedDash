@@ -1,5 +1,4 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { GlobalState } from "../GlobalState";
 import { useNavigate } from "react-router-dom";
@@ -145,7 +144,7 @@ function CategoryList() {
     formData.append("criteresNames", selectedCategory.criteresNames);
     formData.append("criteresNamesEn", selectedCategory.criteresNamesEn);
     formData.append("criteresNamesAr", selectedCategory.criteresNamesAr);
-  
+    
     try {
       const response = await axios.put(
         "http://localhost:8082/api/categories/update",
@@ -157,6 +156,7 @@ function CategoryList() {
       console.error("Error updating category:", error);
     }
   };
+  
 
   // New function to handle deactivating a category
   const deactivateCategory = async (categoryId) => {

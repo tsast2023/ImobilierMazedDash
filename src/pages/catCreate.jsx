@@ -22,7 +22,9 @@ const CatCreate = () => {
   useEffect(() => {
     const fetchParentCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:8082/api/categories/parents");
+        const response = await axios.get(
+          "http://localhost:8082/api/categories/parents"
+        );
         setParentCategories(response.data);
       } catch (error) {
         console.error("Error fetching parent categories:", error);
@@ -38,7 +40,9 @@ const CatCreate = () => {
 
     // Reset criteria inputs if a category is selected
     if (selectedValue) {
-      setInputs([{ criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" }]);
+      setInputs([
+        { criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" },
+      ]);
     } else {
       setInputs([]); // Clear inputs if no category is selected
     }
@@ -52,33 +56,35 @@ const CatCreate = () => {
     formData.append("libCategorie", data.libCategorie);
     formData.append("libCategorieAR", data.libCategorieAR);
     formData.append("libCategorieEN", data.libCategorieEN);
-    
-    // Append parentCategoryId only if it exists
-    if (data.parentCategoryId) {
-      formData.append("parentCategoryId", data.parentCategoryId);
-    } else {
-      // If no parent category is selected, we are creating a top-level category
-      formData.append("type", "CATEGORYPARENTE"); // This could be used by your API to determine the type
-    }
 
-    // Check if criteria are filled
-    if (data.parentCategoryId && inputs.length > 0) {
+    if (data.parentCategoryId) {
+      // If a parent category is selected, create a child category
+      formData.append("parentCategoryId", data.parentCategoryId);
+
+      // Check if at least one criterion is filled, since it's a child category
+      const isCriteriaFilled = inputs.some(
+        (item) =>
+          item.criteresNames || item.criteresNamesEn || item.criteresNamesAr
+      );
+
+      if (!isCriteriaFilled) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Please provide at least one criterion to create a child category.",
+        });
+        return;
+      }
+
+      // Append criteria inputs
       inputs.forEach((item) => {
-        if (item.criteresNames || item.criteresNamesEn || item.criteresNamesAr) {
-          // Append each criterion to the form data
-          formData.append("criteresNames[]", item.criteresNames);
-          formData.append("criteresNamesEn[]", item.criteresNamesEn);
-          formData.append("criteresNamesAr[]", item.criteresNamesAr);
-        }
+        formData.append("criteresNames[]", item.criteresNames);
+        formData.append("criteresNamesEn[]", item.criteresNamesEn);
+        formData.append("criteresNamesAr[]", item.criteresNamesAr);
       });
     } else {
-      // If no criteria provided, show an alert
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: "Please select a parent category and provide at least one criterion to create a child category.",
-      });
-      return;
+      // If no parent category is selected, create a parent category
+      formData.append("type", "CATEGORYPARENTE"); // Assuming your API uses this to identify parent categories
     }
 
     // Append the icon file if it's selected
@@ -97,11 +103,15 @@ const CatCreate = () => {
     });
 
     try {
-      const res = await axios.post("http://localhost:8082/api/categories/create", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        "http://localhost:8082/api/categories/create",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       Swal.fire({
         icon: "success",
         title: "Success!",
@@ -257,8 +267,13 @@ const CatCreate = () => {
               </div>
             </div>
           </div>
-          <div className="d-flex justify-content-end" style={{ marginTop: "20px" }}>
-            <button type="submit" className="btn btn-primary">Créer</button>
+          <div
+            className="d-flex justify-content-end"
+            style={{ marginTop: "20px" }}
+          >
+            <button type="submit" className="btn btn-primary">
+              Créer
+            </button>
           </div>
         </div>
       </form>

@@ -23,9 +23,7 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     const getAllAcheteur = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8081/admin/users/Acheteur"
-        );
+        const res = await axios.get("http://localhost:8081/admin/users/Acheteur");
         console.log("Acheteur:", res.data);
         setAcheteur(res.data);
       } catch (error) {
@@ -35,9 +33,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllVendeur = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8081/admin/users/Vendeur"
-        );
+        const res = await axios.get("http://localhost:8081/admin/users/Vendeur");
         console.log("Vendeur:", res.data);
         setVendeur(res.data);
       } catch (error) {
@@ -61,9 +57,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllProducts = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8082/api/products/all"
-        );
+        const res = await axios.get("http://localhost:8082/api/products/all");
         console.log("Products:", res.data);
         setProducts(res.data);
       } catch (error) {
@@ -73,9 +67,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllTuto = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8081/api/tuto/getAll"
-        );
+        const res = await axios.get("http://localhost:8081/api/tuto/getAll");
         console.log("tutorial:", res.data);
         setTutotiel(res.data);
       } catch (error) {
@@ -85,9 +77,7 @@ export const DataProvider = ({ children }) => {
 
     const getCarteRechar = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8081/api/carte/getAll"
-        );
+        const res = await axios.get("http://localhost:8081/api/carte/getAll");
         console.log("cartes:", res.data);
         setCarteRech(res.data);
       } catch (error) {
@@ -107,9 +97,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllPermissions = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8082/admin/permissions"
-        );
+        const res = await axios.get("http://localhost:8082/admin/permissions");
         console.log("all permissions:", res.data);
         setPermissions(res.data);
       } catch (error) {
@@ -129,14 +117,11 @@ export const DataProvider = ({ children }) => {
 
     const getAllAdmin = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8082/admin/users/Admin",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get("http://localhost:8082/admin/users/Admin", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         console.log("all Admins:", res.data);
         setAdmins(res.data);
       } catch (error) {
@@ -146,9 +131,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllCommandes = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8081/api/commandes/toutes-les-commandes"
-        );
+        const res = await axios.get("http://localhost:8081/api/commandes/toutes-les-commandes");
         console.log("all Commandes:", res.data);
         setCommandes(res.data);
       } catch (error) {
@@ -158,9 +141,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllUsers = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8081/admin/users/Acheteur"
-        );
+        const res = await axios.get("http://localhost:8081/admin/users/Acheteur");
         console.log("all Users:", res.data);
         setUsers(res.data);
       } catch (error) {
@@ -183,6 +164,26 @@ export const DataProvider = ({ children }) => {
     getAllRoles();
   }, [token]);
 
+  // Update category function
+  const updateCategory = async (categoryId, updatedData) => {
+    try {
+      const res = await axios.put(`http://localhost:8082/api/categories/update/${categoryId}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Category updated:", res.data);
+      // Optionally update the local state to reflect the changes
+      setCategories((prevCategories) =>
+        prevCategories.map((category) =>
+          category.id === categoryId ? { ...category, ...updatedData } : category
+        )
+      );
+    } catch (error) {
+      console.log("Error updating category:", error);
+    }
+  };
+
   // New function for fetching filtered categories
   const fetchFilteredCategories = async (filters) => {
     try {
@@ -200,9 +201,27 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // New function for creating a product
+  const createProduct = async (productData) => {
+    try {
+      const res = await axios.post("http://localhost:8082/api/products/create", productData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Product created:", res.data);
+      // Optionally update the local state to reflect the new product
+      setProducts((prevProducts) => [...prevProducts, res.data]);
+    } catch (error) {
+      console.log("Error creating product:", error);
+    }
+  };
+
   const state = {
     Categories,
     fetchFilteredCategories, // Add the new method to the global state
+    updateCategory, // Add the update function to the global state
+    createProduct, // Add the create product function to the global state
     Products,
     tutorials: tutoriel,
     bids,
