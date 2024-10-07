@@ -1,19 +1,20 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { GlobalState } from "../GlobalState";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { GlobalState } from "../GlobalState";
 
 const CatCreate = () => {
   const [data, setData] = useState({
     libCategorie: "",
     libCategorieEN: "",
     libCategorieAR: "",
-    parentCategoryId: "",
+    parentCategoryId: "", // Make sure this value is properly tracked
   });
 
   const [inputs, setInputs] = useState([
     { criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" },
   ]);
+
   const [icon, setIcon] = useState(null);
   const [parentCategories, setParentCategories] = useState([]);
   const state = useContext(GlobalState);
@@ -34,17 +35,19 @@ const CatCreate = () => {
     fetchParentCategories();
   }, []);
 
+  // Handle parent category selection
   const handleSelectChange = (e) => {
     const selectedValue = e.target.value;
     setData({ ...data, parentCategoryId: selectedValue });
+    console.log("Selected Parent Category ID: ", selectedValue); // Log selection
 
-    // Reset criteria inputs if a category is selected
     if (selectedValue) {
+      // If a category is selected, reset inputs
       setInputs([
         { criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" },
       ]);
     } else {
-      setInputs([]); // Clear inputs if no category is selected
+      setInputs([]); // If none selected, clear inputs
     }
   };
 
@@ -52,55 +55,38 @@ const CatCreate = () => {
     e.preventDefault();
     const formData = new FormData();
 
-    // Append the basic data
+    // Append category data
     formData.append("libCategorie", data.libCategorie);
     formData.append("libCategorieAR", data.libCategorieAR);
     formData.append("libCategorieEN", data.libCategorieEN);
 
+    // Check if creating a child category
     if (data.parentCategoryId) {
-      // If a parent category is selected, create a child category
       formData.append("parentCategoryId", data.parentCategoryId);
+      formData.append("type", "CHILD_CATEGORY"); // Send a different type to avoid parent category
 
-      // Check if at least one criterion is filled, since it's a child category
-      const isCriteriaFilled = inputs.some(
-        (item) =>
-          item.criteresNames || item.criteresNamesEn || item.criteresNamesAr
-      );
-
-      if (!isCriteriaFilled) {
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: "Please provide at least one criterion to create a child category.",
-        });
-        return;
-      }
-
-      // Append criteria inputs
-      inputs.forEach((item) => {
-        formData.append("criteresNames[]", item.criteresNames);
-        formData.append("criteresNamesEn[]", item.criteresNamesEn);
-        formData.append("criteresNamesAr[]", item.criteresNamesAr);
+      // Append criteria inputs for child category
+      inputs.forEach((item, index) => {
+        formData.append(`criteresNames[${index}]`, item.criteresNames);
+        formData.append(`criteresNamesEn[${index}]`, item.criteresNamesEn);
+        formData.append(`criteresNamesAr[${index}]`, item.criteresNamesAr);
       });
+
+      console.log("Submitting as a child category");
     } else {
-      // If no parent category is selected, create a parent category
-      formData.append("type", "CATEGORYPARENTE"); // Assuming your API uses this to identify parent categories
+      formData.append("type", "CATEGORYPARENTE");
+      console.log("Submitting as a parent category");
     }
 
-    // Append the icon file if it's selected
+    // Append icon file if selected
     if (icon) {
       formData.append("icon", icon);
     }
 
-    // Debugging output
-    console.log("Submitting form data:", {
-      libCategorie: data.libCategorie,
-      libCategorieAR: data.libCategorieAR,
-      libCategorieEN: data.libCategorieEN,
-      parentCategoryId: data.parentCategoryId,
-      criteres: inputs,
-      icon,
-    });
+    // Log all form data for debugging
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
 
     try {
       const res = await axios.post(
@@ -130,6 +116,7 @@ const CatCreate = () => {
     }
   };
 
+  // Handle icon change
   const handleIconChange = (e) => {
     setIcon(e.target.files[0]);
   };
@@ -146,9 +133,9 @@ const CatCreate = () => {
               <div className="form-group">
                 <label htmlFor="basicInput">Libellé</label>
                 <input
-                  onChange={(e) => {
-                    setData({ ...data, libCategorie: e.target.value });
-                  }}
+                  onChange={(e) =>
+                    setData({ ...data, libCategorie: e.target.value })
+                  }
                   type="text"
                   className="form-control"
                   id="basicInput"
@@ -158,9 +145,9 @@ const CatCreate = () => {
               <div className="form-group">
                 <label htmlFor="libelleEng">Libellé en Anglais</label>
                 <input
-                  onChange={(e) => {
-                    setData({ ...data, libCategorieEN: e.target.value });
-                  }}
+                  onChange={(e) =>
+                    setData({ ...data, libCategorieEN: e.target.value })
+                  }
                   type="text"
                   className="form-control"
                   id="libelleEng"
@@ -170,9 +157,9 @@ const CatCreate = () => {
               <div className="form-group">
                 <label htmlFor="libelleArab">Libellé en Arabe</label>
                 <input
-                  onChange={(e) => {
-                    setData({ ...data, libCategorieAR: e.target.value });
-                  }}
+                  onChange={(e) =>
+                    setData({ ...data, libCategorieAR: e.target.value })
+                  }
                   type="text"
                   className="form-control"
                   id="libelleArab"
@@ -186,7 +173,6 @@ const CatCreate = () => {
                   className="form-select"
                   value={data.parentCategoryId}
                   onChange={handleSelectChange}
-                  required
                 >
                   <option value="">Select a parent category</option>
                   {parentCategories.length > 0 ? (
@@ -267,14 +253,11 @@ const CatCreate = () => {
               </div>
             </div>
           </div>
-          <div
-            className="d-flex justify-content-end"
-            style={{ marginTop: "20px" }}
-          >
-            <button type="submit" className="btn btn-primary">
-              Créer
-            </button>
-          </div>
+        </div>
+        <div className="card-footer">
+          <button type="submit" className="btn btn-primary">
+            Create Category
+          </button>
         </div>
       </form>
     </div>

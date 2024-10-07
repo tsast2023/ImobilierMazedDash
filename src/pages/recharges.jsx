@@ -56,7 +56,7 @@ function Recharges() {
 
   const deleteItem = async (id) => {
     try {
-      const res = await axios.delete(`http://localhost:8081/api/carte/deleteCarte?id=${id}`);
+      const res = await axios.delete(`http://localhost:8082/api/carte/deleteCarte?id=${id}`);
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -66,7 +66,7 @@ function Recharges() {
   const addCarte = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:8081/api/carte/publishNow', carteRech);
+      const res = await axios.post('http://localhost:8082/api/carte/publishNow', carteRech);
       console.log(res.data);
       window.location.reload();
     } catch (error) {

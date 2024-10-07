@@ -23,7 +23,7 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     const getAllAcheteur = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/admin/users/Acheteur");
+        const res = await axios.get("http://localhost:8082/admin/users/Acheteur");
         console.log("Acheteur:", res.data);
         setAcheteur(res.data);
       } catch (error) {
@@ -33,7 +33,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllVendeur = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/admin/users/Vendeur");
+        const res = await axios.get("http://localhost:8082/admin/users/Vendeur");
         console.log("Vendeur:", res.data);
         setVendeur(res.data);
       } catch (error) {
@@ -67,7 +67,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllTuto = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/api/tuto/getAll");
+        const res = await axios.get("http://localhost:8082/api/tuto/getAll");
         console.log("tutorial:", res.data);
         setTutotiel(res.data);
       } catch (error) {
@@ -77,7 +77,7 @@ export const DataProvider = ({ children }) => {
 
     const getCarteRechar = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/api/carte/getAll");
+        const res = await axios.get("http://localhost:8082/api/carte/getAll");
         console.log("cartes:", res.data);
         setCarteRech(res.data);
       } catch (error) {
@@ -87,7 +87,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllBids = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/api/bid/getAll");
+        const res = await axios.get("http://localhost:8082/api/bid/getAll");
         console.log("all bids:", res.data);
         setBids(res.data);
       } catch (error) {
@@ -131,7 +131,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllCommandes = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/api/commandes/toutes-les-commandes");
+        const res = await axios.get("http://localhost:8082/api/commandes/toutes-les-commandes");
         console.log("all Commandes:", res.data);
         setCommandes(res.data);
       } catch (error) {
@@ -141,7 +141,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:8081/admin/users/Acheteur");
+        const res = await axios.get("http://localhost:8082/admin/users/Acheteur");
         console.log("all Users:", res.data);
         setUsers(res.data);
       } catch (error) {

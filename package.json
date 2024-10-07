@@ -33,7 +33,7 @@
     "sweetalert2": "^11.10.8",
     "web-vitals": "^2.1.4"
   },
-  "proxy": "http://localhost:8081",
+  "proxy": "http://localhost:8082",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

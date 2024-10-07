@@ -13,7 +13,7 @@ function CreationAdministrateur() {
     e.preventDefault();
     console.log(data)
     try {
-      const res = await axios.post('http://localhost:8081/admin/createAdmin', data)
+      const res = await axios.post('http://localhost:8082/admin/createAdmin', data)
       console.log(res)
       alert("admin is added successfully")
     } catch (error) {
