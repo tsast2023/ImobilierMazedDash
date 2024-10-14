@@ -13,6 +13,7 @@ const ProdCreate = () => {
   const [filteredCategoriesFille, setFilteredCategoriesFille] = useState([]);
   const { t } = useTranslation();
   const state = useContext(GlobalState);
+  const [withOptions, setWithOptions] = useState(null);
   const [formData, setFormData] = useState({
     libelle: "",
     libelleAnglais: "",
@@ -46,6 +47,11 @@ const ProdCreate = () => {
 
     fetchParentCategories();
   }, []);
+
+  const handleWithOptionsChange = (e) => {
+    const value = e.target.value;
+    setWithOptions(value); // Update the state based on selection
+  };
 
   // Handle parent category selection
   const onParentCategoryChange = (e) => {
@@ -120,15 +126,12 @@ const ProdCreate = () => {
     data.append("libelleAnglais", formData.libelleAnglais);
     data.append("libelleArab", formData.libelleArab);
     data.append("reference", formData.reference);
-    data.append("prix", formData.prix);
-    data.append("stock", formData.stock);
     data.append("description", formData.description);
     data.append("descriptionAnglais", formData.descriptionAnglais);
     data.append("descriptionArab", formData.descriptionArab);
     data.append("parentCategoryId", formData.parentCategoryId);
     data.append("categoriesFille", formData.selectedCategoriesFille);
 
-    // Append dynamic inputs (colors and images)
     inputs.forEach((input, index) => {
       data.append(`colors[${index}]`, input.color);
       data.append(`images[${index}]`, input.image);
@@ -140,7 +143,6 @@ const ProdCreate = () => {
         data
       );
       console.log("Product created successfully:", response.data);
-      // Optionally reset form after successful submission
     } catch (error) {
       console.error("Error creating product:", error);
     }
@@ -224,36 +226,6 @@ const ProdCreate = () => {
                             type="text"
                             name="reference"
                             value={formData.reference}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="prix">{t("Prix")}</label>
-                        <div className="position-relative">
-                          <input
-                            type="text"
-                            name="prix"
-                            value={formData.prix}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="stock">{t("Stock")}</label>
-                        <div className="position-relative">
-                          <input
-                            type="number"
-                            name="stock"
-                            value={formData.stock}
                             onChange={handleFormChange}
                             className="form-control"
                           />
@@ -357,10 +329,10 @@ const ProdCreate = () => {
                       </div>
                     </div>
 
-                    {/* Handle Color Inputs */}
-                    <div className="col-12">
+                    {/* Handle Color and Options Inputs */}
+                    <div className="col-6">
                       <div className="form-group">
-                        <label>{t("Utiliser des couleurs ?")}</label>
+                        <label>{t("Avec couleurs ?")}</label>
                         <div>
                           <select
                             onChange={handleWithColorChange}
@@ -376,14 +348,39 @@ const ProdCreate = () => {
                       </div>
                     </div>
 
+                    <div className="col-6">
+                      <div className="form-group">
+                        <label>{t("Avec options ?")}</label>
+                        <div>
+                          <select
+                            onChange={handleWithOptionsChange}
+                            className="form-control"
+                          >
+                            <option value="">
+                              {t("Sélectionner une option")}
+                            </option>
+                            <option value="no">{t("Non")}</option>
+                            <option value="yes">{t("Oui")}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Rest of your form */}
                     {withColor !== null && (
-                      <div className="col-12">
+                      <div className="col-6">
+                        {" "}
+                        {/* Change this to col-12 for full width */}
                         <div className="form-group">
                           {inputs.map((input, index) => (
-                            <div key={index} className="row">
+                            <div key={index} className="mb-3">
+                              {" "}
+                              {/* Add margin bottom for spacing */}
                               {withColor ? (
-                                <div className="col-6">
-                                  <label>{t("Coulour")}</label>
+                                <div className="mb-3">
+                                  {" "}
+                                  {/* Separate div for color input */}
+                                  <label>{t("Couleur")}</label>
                                   <input
                                     type="color"
                                     value={input.color}
@@ -394,7 +391,9 @@ const ProdCreate = () => {
                                   />
                                 </div>
                               ) : null}
-                              <div className="col-6">
+                              <div className="mb-3">
+                                {" "}
+                                {/* Separate div for file input */}
                                 <label>{t("Image")}</label>
                                 <input
                                   type="file"
@@ -414,6 +413,42 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     )}
+
+                    {withOptions && (
+                      <div className="col-6">
+                        {" "}
+                        {/* Change this to col-12 for full width */}
+                        <div className="form-group">
+                          {inputs.map((input, index) => (
+                            <div key={index} className="mb-3">
+                              {" "}
+                              {/* Add margin bottom for spacing */}
+                              {withOptions ? (
+                                <div className="mb-3">
+                                  {" "}
+                                  {/* Separate div for color input */}
+                                  <label>{t("Prix")}</label>
+                                  <input
+                                    type="Number"
+                                    className="form-control"
+                                  />
+                                </div>
+                              ) : null}
+                              <div className="mb-3">
+                                {" "}
+                                {/* Separate div for file input */}
+                                <label>{t("Stock")}</label>
+                                <input
+                                  type="Number"
+                                  className="form-control"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Go Back Button */}
                     <Modal.Footer>
                       <div className="col-12 d-flex justify-content-end">
@@ -429,7 +464,7 @@ const ProdCreate = () => {
                           onClick={handleSubmit}
                           className="btn btn-primary"
                         >
-                          {t("Créer le produit")}
+                          {t("Suivant")}
                         </button>
                       </div>
                     </Modal.Footer>
