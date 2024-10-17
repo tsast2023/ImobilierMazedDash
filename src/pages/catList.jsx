@@ -101,7 +101,9 @@ function CategoryList() {
           text: "Supprimé(e) ! Votre élément a été supprimé.",
           icon: "success",
           confirmButtonColor: "#b0210e",
-        });
+        }).then(() => {
+          window.location.reload(); // Reload the page on confirmation
+      });
       } else {
         Swal.fire({
           text: "Annulé, Votre élément est en sécurité :)",
@@ -169,7 +171,9 @@ function CategoryList() {
         text: t("La catégorie a été désactivée avec succès !"),
         icon: "success",
         confirmButtonColor: "#b0210e",
-      });
+      }).then(() => {
+        window.location.reload(); // Reload the page on confirmation
+    });
     } catch (error) {
       console.error("Error deactivating category:", error);
       Swal.fire({
@@ -182,24 +186,27 @@ function CategoryList() {
 
   const activateCategory = async (categoryId) => {
     try {
-      const response = await axios.put(
-        `http://localhost:8082/api/categories/Activer/${categoryId}`
-      );
-      console.log(response.data);
-      Swal.fire({
-        text: t("La catégorie a été activée avec succès !"),
-        icon: "success",
-        confirmButtonColor: "#b0210e",
-      });
+        const response = await axios.put(
+            `http://localhost:8082/api/categories/Activer/${categoryId}`
+        );
+        console.log(response.data);
+        Swal.fire({
+            text: t("La catégorie a été activée avec succès !"),
+            icon: "success",
+            confirmButtonColor: "#b0210e",
+        }).then(() => {
+            window.location.reload(); // Reload the page on confirmation
+        });
     } catch (error) {
-      console.error("Error activating category:", error);
-      Swal.fire({
-        text: t("Une erreur s'est produite lors de l' activation."),
-        icon: "error",
-        confirmButtonColor: "#b0210e",
-      });
+        console.error("Error activating category:", error);
+        Swal.fire({
+            text: t("Une erreur s'est produite lors de l'activation."),
+            icon: "error",
+            confirmButtonColor: "#b0210e",
+        });
     }
-  };
+};
+
 
   useEffect(() => {
     // Fetch parent categories from the API

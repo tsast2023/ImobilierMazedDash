@@ -3,13 +3,13 @@ import axios from "axios"; // Import axios for API calls
 import { useTranslation } from "react-i18next";
 import { Modal } from "react-bootstrap";
 import { GlobalState } from "../GlobalState";
+import { Link } from "react-router-dom"
 
 const ProdCreate = () => {
-  const [withColor, setWithColor] = useState(null); // null initially, then true for "Yes" and false for "No"
-  const [inputs, setInputs] = useState([{ color: "", image: "" }]); // Dynamic inputs
+  const [withColor, setWithColor] = useState(null);
+  const [inputs, setInputs] = useState([{ color: "", image: "" }]);
   const [parentCategories, setParentCategories] = useState([]);
-  const [selectedParentCategoryId, setSelectedParentCategoryId] =
-    useState(null);
+  const [selectedParentCategoryId, setSelectedParentCategoryId] =useState(null);
   const [filteredCategoriesFille, setFilteredCategoriesFille] = useState([]);
   const { t } = useTranslation();
   const state = useContext(GlobalState);
@@ -24,7 +24,7 @@ const ProdCreate = () => {
     description: "",
     descriptionAnglais: "",
     descriptionArab: "",
-    parentCategoryId: "", // For the selected parent category
+    parentCategoryNames: "", // For the selected parent category
     selectedCategoriesFille: [],
   });
 
@@ -50,10 +50,9 @@ const ProdCreate = () => {
 
   const handleWithOptionsChange = (e) => {
     const value = e.target.value;
-    setWithOptions(value); // Update the state based on selection
+    setWithOptions(value);
   };
 
-  // Handle parent category selection
   const onParentCategoryChange = (e) => {
     const selectedParentId = e.target.value;
     setSelectedParentCategoryId(selectedParentId);
@@ -459,13 +458,14 @@ const ProdCreate = () => {
                         >
                           {t("Retour")}
                         </button>
+                        <Link to="/ProdAction">
                         <button
                           type="button"
-                          onClick={handleSubmit}
                           className="btn btn-primary"
                         >
                           {t("Suivant")}
                         </button>
+                        </Link>
                       </div>
                     </Modal.Footer>
                   </div>

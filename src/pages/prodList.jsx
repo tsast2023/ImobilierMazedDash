@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { Table, Modal, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from 'axios';
-import { GlobalState } from "../GlobalState";
 
 const ProdList = () => {
   const { t } = useTranslation();
@@ -12,7 +11,7 @@ const ProdList = () => {
   const [starClicked, setStarClicked] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
-  const [products, setProducts] = useState([]); // State to hold product data
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -26,7 +25,6 @@ const ProdList = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch all products from the API
     const fetchProducts = async () => {
       try {
         const response = await axios.get("http://localhost:8082/api/products/all");
@@ -36,11 +34,10 @@ const ProdList = () => {
       }
     };
 
-    fetchProducts(); // Call the function to fetch products
+    fetchProducts();
   }, []);
 
   const deleteItem = (productId) => {
-    // Implement your delete logic here using productId
     console.log("Item deleted:", productId);
   };
 
@@ -74,19 +71,17 @@ const ProdList = () => {
   };
 
   const handleEditClick = (product) => {
-    setCurrentProduct(product); // Set the current product for editing
+    setCurrentProduct(product);
     setShowEditModal(true);
   };
 
   const handleCloseEditModal = () => {
     setShowEditModal(false);
-    setCurrentProduct(null); // Clear the current product
+    setCurrentProduct(null);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically handle the form submission,
-    // like sending updated data to a server.
     console.log(currentProduct);
     setShowEditModal(false);
   };
@@ -106,7 +101,14 @@ const ProdList = () => {
                     <tr>
                       <td>{t("Image")}</td>
                       <td>
-                        <img className="imgtable" src={product.galerie[0] || "./Mazed.jpg"} alt="img" />
+                        {/* Map through galerie to display all images */}
+                        {product.galerie && product.galerie.length > 0 ? (
+                          product.galerie.map((image, imgIndex) => (
+                            <img key={imgIndex} className="imgtable" src={image} alt={`img-${imgIndex}`} />
+                          ))
+                        ) : (
+                          <img className="imgtable" src="./Mazed.jpg" alt="default" />
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -193,7 +195,14 @@ const ProdList = () => {
                   {products.map((product, index) => (
                     <tr key={index}>
                       <td>
-                        <img className="imgtable" src={product.galerie[0] || "./Mazed.jpg"} alt="img" />
+                        {/* Map through galerie to display all images */}
+                        {product.galerie && product.galerie.length > 0 ? (
+                          product.galerie.map((image, imgIndex) => (
+                            <img key={imgIndex} className="imgtable" src={image} alt={`img-${imgIndex}`} />
+                          ))
+                        ) : (
+                          <img className="imgtable" src="./Mazed.jpg" alt="default" />
+                        )}
                       </td>
                       <td>{product.reference}</td>
                       <td>{product.libelleProductFr}</td>
@@ -234,37 +243,23 @@ const ProdList = () => {
         </div>
       </section>
 
+      {/* Modal for editing */}
       <Modal show={showEditModal} onHide={handleCloseEditModal}>
         <Modal.Header closeButton>
           <Modal.Title>{t("Modifier le produit")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {currentProduct && (
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="libelleProductFr" className="form-label">{t("Libellé")}</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="libelleProductFr"
-                  value={currentProduct.libelleProductFr}
-                  onChange={(e) => setCurrentProduct({ ...currentProduct, libelleProductFr: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="prixPrincipale" className="form-label">{t("Prix")}</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="prixPrincipale"
-                  value={currentProduct.prixPrincipale}
-                  onChange={(e) => setCurrentProduct({ ...currentProduct, prixPrincipale: e.target.value })}
-                />
-              </div>
-              {/* Add more fields as necessary */}
-              <Button variant="primary" type="submit">{t("Sauvegarder")}</Button>
-            </form>
-          )}
+          <form onSubmit={handleSubmit}>
+            {/* Include your form fields here, prefilled with currentProduct data */}
+            <div>
+              <label>{t("Libellé")}</label>
+              <input type="text" value={currentProduct ? currentProduct.libelleProductFr : ''} onChange={(e) => setCurrentProduct({ ...currentProduct, libelleProductFr: e.target.value })} />
+            </div>
+            {/* Add other form fields as necessary */}
+            <Button variant="primary" type="submit">
+              {t("Sauvegarder")}
+            </Button>
+          </form>
         </Modal.Body>
       </Modal>
     </div>
@@ -272,3 +267,4 @@ const ProdList = () => {
 };
 
 export default ProdList;
+ 
