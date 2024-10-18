@@ -217,12 +217,35 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const publishProductNow = async (productId) => {
+    try {
+      const token = localStorage.getItem("authToken"); // Or wherever the token is stored
+      const res = await axios.post(
+        `http://localhost:8082/api/products/${productId}/publishNow`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Ensure this is the correct token
+          },
+        }
+      );
+      console.log("Product published immediately:", res.data);
+      return res.data;
+    } catch (error) {
+      console.log("Error publishing product:", error.response || error.message);
+      throw error;
+    }
+  };
+  
+  
+
   const state = {
     Categories,
     fetchFilteredCategories, // Add the new method to the global state
     updateCategory, // Add the update function to the global state
     createProduct, // Add the create product function to the global state
     Products,
+    publishProductNow,
     tutorials: tutoriel,
     bids,
     cartes: carteRech,

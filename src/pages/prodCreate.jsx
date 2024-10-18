@@ -3,13 +3,14 @@ import axios from "axios"; // Import axios for API calls
 import { useTranslation } from "react-i18next";
 import { Modal } from "react-bootstrap";
 import { GlobalState } from "../GlobalState";
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 
 const ProdCreate = () => {
   const [withColor, setWithColor] = useState(null);
   const [inputs, setInputs] = useState([{ color: "", image: "" }]);
   const [parentCategories, setParentCategories] = useState([]);
-  const [selectedParentCategoryId, setSelectedParentCategoryId] =useState(null);
+  const [selectedParentCategoryId, setSelectedParentCategoryId] =
+    useState(null);
   const [filteredCategoriesFille, setFilteredCategoriesFille] = useState([]);
   const { t } = useTranslation();
   const state = useContext(GlobalState);
@@ -24,9 +25,16 @@ const ProdCreate = () => {
     description: "",
     descriptionAnglais: "",
     descriptionArab: "",
-    parentCategoryNames: "", // For the selected parent category
+    parentCategoryNames: "",
     selectedCategoriesFille: [],
   });
+
+  // Function to pass data when pressing 'Suivant'
+  const handleNextClick = () => {
+    // Ensure you have the necessary data in formData and inputs
+    console.log("Passing form data:", formData);
+    console.log("Passing inputs:", inputs);
+  };
 
   const goBack = () => {
     window.history.back();
@@ -437,10 +445,7 @@ const ProdCreate = () => {
                                 {" "}
                                 {/* Separate div for file input */}
                                 <label>{t("Stock")}</label>
-                                <input
-                                  type="Number"
-                                  className="form-control"
-                                />
+                                <input type="Number" className="form-control" />
                               </div>
                             </div>
                           ))}
@@ -458,13 +463,19 @@ const ProdCreate = () => {
                         >
                           {t("Retour")}
                         </button>
-                        <Link to="/ProdAction">
-                        <button
-                          type="button"
-                          className="btn btn-primary"
+                        <Link
+                          to={{
+                            pathname: "/ProdAction",
+                            state: { formData, inputs },
+                          }}
                         >
-                          {t("Suivant")}
-                        </button>
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={handleNextClick}
+                          >
+                            {t("Suivant")}
+                          </button>
                         </Link>
                       </div>
                     </Modal.Footer>

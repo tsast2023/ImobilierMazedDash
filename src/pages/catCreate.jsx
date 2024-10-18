@@ -8,7 +8,7 @@ const CatCreate = () => {
     libCategorie: "",
     libCategorieEN: "",
     libCategorieAR: "",
-    parentCategoryId: "", // For child categories, store the selected parent category ID
+    parentCategoryId: "",
   });
 
   const [inputs, setInputs] = useState([{ criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" }]);
