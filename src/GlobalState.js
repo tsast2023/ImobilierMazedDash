@@ -19,6 +19,7 @@ export const DataProvider = ({ children }) => {
   const [admins, setAdmins] = useState([]);
   const [commandes, setCommandes] = useState([]);
   const [users, setUsers] = useState([]);
+  const [adsList, setAdsList] = useState([]); // New state for ads
 
   useEffect(() => {
     const getAllAcheteur = async () => {
@@ -129,9 +130,10 @@ export const DataProvider = ({ children }) => {
       }
     };
 
+    // Updated API for commandes (getCommandeByUser)
     const getAllCommandes = async () => {
       try {
-        const res = await axios.get("http://localhost:8082/api/commandes/toutes-les-commandes");
+        const res = await axios.get("http://localhost:8082/api/commandes/getCommandeByUser");
         console.log("all Commandes:", res.data);
         setCommandes(res.data);
       } catch (error) {
@@ -149,6 +151,28 @@ export const DataProvider = ({ children }) => {
       }
     };
 
+    // Fetch all ads
+    const fetchAds = async () => {
+      try {
+        const res = await axios.get("http://localhost:8082/api/ads/getAll"); // Adjust API endpoint as needed
+        console.log("Ads List:", res.data);
+        setAdsList(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    // Delete an ad
+    const deleteAd = async (id) => {
+      try {
+        await axios.delete(`http://localhost:8082/api/ads/${id}`);
+        setAdsList((prevAds) => prevAds.filter((ad) => ad.id !== id));
+        console.log("Ad deleted:", id);
+      } catch (error) {
+        console.log("Error deleting ad:", error);
+      }
+    };
+
     // Fetch all data
     getAllVendeur();
     getAllAcheteur();
@@ -162,6 +186,7 @@ export const DataProvider = ({ children }) => {
     getCarteRechar();
     getAllPermissions();
     getAllRoles();
+    fetchAds(); // Fetch ads here
   }, [token]);
 
   // Update category function
@@ -236,8 +261,6 @@ export const DataProvider = ({ children }) => {
       throw error;
     }
   };
-  
-  
 
   const state = {
     Categories,
@@ -254,6 +277,8 @@ export const DataProvider = ({ children }) => {
     Admins: admins,
     Commandes: commandes,
     Users: users,
+    adsList, // Add adsList to global state
+
   };
 
   return <GlobalState.Provider value={state}>{children}</GlobalState.Provider>;

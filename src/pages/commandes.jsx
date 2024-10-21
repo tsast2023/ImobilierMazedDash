@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';  // Import axios for API call
 import { useTranslation } from "react-i18next";
 import { GlobalState } from '../GlobalState';
 
@@ -6,7 +7,8 @@ function Commandes() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
   const state = useContext(GlobalState);
-  const commandes = state.Commandes;
+  const [commandes, setCommandes] = useState([]); // State to hold commandes
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212); // Adjust this breakpoint as needed
@@ -19,6 +21,20 @@ function Commandes() {
 
     // Clean up the event listener on component unmount
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Fetch commandes from the API
+  useEffect(() => {
+    const fetchCommandes = async () => {
+      try {
+        const response = await axios.get('http://localhost:8082/api/commandes/getCommandeByUser');
+        setCommandes(response.data); // Update commandes state with API response
+      } catch (error) {
+        console.error("Error fetching commandes:", error);
+      }
+    };
+
+    fetchCommandes(); // Call the function to fetch commandes
   }, []);
 
   return (
@@ -48,13 +64,13 @@ function Commandes() {
   );
 }
 
-function DesktopTable({commandes}) {
+function DesktopTable({ commandes }) {
   const { t } = useTranslation();
   return (
     <table className="table" id="table1">
       <thead>
         <tr>
-        <th>{t("Image")}</th>
+          <th>{t("Image")}</th>
           <th>{t("Num Commande")}</th>
           <th>{t("Produit")}</th>
           <th>{t("Prix Produit")}</th>
@@ -66,114 +82,72 @@ function DesktopTable({commandes}) {
         </tr>
       </thead>
       <tbody>
-        <tr className="table">
-        <td><img className='imgtable' src="" alt="img"/></td>
-          <td className="text-bold-500">111111</td>
-          <td>Lorem Lorem</td>
-          <td>200</td>
-          <td>500</td>
-          <td>800</td>
-          <td>2000000</td>
-          <td><span className="badge bg-secondary">{t("Terminé")}</span></td>
-          <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
-        </tr>
-        <tr className="table">
-        <td><img className='imgtable' src="" alt="img"/></td>
-          <td className="text-bold-500">111111</td>
-          <td>Lorem Lorem</td>
-
-          <td>200</td>
-          <td>500</td>
-          <td>800</td>
-          <td>2000000</td>
-          <td><span className="badge bg-warning">{t("En Cours")}</span></td>
-          <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
-        </tr>
+        {commandes.map((commande) => (
+          <tr className="table" key={commande.id}>
+            <td><img className='imgtable' src={commande.image} alt="img" /></td>
+            <td className="text-bold-500">{commande.numCommande}</td>
+            <td>{commande.produit}</td>
+            <td>{commande.prixProduit}</td>
+            <td>{commande.quantite}</td>
+            <td>{commande.prixTotal}</td>
+            <td>{new Date(commande.dateCommande).toLocaleDateString()}</td>
+            <td><span className={`badge ${commande.statut === 'Terminé' ? 'bg-secondary' : 'bg-warning'}`}>{t(commande.statut)}</span></td>
+            <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );
 }
 
-function MobileTable({commandes}) {
+function MobileTable({ commandes }) {
   const { t } = useTranslation();
   return (
     <table className="table" id="table1">
       <tbody>
-        <tr>
-          <td>{t("Num Commande")}</td>
-          <td className="text-bold-500">111111</td>
-        </tr>
-        <tr>
-          <td>{t("Produit")}</td>
-          <td>Lorem Lorem</td>
-        </tr>
-        <tr>
-          <td>{t("Image Produit")}</td>
-          <td><img className='imgtable' src="" alt="img"/></td>
-        </tr>
-        <tr>
-          <td>{t("Prix Produit")}</td>
-          <td>200</td>
-        </tr>
-        <tr>
-          <td>{t("Quantité")}</td>
-          <td>500</td>
-        </tr>
-        <tr>
-          <td>{t("Prix Total")}</td>
-          <td>800</td>
-        </tr>
-        <tr>
-          <td>{t("Date De Commande")}</td>
-          <td>2000000</td>
-        </tr>
-        <tr>
-          <td>{t("Status")}</td>
-          <td><span className="badge bg-secondary">{t("Terminé")}</span></td>
-        </tr>
-        <tr>
-          <td>{t("Changer Statut")}</td>
-        <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
-        </tr>
-        <tr>
-          <td colSpan="2"><hr /></td>
-        </tr>
-        <tr>
-          <td>{t("Num Commande")}</td>
-          <td className="text-bold-500">111111</td>
-        </tr>
-        <tr>
-          <td>{t("Produit")}</td>
-          <td>Lorem Lorem</td>
-        </tr>
-        <tr>
-          <td>{t("Image")}</td>
-          <td><img className='imgtable' src="" alt="img"/></td>
-        </tr>
-        <tr>
-          <td>{t("Prix Produit")}</td>
-          <td>200</td>
-        </tr>
-        <tr>
-          <td>{t("Quantité")}</td>
-          <td>500</td>
-        </tr>
-        <tr>
-          <td>{t("Prix Total")}</td>
-          <td>800</td>
-        </tr>
-        <tr>
-          <td>{t("Date De Commande")}</td>
-          <td>2000000</td>
-        </tr>
-        <tr>
-          <td>{t("Status")}</td>
-          <td><span className="badge bg-warning">{t("En Cours")}</span></td>
-        </tr>
-        <tr>
-          <td>{t("Changer Statut")}</td>
-        <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
-        </tr>
+        {commandes.map((commande) => (
+          <React.Fragment key={commande.id}>
+            <tr>
+              <td>{t("Num Commande")}</td>
+              <td className="text-bold-500">{commande.numCommande}</td>
+            </tr>
+            <tr>
+              <td>{t("Produit")}</td>
+              <td>{commande.produit}</td>
+            </tr>
+            <tr>
+              <td>{t("Image Produit")}</td>
+              <td><img className='imgtable' src={commande.image} alt="img" /></td>
+            </tr>
+            <tr>
+              <td>{t("Prix Produit")}</td>
+              <td>{commande.prixProduit}</td>
+            </tr>
+            <tr>
+              <td>{t("Quantité")}</td>
+              <td>{commande.quantite}</td>
+            </tr>
+            <tr>
+              <td>{t("Prix Total")}</td>
+              <td>{commande.prixTotal}</td>
+            </tr>
+            <tr>
+              <td>{t("Date De Commande")}</td>
+              <td>{new Date(commande.dateCommande).toLocaleDateString()}</td>
+            </tr>
+            <tr>
+              <td>{t("Statut")}</td>
+              <td><span className={`badge ${commande.statut === 'Terminé' ? 'bg-secondary' : 'bg-warning'}`}>{t(commande.statut)}</span></td>
+            </tr>
+            <tr>
+              <td>{t("Changer Statut")}</td>
+              <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
+            </tr>
+            <tr>
+              <td colSpan="2"><hr /></td>
+            </tr>
+          </React.Fragment>
+        ))}
       </tbody>
     </table>
   );
