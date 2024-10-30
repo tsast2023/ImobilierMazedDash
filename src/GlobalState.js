@@ -96,6 +96,7 @@ export const DataProvider = ({ children }) => {
       }
     };
 
+    // Fetch all permissions
     const getAllPermissions = async () => {
       try {
         const res = await axios.get("http://localhost:8082/admin/permissions");
@@ -184,7 +185,7 @@ export const DataProvider = ({ children }) => {
     getAllTuto();
     getAllBids();
     getCarteRechar();
-    getAllPermissions();
+    getAllPermissions(); // Fetch permissions
     getAllRoles();
     fetchAds(); // Fetch ads here
   }, [token]);
@@ -272,13 +273,12 @@ export const DataProvider = ({ children }) => {
     tutorials: tutoriel,
     bids,
     cartes: carteRech,
-    Permissions: permissions,
+    Permissions: permissions, // Add permissions to global state
     Roles: roles,
     Admins: admins,
     Commandes: commandes,
     Users: users,
     adsList, // Add adsList to global state
-
   };
 
   return <GlobalState.Provider value={state}>{children}</GlobalState.Provider>;

@@ -22,6 +22,7 @@ function CategoryList() {
   const [pageCount, setPageCount] = useState(0);
   const [data, setData] = useState({ parentCategoryId: "" });
   const [parentCategories, setParentCategories] = useState([]);
+  const [confirmationInput, setConfirmationInput] = useState("");
 
   // Filter states
   const [filterType, setFilterType] = useState("");
@@ -83,27 +84,38 @@ function CategoryList() {
     (currentPage + 1) * itemsPerPage
   );
 
-  const handleDeleteModal = (catId) => {
+  const handleDeleteModal = (cat) => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
       text: t(
         "Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"
       ),
-      icon: "warning",
+      input: "text",
+      inputPlaceholder: t("Entrez le nom de la catégorie pour confirmer"),
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
       confirmButtonText: t("Oui, supprimez-le !"),
       cancelButtonText: t("Non, annuler !"),
-    }).then((result) => {
+      preConfirm: (inputValue) => {
+        if (inputValue.trim() === "") {
+          Swal.showValidationMessage("Le nom ne peut pas être vide.");
+        } else if (inputValue !== cat.libCategorie) {
+          Swal.showValidationMessage(
+            "Le nom entré ne correspond pas à la catégorie."
+          );
+        }
+        return inputValue; // Return inputValue for further processing
+      },
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        deleteC(catId);
+        await deleteC(cat.id); // Await the deletion function
         Swal.fire({
           text: "Supprimé(e) ! Votre élément a été supprimé.",
           icon: "success",
           confirmButtonColor: "#b0210e",
         }).then(() => {
           window.location.reload(); // Reload the page on confirmation
-      });
+        });
       } else {
         Swal.fire({
           text: "Annulé, Votre élément est en sécurité :)",
@@ -114,14 +126,18 @@ function CategoryList() {
     });
   };
 
-  const deleteC = async (id) => {
+  // Define the deleteC function
+  const deleteC = async (categoryId) => {
     try {
-      const res = await axios.delete(
-        `http://localhost:8082/api/categories/delete/${id}`
-      );
-      console.log(res.data);
+      await axios.delete(`http://localhost:8082/api/categories/${categoryId}`);
+      console.log("Category deleted successfully");
     } catch (error) {
-      console.log(error);
+      console.error("Error deleting category:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Une erreur est survenue lors de la suppression de la catégorie!",
+      });
     }
   };
 
@@ -142,11 +158,14 @@ function CategoryList() {
     formData.append("libCategorieAR", selectedCategory.libCategorieAR);
     formData.append("libCategorieEN", selectedCategory.libCategorieEN);
     formData.append("icon", selectedCategory.icon);
-    formData.append("parentCategoryNames", selectedCategory.parentCategoryNames);
+    formData.append(
+      "parentCategoryNames",
+      selectedCategory.parentCategoryNames
+    );
     formData.append("criteresNames", selectedCategory.criteresNames);
     formData.append("criteresNamesEn", selectedCategory.criteresNamesEn);
     formData.append("criteresNamesAr", selectedCategory.criteresNamesAr);
-    
+
     try {
       const response = await axios.put(
         "http://localhost:8082/api/categories/update",
@@ -158,9 +177,36 @@ function CategoryList() {
       console.error("Error updating category:", error);
     }
   };
-  
 
   // New function to handle deactivating a category
+  const handleDeactivate = (cat) => {
+    Swal.fire({
+      title: "Désactiver la catégorie",
+      text: "Veuillez entrer le nom exact de la catégorie pour la désactiver :",
+      input: "text", // Input type
+      inputPlaceholder: "Nom de la catégorie",
+      showCancelButton: true,
+      confirmButtonText: "Désactiver",
+      cancelButtonText: "Annuler",
+      preConfirm: (inputValue) => {
+        // Validate the input against the category name
+        if (inputValue.trim() === "") {
+          Swal.showValidationMessage("Le nom ne peut pas être vide.");
+        } else if (inputValue !== cat.libCategorie) {
+          Swal.showValidationMessage(
+            "Le nom entré ne correspond pas à la catégorie."
+          );
+        }
+        return inputValue; // Return inputValue for further processing
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        // Proceed to deactivate the category if confirmed
+        await deactivateCategory(cat.id);
+      }
+    });
+  };
+
   const deactivateCategory = async (categoryId) => {
     try {
       const response = await axios.put(
@@ -168,55 +214,57 @@ function CategoryList() {
       );
       console.log(response.data);
       Swal.fire({
-        text: t("La catégorie a été désactivée avec succès !"),
+        text: "La catégorie a été désactivée avec succès !",
         icon: "success",
         confirmButtonColor: "#b0210e",
       }).then(() => {
         window.location.reload(); // Reload the page on confirmation
-    });
+      });
     } catch (error) {
       console.error("Error deactivating category:", error);
       Swal.fire({
-        text: t("Une erreur s'est produite lors de la désactivation."),
+        text: "Une erreur s'est produite lors de la désactivation.",
         icon: "error",
         confirmButtonColor: "#b0210e",
       });
     }
   };
 
+  // Modify the deactivate icon click handler in the renderDesktopTable and renderMobileTable functions
+  // Replace the deactivate icon click with this
+
   const activateCategory = async (categoryId) => {
     try {
-        const response = await axios.put(
-            `http://localhost:8082/api/categories/Activer/${categoryId}`
-        );
-        console.log(response.data);
-        Swal.fire({
-            text: t("La catégorie a été activée avec succès !"),
-            icon: "success",
-            confirmButtonColor: "#b0210e",
-        }).then(() => {
-            window.location.reload(); // Reload the page on confirmation
-        });
+      const response = await axios.put(
+        `http://localhost:8082/api/categories/Activer/${categoryId}`
+      );
+      console.log(response.data);
+      Swal.fire({
+        text: t("La catégorie a été activée avec succès !"),
+        icon: "success",
+        confirmButtonColor: "#b0210e",
+      }).then(() => {
+        window.location.reload(); // Reload the page on confirmation
+      });
     } catch (error) {
-        console.error("Error activating category:", error);
-        Swal.fire({
-            text: t("Une erreur s'est produite lors de l'activation."),
-            icon: "error",
-            confirmButtonColor: "#b0210e",
-        });
+      console.error("Error activating category:", error);
+      Swal.fire({
+        text: t("Une erreur s'est produite lors de l'activation."),
+        icon: "error",
+        confirmButtonColor: "#b0210e",
+      });
     }
-};
-
+  };
 
   useEffect(() => {
     // Fetch parent categories from the API
     axios
-      .get('http://localhost:8082/api/categories/parents')
+      .get("http://localhost:8082/api/categories/parents")
       .then((response) => {
         setParentCategories(response.data);
       })
       .catch((error) => {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       });
   }, []);
 
@@ -259,7 +307,7 @@ function CategoryList() {
                 <td>
                   <i
                     className="fa-solid fa-trash deleteIcon"
-                    onClick={() => handleDeleteModal(cat.id)}
+                    onClick={() => handleDeleteModal(cat)} // Pass the entire category object
                   ></i>
                 </td>
               </tr>
@@ -281,67 +329,67 @@ function CategoryList() {
 
   const renderDesktopTable = () => (
     <table className="table">
-    <thead>
-      <tr>
-        <th>{t("Libellé")}</th>
-        <th>{t("Status")}</th>
-        <th>{t("Détail")}</th>
-        <th>{t("Modifier")}</th>
-        <th>{t("Activer")}</th>
-        <th>{t("Désactiver")}</th>
-        <th>{t("Supprimer")}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {currentItems.length > 0 ? (
-        currentItems.map((cat, index) => (
-          <tr key={index}>
-            <td className="text-bold-500">{cat.libCategorie}</td>
-            <td className="text-bold-500">{cat.status}</td>
-            <td>
-              <a
-                onClick={() =>
-                  navigate(`/catdetail/${cat.id}`, { state: { cat } })
-                }
-              >
-                <i className="fa-solid fa-eye"></i>
-              </a>
-            </td>
-            <td>
-              <button className="btn" onClick={() => handleEdit(cat)}>
-                <i className="fa-solid fa-pen-to-square"></i>
-              </button>
-            </td>
-            <td>
-              <i
-                className="fa-solid fa-circle-check"
-                style={{ color: "green" }}
-                onClick={() => activateCategory(cat.id)}
-              ></i>
-            </td>
-
-            <td>
-              <i
-                className="fa-solid fa-ban"
-                onClick={() => deactivateCategory(cat.id)}
-              ></i>
-            </td>
-            <td>
-              <i
-                className="fa-solid fa-trash deleteIcon"
-                onClick={() => handleDeleteModal(cat.id)}
-              ></i>
-            </td>
-          </tr>
-        ))
-      ) : (
+      <thead>
         <tr>
-          <td colSpan="5">No categories available</td>
+          <th>{t("Libellé")}</th>
+          <th>{t("Status")}</th>
+          <th>{t("Détail")}</th>
+          <th>{t("Modifier")}</th>
+          <th>{t("Activer")}</th>
+          <th>{t("Désactiver")}</th>
+          <th>{t("Supprimer")}</th>
         </tr>
-      )}
-    </tbody>
-  </table>
-);
+      </thead>
+      <tbody>
+        {currentItems.length > 0 ? (
+          currentItems.map((cat, index) => (
+            <tr key={index}>
+              <td className="text-bold-500">{cat.libCategorie}</td>
+              <td className="text-bold-500">{cat.status}</td>
+              <td>
+                <a
+                  onClick={() =>
+                    navigate(`/catdetail/${cat.id}`, { state: { cat } })
+                  }
+                >
+                  <i className="fa-solid fa-eye"></i>
+                </a>
+              </td>
+              <td>
+                <button className="btn" onClick={() => handleEdit(cat)}>
+                  <i className="fa-solid fa-pen-to-square"></i>
+                </button>
+              </td>
+              <td>
+                <i
+                  className="fa-solid fa-circle-check"
+                  style={{ color: "green" }}
+                  onClick={() => activateCategory(cat.id)}
+                ></i>
+              </td>
+
+              <td>
+                <i
+                  className="fa-solid fa-ban"
+                  onClick={() => handleDeactivate(cat)} // Call handleDeactivate on click
+                ></i>
+              </td>
+              <td>
+                <i
+                  className="fa-solid fa-trash deleteIcon"
+                  onClick={() => handleDeleteModal(cat)} // Pass the entire category object
+                ></i>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="5">No categories available</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
 
   return (
     <div className="content-container">
@@ -449,142 +497,145 @@ function CategoryList() {
       </div>
 
       <Modal show={showModal} onHide={handleModalClose}>
-  <Modal.Header closeButton>
-    <Modal.Title>{t("Modifier la catégorie")}</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <div className="form-group">
-      <label>{t("Libellé (FR)")}</label>
-      <input
-        type="text"
-        className="form-control"
-        value={selectedCategory ? selectedCategory.libCategorie : ""}
-        onChange={(e) =>
-          setSelectedCategory({
-            ...selectedCategory,
-            libCategorie: e.target.value,
-          })
-        }
-      />
-    </div>
+        <Modal.Header closeButton>
+          <Modal.Title>{t("Modifier la catégorie")}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="form-group">
+            <label>{t("Libellé (FR)")}</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedCategory ? selectedCategory.libCategorie : ""}
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  libCategorie: e.target.value,
+                })
+              }
+            />
+          </div>
 
-    <div className="form-group">
-      <label>{t("Libellé (AR)")}</label>
-      <input
-        type="text"
-        className="form-control"
-        value={selectedCategory ? selectedCategory.libCategorieAR : ""}
-        onChange={(e) =>
-          setSelectedCategory({
-            ...selectedCategory,
-            libCategorieAR: e.target.value,
-          })
-        }
-      />
-    </div>
+          <div className="form-group">
+            <label>{t("Libellé (AR)")}</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedCategory ? selectedCategory.libCategorieAR : ""}
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  libCategorieAR: e.target.value,
+                })
+              }
+            />
+          </div>
 
-    <div className="form-group">
-      <label>{t("Libellé (EN)")}</label>
-      <input
-        type="text"
-        className="form-control"
-        value={selectedCategory ? selectedCategory.libCategorieEN : ""}
-        onChange={(e) =>
-          setSelectedCategory({
-            ...selectedCategory,
-            libCategorieEN: e.target.value,
-          })
-        }
-      />
-    </div>
+          <div className="form-group">
+            <label>{t("Libellé (EN)")}</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedCategory ? selectedCategory.libCategorieEN : ""}
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  libCategorieEN: e.target.value,
+                })
+              }
+            />
+          </div>
 
-    <div className="form-group">
-      <label>{t("Icon")}</label>
-      <input
-        type="file"
-        className="form-control"
-        onChange={(e) => setSelectedCategory({ ...selectedCategory, icon: e.target.files[0] })}
-      />
-    </div>
+          <div className="form-group">
+            <label>{t("Icon")}</label>
+            <input
+              type="file"
+              className="form-control"
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  icon: e.target.files[0],
+                })
+              }
+            />
+          </div>
 
-    <div className="form-group" style={{ marginBottom: "15px" }}>
-  <label htmlFor="category-select">Catégories</label>
-  <select
-    id="category-select"
-    className="form-select"
-    value={data.parentCategoryId}
-    onChange={handleSelectChange}
-    required
-  >
-    <option value="">Select a parent category</option>
-    {parentCategories.length > 0 ? (
-      parentCategories.map((item) => (
-        <option key={item.id} value={item.id}>
-          {item.libCategorie}
-        </option>
-      ))
-    ) : (
-      <option>Loading...</option>
-    )}
-  </select>
-</div>
+          <div className="form-group" style={{ marginBottom: "15px" }}>
+            <label htmlFor="category-select">Catégories</label>
+            <select
+              id="category-select"
+              className="form-select"
+              value={data.parentCategoryId}
+              onChange={handleSelectChange}
+              required
+            >
+              <option value="">Select a parent category</option>
+              {parentCategories.length > 0 ? (
+                parentCategories.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.libCategorie}
+                  </option>
+                ))
+              ) : (
+                <option>Loading...</option>
+              )}
+            </select>
+          </div>
 
+          <div className="form-group">
+            <label>{t("Criteres (FR)")}</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedCategory ? selectedCategory.criteresNames : ""}
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  criteresNames: e.target.value.split(","),
+                })
+              }
+            />
+          </div>
 
-    <div className="form-group">
-      <label>{t("Criteres (FR)")}</label>
-      <input
-        type="text"
-        className="form-control"
-        value={selectedCategory ? selectedCategory.criteresNames : ""}
-        onChange={(e) =>
-          setSelectedCategory({
-            ...selectedCategory,
-            criteresNames: e.target.value.split(","),
-          })
-        }
-      />
-    </div>
+          <div className="form-group">
+            <label>{t("Criteres (EN)")}</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedCategory ? selectedCategory.criteresNamesEn : ""}
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  criteresNamesEn: e.target.value.split(","),
+                })
+              }
+            />
+          </div>
 
-    <div className="form-group">
-      <label>{t("Criteres (EN)")}</label>
-      <input
-        type="text"
-        className="form-control"
-        value={selectedCategory ? selectedCategory.criteresNamesEn : ""}
-        onChange={(e) =>
-          setSelectedCategory({
-            ...selectedCategory,
-            criteresNamesEn: e.target.value.split(","),
-          })
-        }
-      />
-    </div>
-
-    <div className="form-group">
-      <label>{t("Criteres (AR)")}</label>
-      <input
-        type="text"
-        className="form-control"
-        value={selectedCategory ? selectedCategory.criteresNamesAr : ""}
-        onChange={(e) =>
-          setSelectedCategory({
-            ...selectedCategory,
-            criteresNamesAr: e.target.value.split(","),
-          })
-        }
-      />
-    </div>
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={handleModalClose}>
-      {t("Fermer")}
-    </Button>
-    <Button variant="primary" onClick={handleModalSave}>
-      {t("Sauvegarder")}
-    </Button>
-  </Modal.Footer>
-</Modal>
-
+          <div className="form-group">
+            <label>{t("Criteres (AR)")}</label>
+            <input
+              type="text"
+              className="form-control"
+              value={selectedCategory ? selectedCategory.criteresNamesAr : ""}
+              onChange={(e) =>
+                setSelectedCategory({
+                  ...selectedCategory,
+                  criteresNamesAr: e.target.value.split(","),
+                })
+              }
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleModalClose}>
+            {t("Fermer")}
+          </Button>
+          <Button variant="primary" onClick={handleModalSave}>
+            {t("Sauvegarder")}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

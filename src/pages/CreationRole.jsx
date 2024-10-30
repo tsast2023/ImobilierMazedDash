@@ -7,14 +7,25 @@ import { useTranslation } from "react-i18next";
 
 function CreationRole() {
   const [isEnabled, setIsEnabled] = useState(false);
-  const [data , setData] = useState({roleName:"" , permissionNames:[]})
-  const [inputs, setInputs] = useState([]);
-  const state = useContext(GlobalState);
-  const permissions = state.Permissions;
-  console.log("ppp:" , permissions)
+  const [data, setData] = useState({ roleName: "", permissionNames: [] });
+  const [permissions, setPermissions] = useState([]); // Local state to store permissions
   const { t } = useTranslation();
+
+  // Fetching permissions from the API on component mount
   useEffect(() => {
-    console.log("cat from here", permissions);
+    const fetchPermissions = async () => {
+      try {
+        const res = await axios.get("http://localhost:8082/admin/permission/permissions");
+        setPermissions(res.data); // Storing permissions in the state
+      } catch (error) {
+        console.log("Error fetching permissions:", error);
+      }
+    };
+    
+    fetchPermissions();
+  }, []);
+
+  useEffect(() => {
     const select = new Choices("#category-select", {
       removeItemButton: true,
       placeholder: true,
@@ -26,28 +37,23 @@ function CreationRole() {
       const hasSelection = select.getValue().length > 0;
       setIsEnabled(hasSelection);
       if (!hasSelection) {
-        setInputs([]);
+        setData({ ...data, permissionNames: [] });
       }
     };
 
     select.passedElement.element.addEventListener("change", handleSelectChange);
 
     return () => {
-      select.passedElement.element.removeEventListener(
-        "change",
-        handleSelectChange
-      );
+      select.passedElement.element.removeEventListener("change", handleSelectChange);
       select.destroy();
     };
   }, [permissions]);
-  
 
   const createRole = async (e) => {
     e.preventDefault();
-    console.log(data);
     try {
       const res = await axios.post(
-        "http://localhost:8082/admin/create-role",
+        "http://localhost:8082/admin/permission/create-permission",
         data
       );
       console.log(res.data);
@@ -97,19 +103,22 @@ function CreationRole() {
                         </div>
                       </div>
                       <div className="form-group" style={{ marginBottom: "15px" }}>
-                <label htmlFor="category-select">{t("Permission")}</label>
-                <select
-                  id="category-select"
-                  className="choices form-select multiple-remove"
-                  multiple
-                  onChange={handlePermissionChange}
-                >
-                  <option disabled>default</option>
-                 {permissions&& permissions.map((item)=>(
-                  <option value={item.name}>{item.name}</option>
-                 ))}
-                </select>
-              </div>
+                        <label htmlFor="category-select">{t("Permission")}</label>
+                        <select
+                          id="category-select"
+                          className="choices form-select multiple-remove"
+                          multiple
+                          onChange={handlePermissionChange}
+                        >
+                          <option disabled>default</option>
+                          {permissions &&
+                            permissions.map((item) => (
+                              <option key={item.name} value={item.name}>
+                                {item.name}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
                       <br />
                       <br />
                       <br />

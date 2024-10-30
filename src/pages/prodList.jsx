@@ -37,32 +37,47 @@ const ProdList = () => {
     fetchProducts();
   }, []);
 
-  const deleteItem = (productId) => {
-    console.log("Item deleted:", productId);
+  const deleteItem = async (productId) => {
+    try {
+      await axios.delete(`http://localhost:8082/api/products/${productId}`);
+      setProducts(products.filter(product => product.id !== productId)); // Update state to remove deleted item
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
   };
 
-  const handleDelete = (productId) => {
+  const handleDelete = (product) => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
-      text: t("Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"),
+      text: t("Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !") + ` (${product.libelleProductFr})`,
       icon: "warning",
+      input: 'text',
+      inputPlaceholder: t("Tapez 'SUPPRIMER' pour confirmer"),
       showCancelButton: true,
       confirmButtonColor: "#b0210e",
       confirmButtonText: t("Oui, supprimez-le !"),
-      cancelButtonText: t("Non, annuler !")
+      cancelButtonText: t("Non, annuler !"),
+      preConfirm: (inputValue) => {
+        if (inputValue !== 'SUPPRIMER') {
+          Swal.showValidationMessage(
+            t("Veuillez taper 'SUPPRIMER' pour confirmer.")
+          );
+        }
+        return inputValue;
+      }
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteItem(productId);
+        deleteItem(product.id);
         Swal.fire({
           title: "Supprimer",
-          text: "Votre élément est Supprimé :)",
+          text: t("Votre élément est Supprimé :)"),
           icon: "success",
           confirmButtonColor: "#b0210e",
         });
       } else {
         Swal.fire({
           title: "Annulé",
-          text: "Votre élément est en sécurité :)",
+          text: t("Votre élément est en sécurité :)"),
           icon: "error",
           confirmButtonColor: "#b0210e",
         });
@@ -86,6 +101,45 @@ const ProdList = () => {
     setShowEditModal(false);
   };
 
+  const handleDeactivate = (product) => {
+    Swal.fire({
+      title: t("Êtes-vous sûr(e) ?"),
+      text: t("Êtes-vous sûr de vouloir désactiver ce produit ?") + ` (${product.libelleProductFr})`,
+      icon: "warning",
+      input: 'text',
+      inputPlaceholder: t("Tapez 'DÉSACTIVER' pour confirmer"),
+      showCancelButton: true,
+      confirmButtonColor: "#b0210e",
+      confirmButtonText: t("Oui, désactivez-le !"),
+      cancelButtonText: t("Non, annuler !"),
+      preConfirm: (inputValue) => {
+        if (inputValue !== 'DÉSACTIVER') {
+          Swal.showValidationMessage(
+            t("Veuillez taper 'DÉSACTIVER' pour confirmer.")
+          );
+        }
+        return inputValue;
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Call deactivate function (assuming an API exists for this)
+        Swal.fire({
+          title: "Désactiver",
+          text: t("Votre produit est Désactivé :)"),
+          icon: "success",
+          confirmButtonColor: "#b0210e",
+        });
+      } else {
+        Swal.fire({
+          title: "Annulé",
+          text: t("Votre produit est toujours actif :)"),
+          icon: "error",
+          confirmButtonColor: "#b0210e",
+        });
+      }
+    });
+  };
+
   return (
     <div className="content-container">
       <section className="section">
@@ -101,7 +155,6 @@ const ProdList = () => {
                     <tr>
                       <td>{t("Image")}</td>
                       <td>
-                        {/* Map through galerie to display all images */}
                         {product.galerie && product.galerie.length > 0 ? (
                           product.galerie.map((image, imgIndex) => (
                             <img key={imgIndex} className="imgtable" src={image} alt={`img-${imgIndex}`} />
@@ -152,13 +205,13 @@ const ProdList = () => {
                     <tr>
                       <td>{t("Supprimer")}</td>
                       <td>
-                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product.id)}></i>
+                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product)}></i>
                       </td>
                     </tr>
                     <tr>
                       <td>{t("Désactiver")}</td>
                       <td>
-                        <i className="fa-solid fa-ban blockIcon"></i>
+                        <i className="fa-solid fa-ban blockIcon" onClick={() => handleDeactivate(product)}></i>
                       </td>
                     </tr>
                     <tr>
@@ -195,7 +248,6 @@ const ProdList = () => {
                   {products.map((product, index) => (
                     <tr key={index}>
                       <td>
-                        {/* Map through galerie to display all images */}
                         {product.galerie && product.galerie.length > 0 ? (
                           product.galerie.map((image, imgIndex) => (
                             <img key={imgIndex} className="imgtable" src={image} alt={`img-${imgIndex}`} />
@@ -222,10 +274,10 @@ const ProdList = () => {
                         </button>
                       </td>
                       <td>
-                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product.id)}></i>
+                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product)}></i>
                       </td>
                       <td>
-                        <i className="fa-solid fa-ban blockIcon"></i>
+                        <i className="fa-solid fa-ban blockIcon" onClick={() => handleDeactivate(product)}></i>
                       </td>
                       <td>
                         {starClicked ? (
@@ -243,21 +295,22 @@ const ProdList = () => {
         </div>
       </section>
 
-      {/* Modal for editing */}
       <Modal show={showEditModal} onHide={handleCloseEditModal}>
         <Modal.Header closeButton>
           <Modal.Title>{t("Modifier le produit")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleSubmit}>
-            {/* Include your form fields here, prefilled with currentProduct data */}
-            <div>
+            <div className="form-group">
               <label>{t("Libellé")}</label>
-              <input type="text" value={currentProduct ? currentProduct.libelleProductFr : ''} onChange={(e) => setCurrentProduct({ ...currentProduct, libelleProductFr: e.target.value })} />
+              <input type="text" className="form-control" value={currentProduct ? currentProduct.libelleProductFr : ""} onChange={(e) => setCurrentProduct({ ...currentProduct, libelleProductFr: e.target.value })} />
             </div>
-            {/* Add other form fields as necessary */}
+            <div className="form-group">
+              <label>{t("Prix")}</label>
+              <input type="text" className="form-control" value={currentProduct ? currentProduct.prixPrincipale : ""} onChange={(e) => setCurrentProduct({ ...currentProduct, prixPrincipale: e.target.value })} />
+            </div>
             <Button variant="primary" type="submit">
-              {t("Sauvegarder")}
+              {t("Enregistrer")}
             </Button>
           </form>
         </Modal.Body>
@@ -267,4 +320,3 @@ const ProdList = () => {
 };
 
 export default ProdList;
- 
