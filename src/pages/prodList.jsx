@@ -4,6 +4,7 @@ import { Table, Modal, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from 'axios';
+import ReactPaginate from "react-paginate";
 
 const ProdList = () => {
   const { t } = useTranslation();
@@ -12,6 +13,18 @@ const ProdList = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [products, setProducts] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,13 +42,14 @@ const ProdList = () => {
       try {
         const response = await axios.get("http://localhost:8082/api/products/all");
         setProducts(response.data);
+        setPageCount(Math.ceil(response.data.length / itemsPerPage));
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [itemsPerPage]);
 
   const deleteItem = async (productId) => {
     try {
@@ -144,9 +158,45 @@ const ProdList = () => {
     <div className="content-container">
       <section className="section">
         <div className="card">
-          <div className="card-header">
-            <h2 className="new-price">{t("Listes des Produits")}</h2>
+          <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
+            <h2 className="new-price">{t("Liste des Produits")}</h2>
+            <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                  <h6>{t("Items par page:")}</h6>
+                </label>
+                <select
+                  className="itemsPerPage"
+                  id="itemsPerPage"
+                  value={itemsPerPage}
+                  onChange={handleItemsPerPageChange}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={15}>15</option>
+                  <option value={20}>20</option>
+                </select>
+              </div>
           </div>
+
+          {/* Pagination component at the top */}
+          <ReactPaginate
+            previousLabel={"← Previous"}
+            nextLabel={"Next →"}
+            breakLabel={"..."}
+            pageCount={pageCount}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={3}
+            onPageChange={handlePageChange}
+            containerClassName={"pagination"}
+            activeClassName={"active"}
+            className="react-paginate"
+          />
+
           <div className="card-body">
             {isMobile ? (
               products.map((product, index) => (
@@ -205,23 +255,25 @@ const ProdList = () => {
                     <tr>
                       <td>{t("Supprimer")}</td>
                       <td>
-                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product)}></i>
+                        <button className="btn btn-outline block" onClick={() => handleDelete(product)}>
+                          <i className="fa-solid fa-trash font-medium-1"></i>
+                        </button>
                       </td>
                     </tr>
                     <tr>
                       <td>{t("Désactiver")}</td>
                       <td>
-                        <i className="fa-solid fa-ban blockIcon" onClick={() => handleDeactivate(product)}></i>
+                        <button className="btn btn-outline block" onClick={() => handleDeactivate(product)}>
+                          <i className="fa-solid fa-power-off font-medium-1"></i>
+                        </button>
                       </td>
                     </tr>
                     <tr>
                       <td>{t("Mettre à l'une")}</td>
                       <td>
-                        {starClicked ? (
-                          <i className="fa-solid fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
-                        ) : (
-                          <i className="fa-regular fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
-                        )}
+                        <button className="btn btn-outline block" onClick={() => setStarClicked(!starClicked)}>
+                          <i className="fa-solid fa-star font-medium-1"></i>
+                        </button>
                       </td>
                     </tr>
                   </tbody>
@@ -274,17 +326,19 @@ const ProdList = () => {
                         </button>
                       </td>
                       <td>
-                        <i className="fa-solid fa-trash deleteIcon font-medium-1" onClick={() => handleDelete(product)}></i>
+                        <button className="btn btn-outline block" onClick={() => handleDelete(product)}>
+                          <i className="fa-solid fa-trash font-medium-1"></i>
+                        </button>
                       </td>
                       <td>
-                        <i className="fa-solid fa-ban blockIcon" onClick={() => handleDeactivate(product)}></i>
+                        <button className="btn btn-outline block" onClick={() => handleDeactivate(product)}>
+                          <i className="fa-solid fa-power-off font-medium-1"></i>
+                        </button>
                       </td>
                       <td>
-                        {starClicked ? (
-                          <i className="fa-solid fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
-                        ) : (
-                          <i className="fa-regular fa-star arrowIcon" onClick={() => setStarClicked(!starClicked)}></i>
-                        )}
+                        <button className="btn btn-outline block" onClick={() => setStarClicked(!starClicked)}>
+                          <i className="fa-solid fa-star font-medium-1"></i>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -292,6 +346,20 @@ const ProdList = () => {
               </Table>
             )}
           </div>
+
+          {/* Pagination component at the bottom */}
+          <ReactPaginate
+            previousLabel={"← Previous"}
+            nextLabel={"Next →"}
+            breakLabel={"..."}
+            pageCount={pageCount}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={3}
+            onPageChange={handlePageChange}
+            containerClassName={"pagination"}
+            activeClassName={"active"}
+            className="react-paginate"
+          />
         </div>
       </section>
 
@@ -301,17 +369,8 @@ const ProdList = () => {
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>{t("Libellé")}</label>
-              <input type="text" className="form-control" value={currentProduct ? currentProduct.libelleProductFr : ""} onChange={(e) => setCurrentProduct({ ...currentProduct, libelleProductFr: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <label>{t("Prix")}</label>
-              <input type="text" className="form-control" value={currentProduct ? currentProduct.prixPrincipale : ""} onChange={(e) => setCurrentProduct({ ...currentProduct, prixPrincipale: e.target.value })} />
-            </div>
-            <Button variant="primary" type="submit">
-              {t("Enregistrer")}
-            </Button>
+            {/* Your edit form fields go here */}
+            <button type="submit">{t("Enregistrer les modifications")}</button>
           </form>
         </Modal.Body>
       </Modal>

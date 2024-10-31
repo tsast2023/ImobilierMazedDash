@@ -5,7 +5,6 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 
 const Modal = ({ t, handleImageChange, tuto, setTuto, addTuto }) => {
-
   return (
     <div
       className="modal fade text-left"
@@ -332,7 +331,10 @@ const Tutoriel = () => {
         </section>
         <section className="section mt-4">
           <div className="card">
-            <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
+            <div
+              className="card-header"
+              style={{ display: "flex", justifyContent: "space-between" }}
+            >
               <h2 className="new-price">{t("Liste des images")}</h2>
               <div
                 style={{
