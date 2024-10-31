@@ -5,6 +5,7 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 
 const Modal = ({ t, handleImageChange, tuto, setTuto, addTuto }) => {
+
   return (
     <div
       className="modal fade text-left"
@@ -14,11 +15,21 @@ const Modal = ({ t, handleImageChange, tuto, setTuto, addTuto }) => {
       aria-labelledby="myModalLabel33"
       aria-hidden="true"
     >
-      <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+      <div
+        className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+        role="document"
+      >
         <div className="modal-content">
           <div className="modal-header">
-            <h4 className="modal-title" id="myModalLabel33">{t("Ajouter une nouvelle image")}</h4>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h4 className="modal-title" id="myModalLabel33">
+              {t("Ajouter une nouvelle image")}
+            </h4>
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
           </div>
           <form onSubmit={addTuto} action="#">
             <div className="modal-body">
@@ -42,23 +53,61 @@ const Modal = ({ t, handleImageChange, tuto, setTuto, addTuto }) => {
                   onChange={(e) => setTuto({ ...tuto, ordre: e.target.value })}
                 />
               </div>
-              <label htmlFor="description">{t("Description")}</label>
+              <label htmlFor="description français">
+                {t("Description français")}
+              </label>
               <div className="form-group">
                 <textarea
                   id="description"
                   type="text"
                   placeholder={t("Écrivez ici")}
                   className="form-control"
-                  onChange={(e) => setTuto({ ...tuto, description: e.target.value })}
+                  onChange={(e) =>
+                    setTuto({ ...tuto, description: e.target.value })
+                  }
+                />
+              </div>
+              <label htmlFor="description">{t("Description anglais")}</label>
+              <div className="form-group">
+                <textarea
+                  id="description anglais"
+                  type="text"
+                  placeholder={t("Écrivez ici")}
+                  className="form-control"
+                  onChange={(e) =>
+                    setTuto({ ...tuto, description: e.target.value })
+                  }
+                />
+              </div>
+              <label htmlFor="description arabe">
+                {t("Description arabe")}
+              </label>
+              <div className="form-group">
+                <textarea
+                  id="description"
+                  type="text"
+                  placeholder={t("Écrivez ici")}
+                  className="form-control"
+                  onChange={(e) =>
+                    setTuto({ ...tuto, description: e.target.value })
+                  }
                 />
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
                 <i className="bx bx-x d-block d-sm-none"></i>
                 <span className="btn btn-secondary">{t("Annuler")}</span>
               </button>
-              <button className="btn btn-primary" data-bs-dismiss="modal" type="submit">
+              <button
+                className="btn btn-primary"
+                data-bs-dismiss="modal"
+                type="submit"
+              >
                 <i className="bx bx-check d-block d-sm-none"></i>
                 <span className="btn btn-primary">{t("Enregistrer")}</span>
               </button>
@@ -76,11 +125,19 @@ const TableRow = ({ item, handleDelete }) => {
   return (
     <tr>
       <td className="text-bold-500">
-        <img className="imgtable" src={item.file} alt="tuto_image" style={{ width: "auto", height: "150px" }} />
+        <img
+          className="imgtable"
+          src={item.file}
+          alt="tuto_image"
+          style={{ width: "auto", height: "150px" }}
+        />
       </td>
       <td>{item.ordre}</td>
       <td>
-        <i className="fa-solid fa-trash deleteIcon" onClick={() => handleDelete(item.id)}></i>
+        <i
+          className="fa-solid fa-trash deleteIcon"
+          onClick={() => handleDelete(item.id)}
+        ></i>
       </td>
     </tr>
   );
@@ -95,40 +152,41 @@ const ResponsiveTable = ({ tutorials, handleDelete, isMobile }) => {
         <table className="table">
           <tbody>
             <tr>
-            <td>{t("Image")}</td>
-            <td></td>
+              <td>{t("Image")}</td>
+              <td></td>
             </tr>
             <tr>
-            <td>{t("Ordre")}</td>
-            <td></td>
+              <td>{t("Ordre")}</td>
+              <td></td>
             </tr>
             <tr>
-            <td>{t("Supprimer")}</td>
-            <td></td>
+              <td>{t("Supprimer")}</td>
+              <td></td>
             </tr>
           </tbody>
         </table>
       ) : (
-      <table className="table table-lg">
-        <thead>
-          <tr>
-            <td>{t("Image")}</td>
-            <td>{t("Ordre")}</td>
-            <td>{t("Supprimer")}</td>
-          </tr>
-        </thead>
-        <tbody>
-          {tutorials ? (
-            tutorials.map((item, index) => (
-              <TableRow key={index} item={item} handleDelete={handleDelete} />
-            ))
-          ) : (
+        <table className="table table-lg">
+          <thead>
             <tr>
-              <td colSpan="3">{t("loading")}</td>
+              <td>{t("Image")}</td>
+              <td>{t("Ordre")}</td>
+              <td>{t("Supprimer")}</td>
+              <td>{t("Description")}</td>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {tutorials ? (
+              tutorials.map((item, index) => (
+                <TableRow key={index} item={item} handleDelete={handleDelete} />
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3">{t("loading")}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       )}
     </div>
   );
@@ -140,6 +198,13 @@ const Tutoriel = () => {
   const state = useContext(GlobalState);
   const tutorials = state.tutorials;
   const [isMobile, setIsMobile] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -158,7 +223,9 @@ const Tutoriel = () => {
   const handleDelete = (id) => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
-      text: t("Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"),
+      text: t(
+        "Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"
+      ),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -169,16 +236,20 @@ const Tutoriel = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         deleteItem(id);
-        Swal.fire({   title: "Supprimer",
+        Swal.fire({
+          title: "Supprimer",
           text: "Votre élément est Supprimer:)",
           icon: "Succes",
           confirmButtonColor: "#b0210e",
-        });      } else {
-          Swal.fire({   title: "Annulé",
-            text: "Votre élément est en sécurité :)",
-            icon: "error",
-            confirmButtonColor: "#b0210e",
-          });       }
+        });
+      } else {
+        Swal.fire({
+          title: "Annulé",
+          text: "Votre élément est en sécurité :)",
+          icon: "error",
+          confirmButtonColor: "#b0210e",
+        });
+      }
     });
   };
 
@@ -195,7 +266,9 @@ const Tutoriel = () => {
 
   const deleteItem = async (id) => {
     try {
-      const res = await axios.delete(`http://localhost:8082/api/tuto/deleteTuto?id=${id}`);
+      const res = await axios.delete(
+        `http://localhost:8082/api/tuto/deleteTuto?id=${id}`
+      );
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -205,7 +278,10 @@ const Tutoriel = () => {
   const addTuto = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8082/api/tuto/publishNow", tuto);
+      const res = await axios.post(
+        "http://localhost:8082/api/tuto/publishNow",
+        tuto
+      );
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -228,7 +304,9 @@ const Tutoriel = () => {
                 <div className="card-content">
                   <div className="card-body">
                     <div className="form-group">
-                      <h2 className="new-price">{t("Vous souhaitez ajouter une nouvelle image ?")}</h2>
+                      <h2 className="new-price">
+                        {t("Vous souhaitez ajouter une nouvelle image ?")}
+                      </h2>
                       <button
                         type="button"
                         className="btn btn-outline-secondary"
@@ -254,8 +332,29 @@ const Tutoriel = () => {
         </section>
         <section className="section mt-4">
           <div className="card">
-            <div className="card-header">
+            <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
               <h2 className="new-price">{t("Liste des images")}</h2>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                  <h6>{t("Items par page:")}</h6>
+                </label>
+                <select
+                  className="itemsPerPage"
+                  id="itemsPerPage"
+                  value={itemsPerPage}
+                  onChange={handleItemsPerPageChange}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={15}>15</option>
+                  <option value={20}>20</option>
+                </select>
+              </div>
             </div>
             <div className="card-content">
               <div className="card-body">

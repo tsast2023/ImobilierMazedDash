@@ -129,7 +129,7 @@ function Recharges() {
                           <form onSubmit={addCarte}>
                             <div className="modal-body">
                               <label htmlFor="serialNumber">
-                                {t("Numéro de série")}
+                                {t("Numéro de carte")}
                               </label>
                               <div className="form-group">
                                 <input
@@ -200,8 +200,12 @@ function Recharges() {
                     {cartes ? cartes.map((item) => (
                       <React.Fragment key={item.id}>
                         <tr>
-                          <td>{t("Numéro de série")}</td>
+                          <td>{t("Numéro de carte")}</td>
                           <td className="text-bold-500">{item.numSérie}</td>
+                        </tr>
+                        <tr>
+                        <td>{t("Validité")}</td>
+                        <td></td>
                         </tr>
                         <tr>
                           <td>{t("Statut")}</td>
@@ -232,6 +236,7 @@ function Recharges() {
                     <thead>
                       <tr>
                         <th>{t("Numéro de série")}</th>
+                        <th>{t("Validité")}</th>
                         <th>{t("Statut")}</th>
                         <th>{t("Valeur")}</th>
                         <th>{t("Supprimer")}</th>
@@ -241,6 +246,7 @@ function Recharges() {
                       {cartes ? cartes.map((item) => (
                         <tr key={item.id}>
                           <td className="text-bold-500">{item.numSérie}</td>
+                          <td></td>
                           <td>
                             <span className={item.statuscarte === "NONUTILISER" ? "badge bg-success" : "badge bg-danger"}>{item.statuscarte}</span>
                           </td>

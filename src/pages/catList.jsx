@@ -307,9 +307,28 @@ function CategoryList() {
                 <td>
                   <i
                     className="fa-solid fa-trash deleteIcon"
-                    onClick={() => handleDeleteModal(cat)} // Pass the entire category object
+                    onClick={() => handleDeleteModal(cat)}
                   ></i>
                 </td>
+              </tr>
+              <tr>
+                <td>{t("Activer")}</td>
+                <td>
+                <i
+                  className="fa-solid fa-circle-check"
+                  style={{ color: "green" }}
+                  onClick={() => activateCategory(cat.id)}
+                ></i>
+              </td>
+              </tr>
+              <tr>
+                <td>{t("Désactiver")}</td>
+                <td>
+                <i
+                  className="fa-solid fa-ban"
+                  onClick={() => handleDeactivate(cat)}
+                ></i>
+              </td>
               </tr>
               <tr>
                 <td colSpan="2">
@@ -367,17 +386,16 @@ function CategoryList() {
                   onClick={() => activateCategory(cat.id)}
                 ></i>
               </td>
-
               <td>
                 <i
                   className="fa-solid fa-ban"
-                  onClick={() => handleDeactivate(cat)} // Call handleDeactivate on click
+                  onClick={() => handleDeactivate(cat)}
                 ></i>
               </td>
               <td>
                 <i
                   className="fa-solid fa-trash deleteIcon"
-                  onClick={() => handleDeleteModal(cat)} // Pass the entire category object
+                  onClick={() => handleDeleteModal(cat)}
                 ></i>
               </td>
             </tr>
@@ -403,31 +421,38 @@ function CategoryList() {
           <div className="row" id="table-head">
             <div className="col-12">
               <div className="card">
-                <div className="card-header" style={{display:'flex', justifyContent:'space-between'}}>
+                <div
+                  className="card-header"
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
                   <h2 className="new-price">{t("Liste de catégories")}</h2>
                   <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-
-                  }}
-                >
-                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
-                    <h6>{t("Items par page:")}</h6>
-                  </label>
-                  <select className="itemsPerPage"
-                    id="itemsPerPage"
-                    value={itemsPerPage}
-                    onChange={handleItemsPerPageChange}
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
                   >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={15}>15</option>
-                    <option value={20}>20</option>
-                  </select>
-                </div>
+                    <label
+                      htmlFor="itemsPerPage"
+                      style={{ marginRight: "10px" }}
+                    >
+                      <h6>{t("Items par page:")}</h6>
+                    </label>
+                    <select
+                      className="itemsPerPage"
+                      id="itemsPerPage"
+                      value={itemsPerPage}
+                      onChange={handleItemsPerPageChange}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={15}>15</option>
+                      <option value={20}>20</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="row" style={{ padding: "0 20px" }}>
+                  {/* Filter Section */}
                   <div className="col-md-4 mb-4">
                     <h6>{t("Type")}</h6>
                     <fieldset className="form-group">
@@ -464,19 +489,32 @@ function CategoryList() {
                         value={filterEtat}
                         onChange={(e) => setFilterEtat(e.target.value)}
                       >
-                        <option value="">{t("Choisissez le Etat")}</option>
-                        <option value="PUBLIER">{t("Publier")}</option>
-                        <option value="BROUILLON">{t("Brouillon")}</option>
+                        <option value="">{t("Choisissez l'état")}</option>
+                        <option value="BON">{t("Bon")}</option>
+                        <option value="MAUVAIS">{t("Mauvais")}</option>
                       </select>
                     </fieldset>
                   </div>
                 </div>
-                <div className="row" style={{ padding: "0 20px" }}>
-                  <div style={{ textAlign: "center" }}>
-                    {isMobile ? renderMobileTable() : renderDesktopTable()}
-                  </div>
-                </div>
 
+                {/* Top Pagination */}
+                <ReactPaginate
+                  previousLabel={"← Previous"}
+                  nextLabel={"Next →"}
+                  breakLabel={"..."}
+                  pageCount={pageCount}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={3}
+                  onPageChange={handlePageChange}
+                  containerClassName={"pagination"}
+                  activeClassName={"active"}
+                  className="react-paginate"
+                />
+
+                {/* Table Render */}
+                {isMobile ? renderMobileTable() : renderDesktopTable()}
+
+                {/* Bottom Pagination */}
                 <ReactPaginate
                   previousLabel={"← Previous"}
                   nextLabel={"Next →"}
@@ -494,147 +532,6 @@ function CategoryList() {
           </div>
         </section>
       </div>
-
-      <Modal show={showModal} onHide={handleModalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t("Modifier la catégorie")}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="form-group">
-            <label>{t("Libellé (FR)")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.libCategorie : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  libCategorie: e.target.value,
-                })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>{t("Libellé (AR)")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.libCategorieAR : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  libCategorieAR: e.target.value,
-                })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>{t("Libellé (EN)")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.libCategorieEN : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  libCategorieEN: e.target.value,
-                })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>{t("Icon")}</label>
-            <input
-              type="file"
-              className="form-control"
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  icon: e.target.files[0],
-                })
-              }
-            />
-          </div>
-
-          <div className="form-group" style={{ marginBottom: "15px" }}>
-            <label htmlFor="category-select">Catégories</label>
-            <select
-              id="category-select"
-              className="form-select"
-              value={data.parentCategoryId}
-              onChange={handleSelectChange}
-              required
-            >
-              <option value="">Select a parent category</option>
-              {parentCategories.length > 0 ? (
-                parentCategories.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.libCategorie}
-                  </option>
-                ))
-              ) : (
-                <option>Loading...</option>
-              )}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>{t("Criteres (FR)")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.criteresNames : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  criteresNames: e.target.value.split(","),
-                })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>{t("Criteres (EN)")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.criteresNamesEn : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  criteresNamesEn: e.target.value.split(","),
-                })
-              }
-            />
-          </div>
-
-          <div className="form-group">
-            <label>{t("Criteres (AR)")}</label>
-            <input
-              type="text"
-              className="form-control"
-              value={selectedCategory ? selectedCategory.criteresNamesAr : ""}
-              onChange={(e) =>
-                setSelectedCategory({
-                  ...selectedCategory,
-                  criteresNamesAr: e.target.value.split(","),
-                })
-              }
-            />
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleModalClose}>
-            {t("Fermer")}
-          </Button>
-          <Button variant="primary" onClick={handleModalSave}>
-            {t("Sauvegarder")}
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 }

@@ -125,29 +125,29 @@ function ListeAdministrateur() {
         </header>
         <section className="section">
           <div className="card">
-            <div className="card-header">
+            <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
               <h2 className="new-price">{t("Liste des administrateurs")}</h2>
               <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-
-                  }}
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                  <h6>{t("Items par page:")}</h6>
+                </label>
+                <select
+                  className="itemsPerPage"
+                  id="itemsPerPage"
+                  value={itemsPerPage}
+                  onChange={handleItemsPerPageChange}
                 >
-                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
-                    <h6>{t("Items par page:")}</h6>
-                  </label>
-                  <select className="itemsPerPage"
-                    id="itemsPerPage"
-                    value={itemsPerPage}
-                    onChange={handleItemsPerPageChange}
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={15}>15</option>
-                    <option value={20}>20</option>
-                  </select>
-                </div>
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={15}>15</option>
+                  <option value={20}>20</option>
+                </select>
+              </div>
             </div>
             <div className="card-body">
               <div className="table-responsive">

@@ -5,7 +5,13 @@ import { useTranslation } from "react-i18next";
 function QuestionList() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
 
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212);
@@ -23,7 +29,9 @@ function QuestionList() {
   const handleDelete = () => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
-      text: t("Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"),
+      text: t(
+        "Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"
+      ),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -34,16 +42,20 @@ function QuestionList() {
     }).then((result) => {
       if (result.isConfirmed) {
         deleteItem();
-        Swal.fire({   title: "Supprimer",
+        Swal.fire({
+          title: "Supprimer",
           text: "Votre élément est Supprimer:)",
           icon: "Succes",
           confirmButtonColor: "#b0210e",
-        });      } else {
-          Swal.fire({   title: "Annulé",
-            text: "Votre élément est en sécurité :)",
-            icon: "error",
-            confirmButtonColor: "#b0210e",
-          });            }
+        });
+      } else {
+        Swal.fire({
+          title: "Annulé",
+          text: "Votre élément est en sécurité :)",
+          icon: "error",
+          confirmButtonColor: "#b0210e",
+        });
+      }
     });
   };
 
@@ -57,8 +69,32 @@ function QuestionList() {
         <div className="page-heading">
           <section className="section">
             <div className="card">
-              <div className="card-header">
+              <div
+                className="card-header"
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
                 <h2 className="new-price">{t("Liste des questions")}</h2>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                    <h6>{t("Items par page:")}</h6>
+                  </label>
+                  <select
+                    className="itemsPerPage"
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={15}>15</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
               </div>
               <div className="card-body">
                 <div className="table-responsive">
@@ -76,23 +112,36 @@ function QuestionList() {
                         <tr>
                           <td>{t("Voir")}</td>
                           <td>
-                            <i className="fa-solid fa-eye" data-bs-toggle="modal" data-bs-target="#viewModal"></i>
+                            <i
+                              className="fa-solid fa-eye"
+                              data-bs-toggle="modal"
+                              data-bs-target="#viewModal"
+                            ></i>
                           </td>
                         </tr>
                         <tr>
                           <td>{t("Editer")}</td>
                           <td>
-                            <i className="fa-solid fa-pen-to-square" data-bs-toggle="modal" data-bs-target="#editModal"></i>
+                            <i
+                              className="fa-solid fa-pen-to-square"
+                              data-bs-toggle="modal"
+                              data-bs-target="#editModal"
+                            ></i>
                           </td>
                         </tr>
                         <tr>
                           <td>{t("Supprimer")}</td>
                           <td>
-                            <i onClick={handleDelete} className="fa-solid fa-trash"></i>
+                            <i
+                              onClick={handleDelete}
+                              className="fa-solid fa-trash"
+                            ></i>
                           </td>
                         </tr>
                         <tr>
-                          <td colSpan="2"><hr /></td>
+                          <td colSpan="2">
+                            <hr />
+                          </td>
                         </tr>
                         <tr>
                           <td>{t("La question")}</td>
@@ -105,19 +154,30 @@ function QuestionList() {
                         <tr>
                           <td>{t("Voir")}</td>
                           <td>
-                            <i className="fa-solid fa-eye" data-bs-toggle="modal" data-bs-target="#viewModal"></i>
+                            <i
+                              className="fa-solid fa-eye"
+                              data-bs-toggle="modal"
+                              data-bs-target="#viewModal"
+                            ></i>
                           </td>
                         </tr>
                         <tr>
                           <td>{t("Editer")}</td>
                           <td>
-                            <i className="fa-solid fa-pen-to-square" data-bs-toggle="modal" data-bs-target="#editModal"></i>
+                            <i
+                              className="fa-solid fa-pen-to-square"
+                              data-bs-toggle="modal"
+                              data-bs-target="#editModal"
+                            ></i>
                           </td>
                         </tr>
                         <tr>
                           <td>{t("Supprimer")}</td>
                           <td>
-                            <i onClick={handleDelete} className="fa-solid fa-trash"></i>
+                            <i
+                              onClick={handleDelete}
+                              className="fa-solid fa-trash"
+                            ></i>
                           </td>
                         </tr>
                       </tbody>
@@ -138,26 +198,48 @@ function QuestionList() {
                           <td>{t("Lorem Lorem")}</td>
                           <td>{t("05/05/2024")}</td>
                           <th>
-                            <i className="fa-solid fa-eye" data-bs-toggle="modal" data-bs-target="#viewModal"></i>
+                            <i
+                              className="fa-solid fa-eye"
+                              data-bs-toggle="modal"
+                              data-bs-target="#viewModal"
+                            ></i>
                           </th>
                           <th>
-                            <i className="fa-solid fa-pen-to-square" data-bs-toggle="modal" data-bs-target="#editModal"></i>
+                            <i
+                              className="fa-solid fa-pen-to-square"
+                              data-bs-toggle="modal"
+                              data-bs-target="#editModal"
+                            ></i>
                           </th>
                           <th>
-                            <i onClick={handleDelete} className="fa-solid fa-trash"></i>
+                            <i
+                              onClick={handleDelete}
+                              className="fa-solid fa-trash"
+                            ></i>
                           </th>
                         </tr>
                         <tr>
                           <td>{t("Lorem Lorem")}</td>
                           <td>{t("05/05/2024")}</td>
                           <th>
-                            <i className="fa-solid fa-eye" data-bs-toggle="modal" data-bs-target="#viewModal"></i>
+                            <i
+                              className="fa-solid fa-eye"
+                              data-bs-toggle="modal"
+                              data-bs-target="#viewModal"
+                            ></i>
                           </th>
                           <th>
-                            <i className="fa-solid fa-pen-to-square" data-bs-toggle="modal" data-bs-target="#editModal"></i>
+                            <i
+                              className="fa-solid fa-pen-to-square"
+                              data-bs-toggle="modal"
+                              data-bs-target="#editModal"
+                            ></i>
                           </th>
                           <th>
-                            <i onClick={handleDelete} className="fa-solid fa-trash"></i>
+                            <i
+                              onClick={handleDelete}
+                              className="fa-solid fa-trash"
+                            ></i>
                           </th>
                         </tr>
                       </tbody>
@@ -171,30 +253,62 @@ function QuestionList() {
       </div>
 
       {/* View Modal */}
-      <div className="modal fade" id="viewModal" tabIndex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+      <div
+        className="modal fade"
+        id="viewModal"
+        tabIndex="-1"
+        aria-labelledby="viewModalLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="viewModalLabel">{t("Détail de Question")}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 className="modal-title" id="viewModalLabel">
+                {t("Détail de Question")}
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
             <div className="modal-body">
               <p>{t("Contenu de détail de question ici.")}</p>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">{t("Fermer")}</button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                {t("Fermer")}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Edit Modal */}
-      <div className="modal fade" id="editModal" tabIndex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div
+        className="modal fade"
+        id="editModal"
+        tabIndex="-1"
+        aria-labelledby="editModalLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="editModalLabel">{t("Éditer Question")}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 className="modal-title" id="editModalLabel">
+                {t("Éditer Question")}
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
             <div className="modal-body">
               <form className="form form-vertical">
@@ -202,12 +316,24 @@ function QuestionList() {
                   <div className="row">
                     <div className="col-12">
                       <div className="form-group has-icon-left">
-                        <label htmlFor="question" className="form-label">{t("La question")}</label>
-                        <textarea className="form-control" id="question" rows={3}></textarea>
+                        <label htmlFor="question" className="form-label">
+                          {t("La question")}
+                        </label>
+                        <textarea
+                          className="form-control"
+                          id="question"
+                          rows={3}
+                        ></textarea>
                       </div>
                       <div className="form-group has-icon-left">
-                        <label htmlFor="answer" className="form-label">{t("La réponse")}</label>
-                        <textarea className="form-control" id="answer" rows={3}></textarea>
+                        <label htmlFor="answer" className="form-label">
+                          {t("La réponse")}
+                        </label>
+                        <textarea
+                          className="form-control"
+                          id="answer"
+                          rows={3}
+                        ></textarea>
                       </div>
                     </div>
                   </div>
@@ -215,8 +341,16 @@ function QuestionList() {
               </form>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">{t("Annuler")}</button>
-              <button type="button" className="btn btn-primary">{t("Enregistrer")}</button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                {t("Annuler")}
+              </button>
+              <button type="button" className="btn btn-primary">
+                {t("Enregistrer")}
+              </button>
             </div>
           </div>
         </div>

@@ -18,7 +18,7 @@ function AnnonceCreator() {
       return (
         <input
           type="file"
-          className="form-control mb-3" // Add bottom margin for spacing between inputs
+          className="form-control mb-3"
           accept={fileInputType === "video" ? "video/*" : "image/*"}
         />
       );
@@ -54,11 +54,24 @@ function AnnonceCreator() {
                             <option value="">{t("Sélectionner le type d'annonce")}</option>
                             <option value="image">{t("Image")}</option>
                             <option value="video">{t("Vidéo")}</option>
-                            <option value="carousel">{t("Carousel")}</option>
                           </select>
                         </div>
                       </div>
                     </div>
+
+                    {/* Description text area added here */}
+                    <div className="col-12">
+                      <div className="form-group mb-3">
+                        <label htmlFor="description">{t("Description")}</label>
+                        <textarea
+                          id="description"
+                          className="form-control"
+                          placeholder={t("Écrivez la description ici")}
+                          rows="3"
+                        ></textarea>
+                      </div>
+                    </div>
+
                     <div className="col-12 mb-3" id="file-input-container">
                       {handleFileInput()}
                     </div>

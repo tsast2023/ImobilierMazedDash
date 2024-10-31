@@ -15,6 +15,13 @@ function AdsList() {
   const [isMobile, setIsMobile] = useState(false);
   const [editType, setEditType] = useState('');
   const [uploadInputs, setUploadInputs] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -147,6 +154,18 @@ function AdsList() {
                             <Button className="btn" onClick={() => setShowImageModal(true)}>
                               <i className="fa-solid fa-eye"></i>
                             </Button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>{t("Nombre des j'aimes")}</td>
+                          <td>
+                            
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>{t("Voir")}</td>
+                          <td>
+
                           </td>
                         </tr>
                         <tr>

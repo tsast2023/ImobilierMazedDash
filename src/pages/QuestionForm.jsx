@@ -20,7 +20,7 @@ function QuestionForm() {
                       <div className="col-12">
                         <div className="form-group has-icon-left">
                           <label htmlFor="question" className="form-label">
-                            {t("La question")}
+                            {t("Question en français")}
                           </label>
                           <textarea
                             className="form-control"
@@ -30,7 +30,51 @@ function QuestionForm() {
                         </div>
                         <div className="form-group has-icon-left">
                           <label htmlFor="reponse" className="form-label">
-                            {t("La réponse")}
+                            {t("Réponse on français")}
+                          </label>
+                          <textarea
+                            className="form-control"
+                            id="reponse"
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <div className="form-group has-icon-left">
+                          <label htmlFor="question" className="form-label">
+                            {t("Question en anglais")}
+                          </label>
+                          <textarea
+                            className="form-control"
+                            id="question"
+                            rows={3}
+                          />
+                        </div>
+                        <div className="form-group has-icon-left">
+                          <label htmlFor="reponse" className="form-label">
+                            {t("Réponse on anglais")}
+                          </label>
+                          <textarea
+                            className="form-control"
+                            id="reponse"
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <div className="form-group has-icon-left">
+                          <label htmlFor="question" className="form-label">
+                            {t("Question en arabe")}
+                          </label>
+                          <textarea
+                            className="form-control"
+                            id="question"
+                            rows={3}
+                          />
+                        </div>
+                        <div className="form-group has-icon-left">
+                          <label htmlFor="reponse" className="form-label">
+                            {t("Réponse on arabe")}
                           </label>
                           <textarea
                             className="form-control"
