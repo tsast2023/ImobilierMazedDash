@@ -4,15 +4,18 @@ import { GlobalState } from "../GlobalState";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { Table } from "react-bootstrap";
+import Cookies from "js-cookie";
 
 function Recharges() {
   const { t } = useTranslation();
   const state = useContext(GlobalState);
   const cartes = state.cartes;
-  const [carteRech, setCarteRech] = useState({ numSérie: "", valeur: "" });
+  console.log("cartes =====" , cartes)
+  const [carteRech, setCarteRech] = useState({ quantity: "", montant: "" });
   const [isMobile, setIsMobile] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
   const [currentPage, setCurrentPage] = useState(0);
+  const token = Cookies.get('token');
 
   const handleItemsPerPageChange = (event) => {
     setItemsPerPage(Number(event.target.value)); // Update items per page
@@ -69,9 +72,14 @@ function Recharges() {
   const deleteItem = async (id) => {
     try {
       const res = await axios.delete(
-        `http://localhost:8082/api/carte/deleteCarte?id=${id}`
+        `http://localhost:8082/api/carte/deleteCarte?id=${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`, // Add token to headers
+          }
+        }
       );
       console.log(res.data);
+      window.location.reload(); 
     } catch (error) {
       console.log(error);
     }
@@ -81,11 +89,17 @@ function Recharges() {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://localhost:8082/api/carte/publishNow",
-        carteRech
+        "http://localhost:8082/api/carte/generer",
+        null ,   {
+          params: carteRech,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Add token to headers
+          },
+        }
       );
       console.log(res.data);
-      window.location.reload();
+      window.location.reload(); 
     } catch (error) {
       console.log(error);
     }
@@ -158,7 +172,7 @@ function Recharges() {
                                   onChange={(e) =>
                                     setCarteRech({
                                       ...carteRech,
-                                      numSérie: e.target.value,
+                                      quantity: e.target.value,
                                     })
                                   }
                                 />
@@ -174,7 +188,7 @@ function Recharges() {
                                   onChange={(e) =>
                                     setCarteRech({
                                       ...carteRech,
-                                      valeur: e.target.value,
+                                      montant: e.target.value,
                                     })
                                   }
                                 />
@@ -257,7 +271,8 @@ function Recharges() {
                           </tr>
                           <tr>
                             <td>{t("Validité")}</td>
-                            <td></td>
+                            {item.validite = true ?  <td>Valide</td> :  <td>Invalide</td>}
+                           
                           </tr>
                           <tr>
                             <td>{t("Statut")}</td>
@@ -312,7 +327,7 @@ function Recharges() {
                         cartes.map((item) => (
                           <tr key={item.id}>
                             <td className="text-bold-500">{item.numSérie}</td>
-                            <td></td>
+                            <td>{item.validite = true ?  <td>Valide</td> :  <td>Invalide</td>}</td>
                             <td>
                               <span
                                 className={
@@ -325,6 +340,7 @@ function Recharges() {
                               </span>
                             </td>
                             <td>{item.valeur}</td>
+                       
                             <td>
                               <i
                                 className="fa-solid fa-trash deleteIcon"

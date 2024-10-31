@@ -7,6 +7,8 @@ function Commandes() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
   const state = useContext(GlobalState);
+  const commande = state.Commandes;
+  console.log("commandes ==" , commande);
   const [commandes, setCommandes] = useState([]); // State to hold commandes
 
   useEffect(() => {

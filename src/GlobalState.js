@@ -78,7 +78,12 @@ export const DataProvider = ({ children }) => {
 
     const getCarteRechar = async () => {
       try {
-        const res = await axios.get("http://localhost:8082/api/carte/getAll");
+        const res = await axios.get("http://localhost:8082/api/carte/getAll" , {
+          headers: {
+            'Authorization': `Bearer ${token}`, // Add token to headers
+            'Content-Type': 'application/json'
+          }
+        });
         console.log("cartes:", res.data);
         setCarteRech(res.data);
       } catch (error) {
@@ -134,7 +139,7 @@ export const DataProvider = ({ children }) => {
     // Updated API for commandes (getCommandeByUser)
     const getAllCommandes = async () => {
       try {
-        const res = await axios.get("http://localhost:8082/api/commandes/getCommandeByUser");
+        const res = await axios.get("http://localhost:8082/api/commandes");
         console.log("all Commandes:", res.data);
         setCommandes(res.data);
       } catch (error) {
