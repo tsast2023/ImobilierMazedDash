@@ -159,11 +159,11 @@ function AdsList() {
                         <tr>
                           <td>{t("Nombre des j'aimes")}</td>
                           <td>
-                            
+
                           </td>
                         </tr>
                         <tr>
-                          <td>{t("Voir")}</td>
+                          <td>{t("Nombre des dislikes")}</td>
                           <td>
 
                           </td>
@@ -197,6 +197,8 @@ function AdsList() {
                       <th>{t("Date de publication")}</th>
                       <th>{t("Type")}</th>
                       <th>{t("Voir")}</th>
+                      <th>{t("Nombre des j'aimes")}</th>
+                      <th>{t("Nombre des dislike")}</th>
                       <th>{t("Editer")}</th>
                       <th>{t("Supprimer")}</th>
                     </tr>
@@ -212,6 +214,8 @@ function AdsList() {
                             <i className="fa-solid fa-eye"></i>
                           </Button>
                         </td>
+                        <td></td>
+                        <td></td>
                         <td>
                           <Button className="btn" onClick={openEditModal}>
                             <i className="fa-solid fa-pen-to-square"></i>
