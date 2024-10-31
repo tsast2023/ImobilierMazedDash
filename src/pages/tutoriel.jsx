@@ -159,6 +159,10 @@ const ResponsiveTable = ({ tutorials, handleDelete, isMobile }) => {
               <td></td>
             </tr>
             <tr>
+              <td>{t("Description")}</td>
+              <td></td>
+            </tr>
+            <tr>
               <td>{t("Supprimer")}</td>
               <td></td>
             </tr>
@@ -170,8 +174,8 @@ const ResponsiveTable = ({ tutorials, handleDelete, isMobile }) => {
             <tr>
               <td>{t("Image")}</td>
               <td>{t("Ordre")}</td>
-              <td>{t("Supprimer")}</td>
               <td>{t("Description")}</td>
+              <td>{t("Supprimer")}</td>
             </tr>
           </thead>
           <tbody>
