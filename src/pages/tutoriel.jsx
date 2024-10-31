@@ -74,7 +74,7 @@ const Modal = ({ t, handleImageChange, tuto, setTuto, addTuto }) => {
                   placeholder={t("Écrivez ici")}
                   className="form-control"
                   onChange={(e) =>
-                    setTuto({ ...tuto, description: e.target.value })
+                    setTuto({ ...tuto, descriptionAr: e.target.value })
                   }
                 />
               </div>
@@ -88,7 +88,7 @@ const Modal = ({ t, handleImageChange, tuto, setTuto, addTuto }) => {
                   placeholder={t("Écrivez ici")}
                   className="form-control"
                   onChange={(e) =>
-                    setTuto({ ...tuto, description: e.target.value })
+                    setTuto({ ...tuto, descriptionEn: e.target.value })
                   }
                 />
               </div>
@@ -125,13 +125,14 @@ const TableRow = ({ item, handleDelete }) => {
     <tr>
       <td className="text-bold-500">
         <img
-          className="imgtable"
+          className="imgtable"y
           src={item.file}
           alt="tuto_image"
           style={{ width: "auto", height: "150px" }}
         />
       </td>
       <td>{item.ordre}</td>
+      <td>{item.description}</td>
       <td>
         <i
           className="fa-solid fa-trash deleteIcon"
@@ -197,7 +198,7 @@ const ResponsiveTable = ({ tutorials, handleDelete, isMobile }) => {
 
 const Tutoriel = () => {
   const { t } = useTranslation();
-  const [tuto, setTuto] = useState({ ordre: 0, description: "", file: "" });
+  const [tuto, setTuto] = useState({ ordre: 0, description: "",descriptionAr :"",descriptionEn: "", file: "" });
   const state = useContext(GlobalState);
   const tutorials = state.tutorials;
   const [isMobile, setIsMobile] = useState(false);
@@ -279,15 +280,36 @@ const Tutoriel = () => {
   };
 
   const addTuto = async (e) => {
+    const formData = new FormData();
+    formData.append("ordre", tuto.ordre);
+    formData.append("description", tuto.description);
+    formData.append("descriptionAr", tuto.descriptionAr);
+    formData.append("descriptionEn", tuto.descriptionEn);
+    formData.append("file", tuto.file);
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:8082/api/tuto/publishNow",
-        tuto
-      );
+      const res = await axios.post("http://localhost:8082/api/tuto/publishNow", formData, {
+        headers: {
+        "Content-Type": "multipart/form-data",
+        },
+      });
       console.log(res.data);
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Tutoriel created successfully!",
+      });
     } catch (error) {
-      console.log(error);
+      // Handle errors
+      if (error.response) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: error.response.data.message || "An error occurred while creating the tutoriel.",
+        });
+      } else {
+        console.error("Error:", error.message);
+      }
     }
   };
 
