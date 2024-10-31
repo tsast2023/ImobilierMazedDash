@@ -156,6 +156,14 @@ function ResponsiveTable({ data, headers, isMobile }) {
 function Transfer() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
+  
 
   useEffect(() => {
     const handleResize = () => {
@@ -219,8 +227,29 @@ function Transfer() {
         <div className="page-heading">
           <section className="section">
             <div className="card">
-              <div className="card-header">
+              <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
                 <h2 className="new-price">{t("Demandes de transferts")}</h2>
+                <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                <h6>{t("Items par page:")}</h6>
+              </label>
+              <select
+                className="itemsPerPage"
+                id="itemsPerPage"
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+                <option value={20}>20</option>
+              </select>
+            </div>
               </div>
               <div className="card-body">
                 <ResponsiveTable
