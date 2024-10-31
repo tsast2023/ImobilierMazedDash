@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import { GlobalState } from "../GlobalState";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import ReactPaginate from "react-paginate";
 
 const Modal = ({ t, handleImageChange, tuto, setTuto, addTuto }) => {
   return (
@@ -125,7 +126,8 @@ const TableRow = ({ item, handleDelete }) => {
     <tr>
       <td className="text-bold-500">
         <img
-          className="imgtable"y
+          className="imgtable"
+          y
           src={item.file}
           alt="tuto_image"
           style={{ width: "auto", height: "150px" }}
@@ -198,12 +200,23 @@ const ResponsiveTable = ({ tutorials, handleDelete, isMobile }) => {
 
 const Tutoriel = () => {
   const { t } = useTranslation();
-  const [tuto, setTuto] = useState({ ordre: 0, description: "",descriptionAr :"",descriptionEn: "", file: "" });
+  const [tuto, setTuto] = useState({
+    ordre: 0,
+    description: "",
+    descriptionAr: "",
+    descriptionEn: "",
+    file: "",
+  });
   const state = useContext(GlobalState);
   const tutorials = state.tutorials;
   const [isMobile, setIsMobile] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
   const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
 
   const handleItemsPerPageChange = (event) => {
     setItemsPerPage(Number(event.target.value)); // Update items per page
@@ -288,11 +301,15 @@ const Tutoriel = () => {
     formData.append("file", tuto.file);
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8082/api/tuto/publishNow", formData, {
-        headers: {
-        "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        "http://localhost:8082/api/tuto/publishNow",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       console.log(res.data);
       Swal.fire({
         icon: "success",
@@ -305,7 +322,9 @@ const Tutoriel = () => {
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: error.response.data.message || "An error occurred while creating the tutoriel.",
+          text:
+            error.response.data.message ||
+            "An error occurred while creating the tutoriel.",
         });
       } else {
         console.error("Error:", error.message);
@@ -321,7 +340,6 @@ const Tutoriel = () => {
             <i className="bi bi-justify fs-3"></i>
           </a>
         </header>
-
         <section id="form-and-scrolling-components">
           <div className="row">
             <div className="col-md-6 col-12">
@@ -386,10 +404,34 @@ const Tutoriel = () => {
             </div>
             <div className="card-content">
               <div className="card-body">
+              <ReactPaginate
+                  previousLabel={"← Previous"}
+                  nextLabel={"Next →"}
+                  breakLabel={"..."}
+                  pageCount={Math.ceil(tutorials.length / itemsPerPage)}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={3}
+                  onPageChange={handlePageChange}
+                  containerClassName={"pagination"}
+                  activeClassName={"active"}
+                  className="react-paginate"
+                />
                 <ResponsiveTable
                   tutorials={tutorials}
                   handleDelete={handleDelete}
                   isMobile={isMobile}
+                />
+                <ReactPaginate
+                  previousLabel={"← Previous"}
+                  nextLabel={"Next →"}
+                  breakLabel={"..."}
+                  pageCount={Math.ceil(tutorials.length / itemsPerPage)}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={3}
+                  onPageChange={handlePageChange}
+                  containerClassName={"pagination"}
+                  activeClassName={"active"}
+                  className="react-paginate"
                 />
               </div>
             </div>
