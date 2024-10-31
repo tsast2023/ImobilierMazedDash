@@ -5,7 +5,7 @@ import axios from "axios";
 function CreationAdministrateur() {
   const state= useContext(GlobalState);
   const roles = state.Roles;
-  const [data,setData] = useState({prenom:"" , numTel:"" , email:"" , identifiant:"" , roleName:(roles && roles[0].name) || "" , password:""});
+  const [data,setData] = useState({prenom:"" , numTel:"" , email:"" , identifiant:"" , roleName: "" , password:""});
   
   const { t } = useTranslation();
 

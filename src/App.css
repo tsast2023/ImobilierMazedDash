@@ -132,3 +132,7 @@ hr {
   height: 45px;
 }
 
+.itemsPerPage {
+  height: 25px;
+  width: 45px;
+}

@@ -403,8 +403,29 @@ function CategoryList() {
           <div className="row" id="table-head">
             <div className="col-12">
               <div className="card">
-                <div className="card-header">
+                <div className="card-header" style={{display:'flex', justifyContent:'space-between'}}>
                   <h2 className="new-price">{t("Liste de catégories")}</h2>
+                  <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+
+                  }}
+                >
+                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                    <h6>{t("Items par page:")}</h6>
+                  </label>
+                  <select className="itemsPerPage"
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={15}>15</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
                 </div>
                 <div className="row" style={{ padding: "0 20px" }}>
                   <div className="col-md-4 mb-4">
@@ -449,28 +470,6 @@ function CategoryList() {
                       </select>
                     </fieldset>
                   </div>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginBottom: "10px",
-                    marginRight: "20px",
-                  }}
-                >
-                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
-                    <h6>{t("Items par page:")}</h6>
-                  </label>
-                  <select
-                    id="itemsPerPage"
-                    value={itemsPerPage}
-                    onChange={handleItemsPerPageChange}
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={15}>15</option>
-                    <option value={20}>20</option>
-                  </select>
                 </div>
                 <div className="row" style={{ padding: "0 20px" }}>
                   <div style={{ textAlign: "center" }}>

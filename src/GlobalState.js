@@ -99,7 +99,7 @@ export const DataProvider = ({ children }) => {
     // Fetch all permissions
     const getAllPermissions = async () => {
       try {
-        const res = await axios.get("http://localhost:8082/admin/permissions");
+        const res = await axios.get("http://localhost:8082/admin/permission/permissions");
         console.log("all permissions:", res.data);
         setPermissions(res.data);
       } catch (error) {
@@ -109,7 +109,7 @@ export const DataProvider = ({ children }) => {
 
     const getAllRoles = async () => {
       try {
-        const res = await axios.get("http://localhost:8082/admin/allRoles");
+        const res = await axios.get("http://localhost:8082/admin/role/allRoles");
         console.log("all roles:", res.data);
         setRoles(res.data);
       } catch (error) {

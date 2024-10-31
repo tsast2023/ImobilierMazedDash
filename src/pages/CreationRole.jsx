@@ -8,22 +8,24 @@ import { useTranslation } from "react-i18next";
 function CreationRole() {
   const [isEnabled, setIsEnabled] = useState(false);
   const [data, setData] = useState({ roleName: "", permissionNames: [] });
-  const [permissions, setPermissions] = useState([]); // Local state to store permissions
+  // const [permissions, setPermissions] = useState([]); 
+  const state = useContext(GlobalState);
+  const Permissions = state.Permissions;
+    console.log("Per ==" , Permissions);// Local state to store permissions
   const { t } = useTranslation();
-
-  // Fetching permissions from the API on component mount
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        const res = await axios.get("http://localhost:8082/admin/permission/permissions");
-        setPermissions(res.data); // Storing permissions in the state
-      } catch (error) {
-        console.log("Error fetching permissions:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchPermissions = async () => {
+  //     try {
+  //       const res = await axios.get("http://localhost:8082/admin/permission/permissions");
+  //       setPermissions(res.data);
+  //       console.log("permissions ====" ,permissions) // Storing permissions in the state
+  //     } catch (error) {
+  //       console.log("Error fetching permissions:", error);
+  //     }
+  //   };
     
-    fetchPermissions();
-  }, []);
+  //   fetchPermissions();
+  // }, []);
 
   useEffect(() => {
     const select = new Choices("#category-select", {
@@ -47,7 +49,7 @@ function CreationRole() {
       select.passedElement.element.removeEventListener("change", handleSelectChange);
       select.destroy();
     };
-  }, [permissions]);
+  }, [Permissions]);
 
   const createRole = async (e) => {
     e.preventDefault();
@@ -109,11 +111,11 @@ function CreationRole() {
                           className="choices form-select multiple-remove"
                           multiple
                           onChange={handlePermissionChange}
+                          value={Permissions}
                         >
-                          <option disabled>default</option>
-                          {permissions &&
-                            permissions.map((item) => (
-                              <option key={item.name} value={item.name}>
+                          {Permissions &&
+                            Permissions.map((item) => (
+                              <option key={item.id} value={item.name}>
                                 {item.name}
                               </option>
                             ))}
