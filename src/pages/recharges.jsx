@@ -93,7 +93,6 @@ function Recharges() {
         null ,   {
           params: carteRech,
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` // Add token to headers
           },
         }
@@ -160,7 +159,7 @@ function Recharges() {
                           <form onSubmit={addCarte}>
                             <div className="modal-body">
                               <label htmlFor="serialNumber">
-                                {t("Numéro de carte")}
+                                {t("Nombre de carte")}
                               </label>
                               <div className="form-group">
                                 <input
