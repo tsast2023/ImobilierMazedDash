@@ -1,9 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import Cookies from 'js-cookie'
+import { toast } from 'react-toastify';
+
 
 function QuestionForm() {
-  const { t } = useTranslation();
+  const token = Cookies.get('token');
+  const [question , setQuestion]= useState({question:"" ,questionAr:"",questionEn:"", reponse:"" , reponseAr:"" ,reponseEn:"" })
+  const { t, i18n } = useTranslation();
+  const addQuestion = async(e)=>{
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:8082/api/questions/create", question , {headers : {Authorization: `Bearer ${token}`}});
+      console.log(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
+  const notify = () => {
+    toast.success(t("Action créée avec succès"));
+  };
+  
   return (
     <div className="content-container">
       <div id="main">
@@ -14,72 +33,74 @@ function QuestionForm() {
             </div>
             <div className="card-content">
               <div className="card-body">
-                <form className="form form-vertical">
+                <form onSubmit={addQuestion} className="form form-vertical">
                   <div className="form-body">
                     <div className="row">
                       <div className="col-12">
                         <div className="form-group has-icon-left">
                           <label htmlFor="question" className="form-label">
-                            {t("Question en français")}
+                            {t("La question")}
                           </label>
                           <textarea
                             className="form-control"
                             id="question"
                             rows={3}
+                            onChange={e=>setQuestion({...question , question:e.target.value})}
                           />
                         </div>
-                        <div className="form-group has-icon-left">
-                          <label htmlFor="reponse" className="form-label">
-                            {t("Réponse on français")}
-                          </label>
-                          <textarea
-                            className="form-control"
-                            id="reponse"
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                      <div className="col-12">
                         <div className="form-group has-icon-left">
                           <label htmlFor="question" className="form-label">
-                            {t("Question en anglais")}
+                            {t("La réponse")}
                           </label>
                           <textarea
                             className="form-control"
                             id="question"
                             rows={3}
+                            onChange={e=>setQuestion({...question , reponse:e.target.value})}
                           />
                         </div>
                         <div className="form-group has-icon-left">
                           <label htmlFor="reponse" className="form-label">
-                            {t("Réponse on anglais")}
+                            {t("La question(arabe)")}
                           </label>
                           <textarea
                             className="form-control"
                             id="reponse"
                             rows={3}
-                          />
-                        </div>
-                      </div>
-                      <div className="col-12">
-                        <div className="form-group has-icon-left">
-                          <label htmlFor="question" className="form-label">
-                            {t("Question en arabe")}
-                          </label>
-                          <textarea
-                            className="form-control"
-                            id="question"
-                            rows={3}
+                            onChange={e=>setQuestion({...question , questionAr:e.target.value})}
                           />
                         </div>
                         <div className="form-group has-icon-left">
                           <label htmlFor="reponse" className="form-label">
-                            {t("Réponse on arabe")}
+                            {t("La réponse(arabe)")}
                           </label>
                           <textarea
                             className="form-control"
                             id="reponse"
                             rows={3}
+                            onChange={e=>setQuestion({...question , reponseAr:e.target.value})}
+                          />
+                        </div>
+                        <div className="form-group has-icon-left">
+                          <label htmlFor="reponse" className="form-label">
+                            {t("La question(eng)")}
+                          </label>
+                          <textarea
+                            className="form-control"
+                            id="reponse"
+                            rows={3}
+                            onChange={e=>setQuestion({...question , questionEn:e.target.value})}
+                          />
+                        </div>
+                        <div className="form-group has-icon-left">
+                          <label htmlFor="reponse" className="form-label">
+                            {t("La reponse(eng)")}
+                          </label>
+                          <textarea
+                            className="form-control"
+                            id="reponse"
+                            rows={3}
+                            onChange={e=>setQuestion({...question , reponseEn:e.target.value})}
                           />
                         </div>
                       </div>
@@ -91,7 +112,7 @@ function QuestionForm() {
                           {t("Annuler")}
                         </button>
 
-                        <button type="button" className="btn btn-primary">
+                        <button type="submit" className="btn btn-primary" onClick={notify}>
                           {t("Enregistrer")}
                         </button>
                       </div>

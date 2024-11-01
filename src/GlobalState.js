@@ -6,6 +6,13 @@ export const GlobalState = createContext();
 
 export const DataProvider = ({ children }) => {
   const token = Cookies.get("token");
+  const [demandeT , setDemandeT] = useState();
+  const [pseudo , setpseudo] = useState("");
+  const [statusDemande , setstatusDemande] = useState("");
+  const [typeRecharge , settypeRecharge] = useState("");
+  const [pageTransfert , setpageTransfert] = useState(0);
+  const [numTel , setnumTel] = useState("");
+  const [questions , setQuestions]= useState();
   const [Categories, setCategories] = useState([]);
   const [Acheteur, setAcheteur] = useState([]);
   const [Vendeur, setVendeur] = useState([]);
@@ -24,17 +31,17 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     const getAllAcheteur = async () => {
       try {
-        const res = await axios.get("http://localhost:8082/admin/users/Acheteur");
+        const res = await axios.get("http://localhost:8082/admin/users/Acheteur", {headers : {Authorization: `Bearer ${token}`}});
         console.log("Acheteur:", res.data);
         setAcheteur(res.data);
       } catch (error) {
         console.log(error);
       }
     };
-
+    
     const getAllVendeur = async () => {
       try {
-        const res = await axios.get("http://localhost:8082/admin/users/Vendeur");
+        const res = await axios.get("http://localhost:8082/admin/users/Vendeur" , {headers : {Authorization: `Bearer ${token}`}});
         console.log("Vendeur:", res.data);
         setVendeur(res.data);
       } catch (error) {
@@ -65,6 +72,15 @@ export const DataProvider = ({ children }) => {
         console.log(error);
       }
     };
+    const getAllQuestions = async()=>{
+      try {
+        const res = await axios.get('http://localhost:8082/api/questions', {headers : {Authorization: `Bearer ${token}`}})
+        console.log("all questions:" , res.data)
+        setQuestions(res.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
 
     const getAllTuto = async () => {
       try {
@@ -156,8 +172,6 @@ export const DataProvider = ({ children }) => {
         console.log(error);
       }
     };
-
-    // Fetch all ads
     const fetchAds = async () => {
       try {
         const res = await axios.get("http://localhost:8082/api/ads/getAll"); // Adjust API endpoint as needed
@@ -167,19 +181,6 @@ export const DataProvider = ({ children }) => {
         console.log(error);
       }
     };
-
-    // Delete an ad
-    const deleteAd = async (id) => {
-      try {
-        await axios.delete(`http://localhost:8082/api/ads/${id}`);
-        setAdsList((prevAds) => prevAds.filter((ad) => ad.id !== id));
-        console.log("Ad deleted:", id);
-      } catch (error) {
-        console.log("Error deleting ad:", error);
-      }
-    };
-
-    // Fetch all data
     getAllVendeur();
     getAllAcheteur();
     getAllUsers();
@@ -190,6 +191,7 @@ export const DataProvider = ({ children }) => {
     getAllTuto();
     getAllBids();
     getCarteRechar();
+    getAllQuestions();
     getAllPermissions(); // Fetch permissions
     getAllRoles();
     fetchAds(); // Fetch ads here
@@ -231,58 +233,35 @@ export const DataProvider = ({ children }) => {
       console.log(error);
     }
   };
-
-  // New function for creating a product
-  const createProduct = async (productData) => {
-    try {
-      const res = await axios.post("http://localhost:8082/api/products/create", productData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("Product created:", res.data);
-      // Optionally update the local state to reflect the new product
-      setProducts((prevProducts) => [...prevProducts, res.data]);
-    } catch (error) {
-      console.log("Error creating product:", error);
+      
+  useEffect(()=>{
+    const getAllDemandesTransfert = async()=>{
+      try {
+        const res = await axios.get(`http://localhost:8082/api/demandeTransfert/filter?numTel=${numTel}&pseudo=${pseudo}&statusDemande=${statusDemande}&typeRecharge=${typeRecharge}&page=${pageTransfert}`, {headers : {Authorization: `Bearer ${token}`}})
+        console.log("all demandes transferts:" , res.data , token)
+        setDemandeT(res.data)
+      } catch (error) {
+        console.log(error , token)
+      }
     }
-  };
-
-  const publishProductNow = async (productId) => {
-    try {
-      const token = localStorage.getItem("authToken"); // Or wherever the token is stored
-      const res = await axios.post(
-        `http://localhost:8082/api/products/${productId}/publishNow`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Ensure this is the correct token
-          },
-        }
-      );
-      console.log("Product published immediately:", res.data);
-      return res.data;
-    } catch (error) {
-      console.log("Error publishing product:", error.response || error.message);
-      throw error;
-    }
-  };
+    getAllDemandesTransfert();
+  }, [pseudo , statusDemande , typeRecharge , pageTransfert ])
 
   const state = {
     Categories,
     fetchFilteredCategories, // Add the new method to the global state
-    updateCategory, // Add the update function to the global state
-    createProduct, // Add the create product function to the global state
+    updateCategory, // Add the update function to the global state// Add the create product function to the global state
     Products,
-    publishProductNow,
     tutorials: tutoriel,
     bids,
     cartes: carteRech,
     Permissions: permissions, // Add permissions to global state
     Roles: roles,
+    Questions : questions,
     Admins: admins,
     Commandes: commandes,
     Users: users,
+    demandesT : demandeT,
     adsList, // Add adsList to global state
   };
 
