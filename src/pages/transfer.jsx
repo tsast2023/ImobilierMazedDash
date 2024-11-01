@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactPaginate from "react-paginate";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 
@@ -37,7 +38,6 @@ function Modal({ t }) {
           </div>
           <div className="modal-footer">
             <button type="button" className="btn" data-bs-dismiss="modal">
-              <i className="bx bx-x d-block d-sm-none"></i>
               <span className="d-none d-sm-block">{t("Annulé")}</span>
             </button>
             <button
@@ -45,7 +45,6 @@ function Modal({ t }) {
               className="btn btn-primary ms-1"
               data-bs-dismiss="modal"
             >
-              <i className="bx bx-check d-block d-sm-none"></i>
               <span className="d-none d-sm-block">{t("Envoyer")}</span>
             </button>
           </div>
@@ -55,7 +54,7 @@ function Modal({ t }) {
   );
 }
 
-function TableRow({ userData, status, onAccept }) {
+function TableRow({ userData, onAccept }) {
   const { t } = useTranslation();
 
   const handleAccept = () => {
@@ -71,16 +70,20 @@ function TableRow({ userData, status, onAccept }) {
     }).then((result) => {
       if (result.isConfirmed) {
         onAccept();
-        Swal.fire({   title: "Accepter",
-          text: "Votre élément est Accepter :)",
-          icon: "Succes",
+        Swal.fire({
+          title: "Accepter",
+          text: "Votre élément est accepté :)",
+          icon: "success",
           confirmButtonColor: "#b0210e",
-        });       } else {
-        Swal.fire({   title: "Annulé",
+        });
+      } else {
+        Swal.fire({
+          title: "Annulé",
           text: "Votre élément est en sécurité :)",
           icon: "error",
           confirmButtonColor: "#b0210e",
-        });       }
+        });
+      }
     });
   };
 
@@ -95,89 +98,34 @@ function TableRow({ userData, status, onAccept }) {
   );
 }
 
-// ResponsiveTable component
 function ResponsiveTable({ data, headers, isMobile }) {
   const { t } = useTranslation();
 
-  const handleAccept = () => {
-    // Handle acceptance logic
-    console.log("Item accepted");
-  };
-
   return (
     <div className="table-responsive datatable-minimal">
-      {isMobile ? (
-        <table className="table" id="table2">
-          <tbody>
-            {data.map((item, index) => (
-              <React.Fragment key={index}>
-                <TableRow
-                  userData={item}
-                  status={item.status}
-                  onAccept={handleAccept}
-                />
-                <tr>
-                  <td colSpan="2">
-                    <hr />
-                  </td>
-                </tr>
-              </React.Fragment>
+      <table className="table" id="table2">
+        <thead>
+          <tr>
+            {headers.map((header, index) => (
+              <th key={index}>{t(header)}</th>
             ))}
-          </tbody>
-        </table>
-      ) : (
-        <table className="table" id="table2">
-          <thead>
-            <tr>
-              {headers.map((header, index) => (
-                <th key={index}>{t(header)}</th>
-              ))}
-              {/* <th>{t("Accepter")}</th>
-              <th>{t("Refuser")}</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, index) => (
-              <TableRow
-                key={index}
-                userData={item}
-                status={item.status}
-                onAccept={handleAccept}
-              />
-            ))}
-          </tbody>
-        </table>
-      )}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <TableRow key={index} userData={item} onAccept={() => {}} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-// Transfer component
 function Transfer() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
-  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(0);
-
-  const handleItemsPerPageChange = (event) => {
-    setItemsPerPage(Number(event.target.value)); // Update items per page
-    setCurrentPage(0); // Reset to first page when items per page changes
-  };
-  
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1212);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    // Initial check
-    handleResize();
-
-    // Clean up the event listener on component unmount
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const data = [
     {
@@ -186,10 +134,7 @@ function Transfer() {
       value: "076",
       location: "Offenburg",
       note: "Lorem",
-      status: {
-        text: "Accepté",
-        color: "secondary",
-      },
+      status: { text: "Accepté", color: "secondary" },
     },
     {
       name: "Graiden",
@@ -197,10 +142,7 @@ function Transfer() {
       value: "076",
       location: "Offenburg",
       note: "Lorem",
-      status: {
-        text: "Refusé",
-        color: "danger",
-      },
+      status: { text: "Refusé", color: "danger" },
     },
     {
       name: "Graiden",
@@ -208,12 +150,32 @@ function Transfer() {
       value: "076",
       location: "Offenburg",
       note: "Lorem",
-      status: {
-        text: "En attente",
-        color: "warning",
-      },
+      status: { text: "En attente", color: "warning" },
     },
+    // Additional data objects here
   ];
+
+  // Pagination Slice
+  const paginatedData = data.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
+
+  const handlePageChange = ({ selected }) => {
+    setCurrentPage(selected);
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value));
+    setCurrentPage(0);
+  };
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1212);
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="content-container">
@@ -229,39 +191,52 @@ function Transfer() {
             <div className="card">
               <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
                 <h2 className="new-price">{t("Demandes de transferts")}</h2>
-                <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
-              <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
-                <h6>{t("Items par page:")}</h6>
-              </label>
-              <select
-                className="itemsPerPage"
-                id="itemsPerPage"
-                value={itemsPerPage}
-                onChange={handleItemsPerPageChange}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={15}>15</option>
-                <option value={20}>20</option>
-              </select>
-            </div>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                    <h6>{t("Items par page:")}</h6>
+                  </label>
+                  <select
+                    className="itemsPerPage"
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={15}>15</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
               </div>
               <div className="card-body">
+              <ReactPaginate
+                  previousLabel={"← Previous"}
+                  nextLabel={"Next →"}
+                  breakLabel={"..."}
+                  pageCount={Math.ceil(data.length / itemsPerPage)}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={3}
+                  onPageChange={handlePageChange}
+                  containerClassName={"pagination"}
+                  activeClassName={"active"}
+                  className="react-paginate"
+                />
                 <ResponsiveTable
-                  data={data}
-                  headers={[
-                    "Fichier",
-                    "Type recharge",
-                    "Pseudo",
-                    "Montant",
-                    "Statut",
-                  ]}
+                  data={paginatedData}
+                  headers={["Fichier", "Type recharge", "Pseudo", "Montant", "Statut"]}
                   isMobile={isMobile}
+                />
+                <ReactPaginate
+                  previousLabel={"← Previous"}
+                  nextLabel={"Next →"}
+                  breakLabel={"..."}
+                  pageCount={Math.ceil(data.length / itemsPerPage)}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={3}
+                  onPageChange={handlePageChange}
+                  containerClassName={"pagination"}
+                  activeClassName={"active"}
+                  className="react-paginate"
                 />
               </div>
             </div>
