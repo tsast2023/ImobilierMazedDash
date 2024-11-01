@@ -5,23 +5,30 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { Table } from "react-bootstrap";
 import Cookies from "js-cookie";
+import ReactPaginate from "react-paginate";
 
 function Recharges() {
   const { t } = useTranslation();
   const state = useContext(GlobalState);
   const cartes = state.cartes;
-  console.log("cartes =====" , cartes)
+  console.log("cartes =====", cartes);
   const [carteRech, setCarteRech] = useState({ quantity: "", montant: "" });
   const [isMobile, setIsMobile] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
   const [currentPage, setCurrentPage] = useState(0);
-  const token = Cookies.get('token');
+  const token = Cookies.get("token");
+  const recharges = state.recharges || []; // Fallback to an empty array if undefined
+
+  // Define a function to handle page click
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
 
   const handleItemsPerPageChange = (event) => {
     setItemsPerPage(Number(event.target.value)); // Update items per page
     setCurrentPage(0); // Reset to first page when items per page changes
   };
-  
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212);
@@ -72,14 +79,15 @@ function Recharges() {
   const deleteItem = async (id) => {
     try {
       const res = await axios.delete(
-        `http://localhost:8082/api/carte/deleteCarte?id=${id}`, {
+        `http://localhost:8082/api/carte/deleteCarte?id=${id}`,
+        {
           headers: {
-            'Authorization': `Bearer ${token}`, // Add token to headers
-          }
+            Authorization: `Bearer ${token}`, // Add token to headers
+          },
         }
       );
       console.log(res.data);
-      window.location.reload(); 
+      window.location.reload();
     } catch (error) {
       console.log(error);
     }
@@ -90,15 +98,17 @@ function Recharges() {
     try {
       const res = await axios.post(
         "http://localhost:8082/api/carte/generer",
-        null ,   {
+        null,
+        {
           params: carteRech,
           headers: {
-            'Authorization': `Bearer ${token}` // Add token to headers
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Add token to headers
           },
         }
       );
       console.log(res.data);
-      window.location.reload(); 
+      window.location.reload();
     } catch (error) {
       console.log(error);
     }
@@ -270,8 +280,11 @@ function Recharges() {
                           </tr>
                           <tr>
                             <td>{t("Validité")}</td>
-                            {item.validite = true ?  <td>Valide</td> :  <td>Invalide</td>}
-                           
+                            <td>
+                              <div>
+                                {item.validite === true ? "Valide" : "Invalide"}
+                              </div>
+                            </td>
                           </tr>
                           <tr>
                             <td>{t("Statut")}</td>
@@ -311,6 +324,22 @@ function Recharges() {
                 </Table>
               ) : (
                 <div className="table-responsive datatable-minimal">
+                  <ReactPaginate
+                    previousLabel={"← Previous"}
+                    nextLabel={"Next →"}
+                    breakLabel={"..."}
+                    pageCount={
+                      recharges && recharges.length > 0
+                        ? Math.ceil(recharges.length / itemsPerPage)
+                        : 1
+                    }
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={3}
+                    onPageChange={handlePageChange}
+                    containerClassName={"pagination"}
+                    activeClassName={"active"}
+                    className="react-paginate"
+                  />
                   <Table className="table" id="table2">
                     <thead>
                       <tr>
@@ -326,7 +355,11 @@ function Recharges() {
                         cartes.map((item) => (
                           <tr key={item.id}>
                             <td className="text-bold-500">{item.numSérie}</td>
-                            <td>{item.validite = true ?  <td>Valide</td> :  <td>Invalide</td>}</td>
+                            <td className="text-bold-500">
+                              <div>
+                                {item.validite === true ? "Valide" : "Invalide"}
+                              </div>
+                            </td>
                             <td>
                               <span
                                 className={
@@ -339,7 +372,6 @@ function Recharges() {
                               </span>
                             </td>
                             <td>{item.valeur}</td>
-                       
                             <td>
                               <i
                                 className="fa-solid fa-trash deleteIcon"
@@ -350,11 +382,27 @@ function Recharges() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="4">loading</td>
+                          <td colSpan="5">loading</td>
                         </tr>
                       )}
                     </tbody>
                   </Table>
+                  <ReactPaginate
+                    previousLabel={"← Previous"}
+                    nextLabel={"Next →"}
+                    breakLabel={"..."}
+                    pageCount={
+                      recharges && recharges.length > 0
+                        ? Math.ceil(recharges.length / itemsPerPage)
+                        : 1
+                    }
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={3}
+                    onPageChange={handlePageChange}
+                    containerClassName={"pagination"}
+                    activeClassName={"active"}
+                    className="react-paginate"
+                  />
                 </div>
               )}
             </div>
