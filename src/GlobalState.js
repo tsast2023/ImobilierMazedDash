@@ -172,15 +172,15 @@ export const DataProvider = ({ children }) => {
         console.log(error);
       }
     };
-    const fetchAds = async () => {
-      try {
-        const res = await axios.get("http://localhost:8082/api/ads/getAll"); // Adjust API endpoint as needed
-        console.log("Ads List:", res.data);
-        setAdsList(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    // const fetchAds = async () => {
+    //   try {
+    //     const res = await axios.get("http://localhost:8082/api/ads/getAll"); // Adjust API endpoint as needed
+    //     console.log("Ads List:", res.data);
+    //     setAdsList(res.data);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
     getAllVendeur();
     getAllAcheteur();
     getAllUsers();
@@ -194,7 +194,7 @@ export const DataProvider = ({ children }) => {
     getAllQuestions();
     getAllPermissions(); // Fetch permissions
     getAllRoles();
-    fetchAds(); // Fetch ads here
+    // fetchAds(); // Fetch ads here
   }, [token]);
 
   // Update category function
@@ -258,6 +258,7 @@ export const DataProvider = ({ children }) => {
     Permissions: permissions, // Add permissions to global state
     Roles: roles,
     Questions : questions,
+    Vendeurs : Vendeur,
     Admins: admins,
     Commandes: commandes,
     Users: users,

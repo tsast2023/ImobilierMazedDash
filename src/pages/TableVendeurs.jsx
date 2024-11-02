@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useContext } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useTranslation } from 'react-i18next';
+import { GlobalState } from "../GlobalState";
 
 function TableVendeurs() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
-
+  const state = useContext(GlobalState);
+  const vendeurs = state.Vendeurs;
+  
+   console.log("vendeurs ===" , vendeurs)
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212);
@@ -116,6 +120,8 @@ function TableVendeurs() {
                 {isMobile ? (
                   <table className="table" id="table1">
                     <tbody>
+                    {vendeurs && vendeurs.map((item)=>(
+                      <>
                       <tr>
                         <td>{t("Nom")}</td>
                         <td>Alex</td>
@@ -159,6 +165,8 @@ function TableVendeurs() {
                       <tr>
                         <td colSpan="2"><hr /></td>
                       </tr>
+                      </>
+                    ))}  
                     </tbody>
                   </table>
                 ) : (
