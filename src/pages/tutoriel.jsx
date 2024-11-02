@@ -153,22 +153,43 @@ const ResponsiveTable = ({ tutorials, handleDelete, isMobile }) => {
       {isMobile ? (
         <table className="table">
           <tbody>
-            <tr>
-              <td>{t("Image")}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>{t("Ordre")}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>{t("Description")}</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>{t("Supprimer")}</td>
-              <td></td>
-            </tr>
+            {tutorials && tutorials.length > 0 ? (
+              tutorials.map((item, index) => (
+                <React.Fragment key={index}>
+                  <tr>
+                    <td>{t("Image")}</td>
+                    <td>
+                      <img
+                        src={item.file}
+                        alt={item.description}
+                        style={{ width: "50px", height: "auto" }}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>{t("Ordre")}</td>
+                    <td>{item.ordre}</td>
+                  </tr>
+                  <tr>
+                    <td>{t("Description")}</td>
+                    <td>{item.description}</td>
+                  </tr>
+                  <tr>
+                    <td>{t("Supprimer")}</td>
+                    <td>
+                      <i
+                        className="fa-solid fa-trash deleteIcon"
+                        onClick={() => handleDelete(item.id)}
+                      ></i>
+                    </td>
+                  </tr>
+                </React.Fragment>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="2">{t("Aucun tutoriel disponible")}</td>
+              </tr>
+            )}
           </tbody>
         </table>
       ) : (
@@ -182,13 +203,13 @@ const ResponsiveTable = ({ tutorials, handleDelete, isMobile }) => {
             </tr>
           </thead>
           <tbody>
-            {tutorials ? (
+            {tutorials && tutorials.length > 0 ? (
               tutorials.map((item, index) => (
                 <TableRow key={index} item={item} handleDelete={handleDelete} />
               ))
             ) : (
               <tr>
-                <td colSpan="3">{t("loading")}</td>
+                <td colSpan="4">{t("Aucun tutoriel disponible")}</td>
               </tr>
             )}
           </tbody>
@@ -404,7 +425,7 @@ const Tutoriel = () => {
             </div>
             <div className="card-content">
               <div className="card-body">
-              <ReactPaginate
+                <ReactPaginate
                   previousLabel={"← Previous"}
                   nextLabel={"Next →"}
                   breakLabel={"..."}

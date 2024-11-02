@@ -328,32 +328,6 @@ const Playground = () => {
                   {t("Liste de enchère")}
                 </MenuItem>
               </SubMenu>
-
-              <SubMenu
-                label={t("Participants")}
-                icon={<i className="fa-solid fa-users"></i>}
-              >
-                <MenuItem
-                  component={<Link to="/CreationPart" />}
-                  onClick={() => setActiveLink("/CreationPart")}
-                  style={
-                    activeLink === "/CreationPart"
-                      ? menuItemStyles.active
-                      : null
-                  }
-                >
-                  {t("Création d'un participant")}
-                </MenuItem>
-                <MenuItem
-                  component={<Link to="/PartListe" />}
-                  onClick={() => setActiveLink("/PartListe")}
-                  style={
-                    activeLink === "/PartListe" ? menuItemStyles.active : null
-                  }
-                >
-                  {t("Liste des participants")}
-                </MenuItem>
-              </SubMenu>
               <SubMenu
                 label={t("Vendeurs")}
                 icon={<i className="fa-solid fa-user-clock"></i>}
@@ -545,6 +519,16 @@ const Playground = () => {
                 }
               >
                 {t("Tutoriel")}
+              </MenuItem>
+              <MenuItem
+                icon={<i class="fa-solid fa-bell"></i>}
+                component={<Link to="/notification" />}
+                onClick={() => setActiveLink("/notification")}
+                style={
+                  activeLink === "/notification" ? menuItemStyles.active : null
+                }
+              >
+                {t("Notifications")}
               </MenuItem>
               <MenuItem
                 icon={<i className="fa-solid fa-right-from-bracket"></i>}

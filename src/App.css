@@ -136,3 +136,62 @@ hr {
   height: 25px;
   width: 45px;
 }
+
+/* Ensure consistent padding and margins for tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  text-align: left;
+  direction: ltr; /* Default to LTR */
+}
+
+
+
+/* Additional styles for RTL (Arabic) */
+[dir="rtl"] table {
+  text-align: right;
+  direction: rtl; /* Set table direction to RTL */
+  margin-left: auto; /* Ensure the table is not too close to the left side */
+  margin-right: 0;
+}
+
+[dir="rtl"] table th, [dir="rtl"] table td {
+  padding: 10px 15px;
+  text-align: right;
+  margin-right: 0;
+}
+
+[dir="rtl"] .card {
+  margin-right: 20px;
+  margin-left: 60px; /* Ensure spacing on both sides */
+  text-align: right;
+  direction: rtl; /* Set direction to RTL */
+}
+
+.customTr {
+  font-size: 12px;
+}
+
+.customTb {
+  font-size: 14px;
+}
+
+.info-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.info-row p {
+  margin: 0;
+}
+
+.info-row .data {
+  text-align: right;
+}

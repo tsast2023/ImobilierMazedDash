@@ -67,12 +67,16 @@ import DemandeEnchereAdmin from './pages/DemandeEnchereAdmin';
 import DemandeCatAdmin from './pages/DemandeCatAdmin';
 import Winners from './pages/winners';
 import Echeance from './pages/echeance';
+import NotificationP from './pages/Notification';
 import './App.css';
 import './i18n';
+import { useTranslation } from "react-i18next";
+
 
 const App = () => {
   const [token, setToken] = useState(null);
   const authToken= Cookies.get('token');
+  const { t, i18n } = useTranslation();
   
   useEffect(() => {
     const requestPermission = async () => {
@@ -105,6 +109,12 @@ const App = () => {
       new Notification(notificationTitle, notificationOptions);
     });
   }, []);
+
+  useEffect(() => {
+    const direction = i18n.language === "ar" ? "rtl" : "ltr";
+    document.documentElement.dir = direction; // Set the direction of the document
+  }, [i18n.language]);
+
 
   return (
     <DataProvider>
@@ -178,6 +188,7 @@ const App = () => {
               <Route path='/DemandeCatAdmin' element={<DemandeCatAdmin />} />
               <Route path='/Winners' element={<Winners />} />
               <Route path='/Echéance' element={<Echeance />} />
+              <Route path='/notification' element={<NotificationP/>}/>
             </Routes>
           </div>
         )}

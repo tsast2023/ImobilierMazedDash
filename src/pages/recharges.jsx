@@ -11,35 +11,32 @@ function Recharges() {
   const { t } = useTranslation();
   const state = useContext(GlobalState);
   const cartes = state.cartes;
-  console.log("cartes =====", cartes);
   const [carteRech, setCarteRech] = useState({ quantity: "", montant: "" });
   const [isMobile, setIsMobile] = useState(false);
-  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(0);
   const token = Cookies.get("token");
-  const recharges = state.recharges || []; // Fallback to an empty array if undefined
+  const recharges = state.recharges || [];
 
-  // Define a function to handle page click
+  // New state variables for filters
+  const [filterNumSérie, setFilterNumSérie] = useState("");
+  const [filterStatut, setFilterStatut] = useState("");
+
   const handlePageChange = (selectedPage) => {
-    setCurrentPage(selectedPage.selected); // Update current page
+    setCurrentPage(selectedPage.selected);
   };
 
   const handleItemsPerPageChange = (event) => {
-    setItemsPerPage(Number(event.target.value)); // Update items per page
-    setCurrentPage(0); // Reset to first page when items per page changes
+    setItemsPerPage(Number(event.target.value));
+    setCurrentPage(0);
   };
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212);
     };
-
     window.addEventListener("resize", handleResize);
-
-    // Initial check
     handleResize();
-
-    // Clean up the event listener on component unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -64,7 +61,7 @@ function Recharges() {
           text: "Votre élément est Supprimer:)",
           icon: "Succes",
           confirmButtonColor: "#b0210e",
-        }); // window.location.reload();
+        });
       } else {
         Swal.fire({
           title: "Annulé",
@@ -78,15 +75,14 @@ function Recharges() {
 
   const deleteItem = async (id) => {
     try {
-      const res = await axios.delete(
+      await axios.delete(
         `http://localhost:8082/api/carte/deleteCarte?id=${id}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Add token to headers
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log(res.data);
       window.location.reload();
     } catch (error) {
       console.log(error);
@@ -96,23 +92,32 @@ function Recharges() {
   const addCarte = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:8082/api/carte/generer",
-        null,
-        {
-          params: carteRech,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Add token to headers
-          },
-        }
-      );
-      console.log(res.data);
+      await axios.post("http://localhost:8082/api/carte/generer", null, {
+        params: carteRech,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       window.location.reload();
     } catch (error) {
       console.log(error);
     }
   };
+
+  // Filtered cartes based on Numéro de série and Statut
+  const filteredCartes = cartes.filter((item) => {
+    return (
+      (!filterNumSérie || item.numSérie.includes(filterNumSérie)) &&
+      (!filterStatut || item.statuscarte === filterStatut)
+    );
+  });
+
+  // Paginated data for filtered results
+  const paginatedCartes = filteredCartes.slice(
+    currentPage * itemsPerPage,
+    currentPage * itemsPerPage + itemsPerPage
+  );
 
   return (
     <div id="main">
@@ -141,94 +146,7 @@ function Recharges() {
                       <i className="bi bi-plus"></i>
                       {t("Ajouter")}
                     </button>
-
-                    <div
-                      className="modal fade text-left"
-                      id="inlineForm"
-                      tabIndex="-1"
-                      role="dialog"
-                      aria-labelledby="myModalLabel33"
-                      aria-hidden="true"
-                    >
-                      <div
-                        className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                        role="document"
-                      >
-                        <div className="modal-content">
-                          <div className="modal-header">
-                            <h4 className="modal-title" id="myModalLabel33">
-                              {t("Ajouter une nouvelle carte")}
-                            </h4>
-                            <button
-                              type="button"
-                              className="btn-close"
-                              data-bs-dismiss="modal"
-                              aria-label="Close"
-                            ></button>
-                          </div>
-                          <form onSubmit={addCarte}>
-                            <div className="modal-body">
-                              <label htmlFor="serialNumber">
-                                {t("Nombre de carte")}
-                              </label>
-                              <div className="form-group">
-                                <input
-                                  id="serialNumber"
-                                  type="text"
-                                  placeholder={t("Écrivez ici")}
-                                  className="form-control"
-                                  maxLength="25"
-                                  onChange={(e) =>
-                                    setCarteRech({
-                                      ...carteRech,
-                                      quantity: e.target.value,
-                                    })
-                                  }
-                                />
-                              </div>
-                              <label htmlFor="value">{t("Valeur")}</label>
-                              <div className="form-group">
-                                <input
-                                  id="value"
-                                  type="text"
-                                  placeholder={t("Écrivez ici")}
-                                  className="form-control"
-                                  maxLength="25"
-                                  onChange={(e) =>
-                                    setCarteRech({
-                                      ...carteRech,
-                                      montant: e.target.value,
-                                    })
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <div className="modal-footer">
-                              <button
-                                type="button"
-                                className="btn btn-light-secondary"
-                                data-bs-dismiss="modal"
-                              >
-                                <i className="bx bx-x d-block d-sm-none"></i>
-                                <span className="btn btn-secondary">
-                                  {t("Annuler")}
-                                </span>
-                              </button>
-                              <button
-                                type="submit"
-                                className="btn btn-primary"
-                                data-bs-dismiss="modal"
-                              >
-                                <i className="bx bx-check d-block d-sm-none"></i>
-                                <span className="btn btn-primary">
-                                  {t("Enregistrer")}
-                                </span>
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Modal content here */}
                   </div>
                 </div>
               </div>
@@ -244,12 +162,7 @@ function Recharges() {
             style={{ display: "flex", justifyContent: "space-between" }}
           >
             <h2 className="new-price">{t("Liste des cartes ajoutées")}</h2>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
                 <h6>{t("Items par page:")}</h6>
               </label>
@@ -266,60 +179,86 @@ function Recharges() {
               </select>
             </div>
           </div>
+
+          {/* Filter Inputs */}
+          <div className="row" style={{ padding: "0 20px" }}>
+            {/* Numéro de série Filter Section */}
+            <div className="col-md-6 mb-4">
+              <h6>{t("Numéro de série")}</h6>
+              <fieldset className="form-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder={t("Filter by Numéro de série")}
+                  value={filterNumSérie}
+                  onChange={(e) => setFilterNumSérie(e.target.value)}
+                />
+              </fieldset>
+            </div>
+
+            {/* Statut Filter Section */}
+            <div className="col-md-6 mb-4">
+              <h6>{t("Statut")}</h6>
+              <fieldset className="form-group">
+                <select
+                  className="form-select"
+                  value={filterStatut}
+                  onChange={(e) => setFilterStatut(e.target.value)}
+                >
+                  <option value="">{t("All Statut")}</option>
+                  <option value="NONUTILISER">{t("NONUTILISER")}</option>
+                  <option value="UTILISER">{t("UTILISER")}</option>
+                </select>
+              </fieldset>
+            </div>
+          </div>
+
           <div className="card-content">
             <div className="card-body">
               {isMobile ? (
                 <Table responsive="sm">
                   <tbody>
-                    {cartes ? (
-                      cartes.map((item) => (
-                        <React.Fragment key={item.id}>
-                          <tr>
-                            <td>{t("Numéro de carte")}</td>
-                            <td className="text-bold-500">{item.numSérie}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Validité")}</td>
-                            <td>
-                              <div>
-                                {item.validite === true ? "Valide" : "Invalide"}
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>{t("Statut")}</td>
-                            <td>
-                              <span
-                                className={
-                                  item.statuscarte === "NONUTILISER"
-                                    ? "badge bg-success"
-                                    : "badge bg-danger"
-                                }
-                              >
-                                {item.statuscarte}
-                              </span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>{t("Valeur")}</td>
-                            <td>{item.valeur}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Supprimer")}</td>
-                            <td>
-                              <i
-                                className="fa-solid fa-trash deleteIcon"
-                                onClick={() => handleDelete(item.id)}
-                              ></i>
-                            </td>
-                          </tr>
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="2">loading</td>
-                      </tr>
-                    )}
+                    {paginatedCartes.map((item) => (
+                      <React.Fragment key={item.id}>
+                        <tr>
+                          <td>{t("Numéro de carte")}</td>
+                          <td className="text-bold-500">{item.numSérie}</td>
+                        </tr>
+                        <tr>
+                          <td>{t("Validité")}</td>
+                          <td>
+                            {item.validite === true ? "Valide" : "Invalide"}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>{t("Statut")}</td>
+                          <td>
+                            <span
+                              className={
+                                item.statuscarte === "NONUTILISER"
+                                  ? "badge bg-success"
+                                  : "badge bg-danger"
+                              }
+                            >
+                              {item.statuscarte}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>{t("Valeur")}</td>
+                          <td>{item.valeur}</td>
+                        </tr>
+                        <tr>
+                          <td>{t("Supprimer")}</td>
+                          <td>
+                            <i
+                              className="fa-solid fa-trash deleteIcon"
+                              onClick={() => handleDelete(item.id)}
+                            ></i>
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    ))}
                   </tbody>
                 </Table>
               ) : (
@@ -328,11 +267,7 @@ function Recharges() {
                     previousLabel={"← Previous"}
                     nextLabel={"Next →"}
                     breakLabel={"..."}
-                    pageCount={
-                      recharges && recharges.length > 0
-                        ? Math.ceil(recharges.length / itemsPerPage)
-                        : 1
-                    }
+                    pageCount={Math.ceil(filteredCartes.length / itemsPerPage)}
                     marginPagesDisplayed={2}
                     pageRangeDisplayed={3}
                     onPageChange={handlePageChange}
@@ -351,58 +286,34 @@ function Recharges() {
                       </tr>
                     </thead>
                     <tbody>
-                      {cartes ? (
-                        cartes.map((item) => (
-                          <tr key={item.id}>
-                            <td className="text-bold-500">{item.numSérie}</td>
-                            <td className="text-bold-500">
-                              <div>
-                                {item.validite === true ? "Valide" : "Invalide"}
-                              </div>
-                            </td>
-                            <td>
-                              <span
-                                className={
-                                  item.statuscarte === "NONUTILISER"
-                                    ? "badge bg-success"
-                                    : "badge bg-danger"
-                                }
-                              >
-                                {item.statuscarte}
-                              </span>
-                            </td>
-                            <td>{item.valeur}</td>
-                            <td>
-                              <i
-                                className="fa-solid fa-trash deleteIcon"
-                                onClick={() => handleDelete(item.id)}
-                              ></i>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5">loading</td>
+                      {paginatedCartes.map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.numSérie}</td>
+                          <td>
+                            {item.validite === true ? "Valide" : "Invalide"}
+                          </td>
+                          <td>
+                            <span
+                              className={
+                                item.statuscarte === "NONUTILISER"
+                                  ? "badge bg-success"
+                                  : "badge bg-danger"
+                              }
+                            >
+                              {item.statuscarte}
+                            </span>
+                          </td>
+                          <td>{item.valeur}</td>
+                          <td>
+                            <i
+                              className="fa-solid fa-trash deleteIcon"
+                              onClick={() => handleDelete(item.id)}
+                            ></i>
+                          </td>
                         </tr>
-                      )}
+                      ))}
                     </tbody>
                   </Table>
-                  <ReactPaginate
-                    previousLabel={"← Previous"}
-                    nextLabel={"Next →"}
-                    breakLabel={"..."}
-                    pageCount={
-                      recharges && recharges.length > 0
-                        ? Math.ceil(recharges.length / itemsPerPage)
-                        : 1
-                    }
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={3}
-                    onPageChange={handlePageChange}
-                    containerClassName={"pagination"}
-                    activeClassName={"active"}
-                    className="react-paginate"
-                  />
                 </div>
               )}
             </div>

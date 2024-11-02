@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button } from 'react-bootstrap';
-import Swal from 'sweetalert2';
+import React, { useContext, useState, useEffect } from "react";
+import { Modal, Button } from "react-bootstrap";
+import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
-import { Link } from 'react-router-dom';
-import axios from 'axios'; // Import axios for API requests
+import { Link } from "react-router-dom";
+import axios from "axios"; // Import axios for API requests
+import ReactPaginate from "react-paginate";
+import { GlobalState } from "../GlobalState";
 
 function AdsList() {
+  const state = useContext(GlobalState);
   const { t } = useTranslation();
   const [adsList, setAdsList] = useState([]); // State to hold the fetched ads
   const [showImageModal, setShowImageModal] = useState(false);
@@ -13,10 +16,15 @@ function AdsList() {
   const [showCarouselModal, setShowCarouselModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false); // State for edit modal
   const [isMobile, setIsMobile] = useState(false);
-  const [editType, setEditType] = useState('');
+  const [editType, setEditType] = useState("");
   const [uploadInputs, setUploadInputs] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
   const [currentPage, setCurrentPage] = useState(0);
+  const ads = state.ads || []; // Default to an empty array if state.ads is undefined
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
 
   const handleItemsPerPageChange = (event) => {
     setItemsPerPage(Number(event.target.value)); // Update items per page
@@ -41,10 +49,12 @@ function AdsList() {
   useEffect(() => {
     const fetchAds = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/annonce/getAll');
+        const response = await axios.get(
+          "http://localhost:8082/api/annonce/getAll"
+        );
         setAdsList(response.data); // Set the fetched ads list in state
       } catch (error) {
-        console.error('Error fetching the ads:', error);
+        console.error("Error fetching the ads:", error);
         // Optionally show a notification or error message here
       }
     };
@@ -55,7 +65,9 @@ function AdsList() {
   const handleDelete = (id) => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
-      text: t("Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"),
+      text: t(
+        "Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"
+      ),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -88,7 +100,7 @@ function AdsList() {
       await axios.delete(`http://localhost:8082/api/annonce/delete/${id}`);
       setAdsList(adsList.filter((ad) => ad.id !== id)); // Remove the deleted ad from the list
     } catch (error) {
-      console.error('Error deleting the ad:', error);
+      console.error("Error deleting the ad:", error);
     }
   };
 
@@ -98,7 +110,7 @@ function AdsList() {
 
   const closeEditModal = () => {
     setShowEditModal(false);
-    setEditType(''); // Reset edit type
+    setEditType(""); // Reset edit type
     setUploadInputs([]); // Clear upload inputs
   };
 
@@ -126,10 +138,48 @@ function AdsList() {
     <div className="content-container">
       <section className="section">
         <div className="card">
-          <div className="card-header">
+          <div
+            className="card-header"
+            style={{ display: "flex", justifyContent: "space-between" }}
+          >
             <h2 className="new-price">{t("Liste des annonces")}</h2>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                <h6>{t("Items par page:")}</h6>
+              </label>
+              <select
+                className="itemsPerPage"
+                id="itemsPerPage"
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+                <option value={20}>20</option>
+              </select>
+            </div>
           </div>
           <div className="card-body">
+            {adsList.length > 0 && (
+              <ReactPaginate
+                previousLabel={"← Previous"}
+                nextLabel={"Next →"}
+                breakLabel={"..."}
+                pageCount={Math.ceil(adsList.length / itemsPerPage)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={3}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                activeClassName={"active"}
+                className="react-paginate"
+              />
+            )}
             <div className="table-responsive">
               {isMobile ? (
                 <table className="table" id="table1">
@@ -151,22 +201,21 @@ function AdsList() {
                         <tr>
                           <td>{t("Voir")}</td>
                           <td>
-                            <Button className="btn" onClick={() => setShowImageModal(true)}>
+                            <Button
+                              className="btn"
+                              onClick={() => setShowImageModal(true)}
+                            >
                               <i className="fa-solid fa-eye"></i>
                             </Button>
                           </td>
                         </tr>
                         <tr>
                           <td>{t("Nombre des j'aimes")}</td>
-                          <td>
-
-                          </td>
+                          <td></td>
                         </tr>
                         <tr>
                           <td>{t("Nombre des dislikes")}</td>
-                          <td>
-
-                          </td>
+                          <td></td>
                         </tr>
                         <tr>
                           <td>{t("Editer")}</td>
@@ -179,11 +228,16 @@ function AdsList() {
                         <tr>
                           <td>{t("Supprimer")}</td>
                           <td>
-                            <i className="fa-solid fa-trash deleteIcon" onClick={() => handleDelete(ad.id)}></i>
+                            <i
+                              className="fa-solid fa-trash deleteIcon"
+                              onClick={() => handleDelete(ad.id)}
+                            ></i>
                           </td>
                         </tr>
                         <tr>
-                          <td colSpan="2"><hr /></td>
+                          <td colSpan="2">
+                            <hr />
+                          </td>
                         </tr>
                       </React.Fragment>
                     ))}
@@ -210,7 +264,10 @@ function AdsList() {
                         <td>{ad.publicationDate}</td>
                         <td>{t(ad.type)}</td>
                         <td>
-                          <Button className="btn" onClick={() => setShowImageModal(true)}>
+                          <Button
+                            className="btn"
+                            onClick={() => setShowImageModal(true)}
+                          >
                             <i className="fa-solid fa-eye"></i>
                           </Button>
                         </td>
@@ -222,7 +279,10 @@ function AdsList() {
                           </Button>
                         </td>
                         <td>
-                          <i className="fa-solid fa-trash deleteIcon" onClick={() => handleDelete(ad.id)}></i>
+                          <i
+                            className="fa-solid fa-trash deleteIcon"
+                            onClick={() => handleDelete(ad.id)}
+                          ></i>
                         </td>
                       </tr>
                     ))}
@@ -230,63 +290,57 @@ function AdsList() {
                 </table>
               )}
             </div>
+            {/* Add pagination controls */}
+            {adsList.length > 0 && (
+              <ReactPaginate
+                previousLabel={"← Previous"}
+                nextLabel={"Next →"}
+                breakLabel={"..."}
+                pageCount={Math.ceil(adsList.length / itemsPerPage)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={3}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                activeClassName={"active"}
+                className="react-paginate"
+              />
+            )}
           </div>
         </div>
-
-        {/* Edit Modal */}
-        <Modal show={showEditModal} onHide={closeEditModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>{t("Modification d’une annonce")}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="form-group mb-3">
-              <label htmlFor="edit-type">{t("Type de l'annonce")}</label>
-              <select
-                className="form-control"
-                id="edit-type"
-                onChange={handleEditTypeChange}
-                value={editType}
-              >
-                <option value="">{t("Sélectionner le type d'annonce")}</option>
-                <option value="image">{t("Image")}</option>
-                <option value="video">{t("Vidéo")}</option>
-                <option value="carousel">{t("Carousel")}</option>
-              </select>
-            </div>
-            {editType && (
-              <div className="form-group mb-3">
-                <label>{t("Ajouter un fichier")}</label>
-                <Button variant="secondary" onClick={handleAddUploadInput}>{t("Ajouter")}</Button>
-                {uploadInputs.map((_, index) => (
-                  <div key={index} className="mt-2">
-                    <div className="custom-file">
-                      <input type="file" className="custom-file-input" />
-                      <label className="custom-file-label" htmlFor="customFile">
-                        {t("Choisir un fichier")}
-                      </label>
-                      <Button
-                        variant="link"
-                        className="ml-2"
-                        onClick={() => handleRemoveUploadInput(index)}
-                      >
-                        {t("Supprimer")}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={closeEditModal}>
-              {t("Annuler")}
-            </Button>
-            <Button variant="primary" onClick={handleEditSave}>
-              {t("Enregistrer")}
-            </Button>
-          </Modal.Footer>
-        </Modal>
       </section>
+
+      {/* Modal for editing */}
+      <Modal show={showEditModal} onHide={closeEditModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Modal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <label>Edit Type:</label>
+          <select value={editType} onChange={handleEditTypeChange}>
+            <option value="">Select Type</option>
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+            <option value="carousel">Carousel</option>
+          </select>
+          {uploadInputs.map((input, index) => (
+            <div key={index} style={{ display: "flex", marginBottom: "10px" }}>
+              <input type="file" />
+              <button onClick={() => handleRemoveUploadInput(index)}>
+                Remove
+              </button>
+            </div>
+          ))}
+          <button onClick={handleAddUploadInput}>Add Input</button>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeEditModal}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleEditSave}>
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
