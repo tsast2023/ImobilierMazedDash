@@ -337,121 +337,164 @@ const ProdCreate = () => {
                     </div>
 
                     {/* Handle Color and Options Inputs */}
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>{t("Avec couleurs ?")}</label>
-                        <div>
-                          <select
-                            onChange={handleWithColorChange}
-                            className="form-control"
-                          >
-                            <option value="">
-                              {t("Sélectionner une option")}
-                            </option>
-                            <option value="no">{t("Non")}</option>
-                            <option value="yes">{t("Oui")}</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-6">
-                      <div className="form-group">
-                        <label>{t("Avec options ?")}</label>
-                        <div>
-                          <select
-                            onChange={handleWithOptionsChange}
-                            className="form-control"
-                          >
-                            <option value="">
-                              {t("Sélectionner une option")}
-                            </option>
-                            <option value="no">{t("Non")}</option>
-                            <option value="yes">{t("Oui")}</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Rest of your form */}
-                    {withColor !== null && (
+                    <div className="row">
                       <div className="col-6">
-                        {" "}
-                        {/* Change this to col-12 for full width */}
                         <div className="form-group">
-                          {inputs.map((input, index) => (
-                            <div key={index} className="mb-3">
-                              {" "}
-                              {/* Add margin bottom for spacing */}
-                              {withColor ? (
-                                <div className="mb-3">
+                          <label>{t("Avec couleurs ?")}</label>
+                          <div>
+                            <div className="form-check form-check-inline">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="withColor"
+                                id="withColorYes"
+                                value="yes"
+                                onChange={handleWithColorChange}
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="withColorYes"
+                              >
+                                {t("Oui")}
+                              </label>
+                            </div>
+                            <div className="form-check form-check-inline">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="withColor"
+                                id="withColorNo"
+                                value="no"
+                                onChange={handleWithColorChange}
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="withColorNo"
+                              >
+                                {t("Non")}
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col-6">
+                        <div className="form-group">
+                          <label>{t("Avec options ?")}</label>
+                          <div>
+                            <div className="form-check form-check-inline">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="withOptions"
+                                id="withOptionsYes"
+                                value="yes"
+                                onChange={handleWithOptionsChange}
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="withOptionsYes"
+                              >
+                                {t("Oui")}
+                              </label>
+                            </div>
+                            <div className="form-check form-check-inline">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="withOptions"
+                                id="withOptionsNo"
+                                value="no"
+                                onChange={handleWithOptionsChange}
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="withOptionsNo"
+                              >
+                                {t("Non")}
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Conditionally Render Inputs Based on States */}
+                      {withColor !== null && (
+                        <div className="col-12">
+                          <div className="form-group row align-items-center">
+                            {inputs.map((input, index) => (
+                              <div
+                                key={index}
+                                className="d-flex align-items-center mb-3"
+                              >
+                                {withColor && (
+                                  <div className="mr-4 mb-3">
+                                    {" "}
+                                    {/* Added mb-3 for spacing */}
+                                    <label>{t("Couleur")}</label>
+                                    <input
+                                      type="color"
+                                      value={input.color}
+                                      onChange={(e) =>
+                                        handleColorChange(e, index)
+                                      }
+                                      className="form-control form-control-color"
+                                    />
+                                  </div>
+                                )}
+                                <div className="mr-4 mb-3">
                                   {" "}
-                                  {/* Separate div for color input */}
-                                  <label>{t("Couleur")}</label>
+                                  {/* Added mb-3 for spacing */}
+                                  <label>{t("Image")}</label>
                                   <input
-                                    type="color"
-                                    value={input.color}
+                                    type="file"
                                     onChange={(e) =>
-                                      handleColorChange(e, index)
+                                      handleImageChange(e, index)
                                     }
                                     className="form-control"
                                   />
                                 </div>
-                              ) : null}
-                              <div className="mb-3">
-                                {" "}
-                                {/* Separate div for file input */}
-                                <label>{t("Image")}</label>
-                                <input
-                                  type="file"
-                                  onChange={(e) => handleImageChange(e, index)}
-                                  className="form-control"
-                                />
+                                {withOptions === "yes" && ( // Only show if withOptions is "yes"
+                                  <>
+                                    <div className="mr-4 mb-3">
+                                      {" "}
+                                      {/* Added mb-3 for spacing */}
+                                      <label>{t("Prix")}</label>
+                                      <input
+                                        type="number"
+                                        className="form-control"
+                                      />
+                                    </div>
+                                    <div className="mb-3">
+                                      {" "}
+                                      {/* Added mb-3 for spacing */}
+                                      <label>{t("Stock")}</label>
+                                      <input
+                                        type="number"
+                                        className="form-control"
+                                        Ensure
+                                        you
+                                        handle
+                                        stock
+                                        change
+                                        correctly
+                                      />
+                                    </div>
+                                  </>
+                                )}
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                           <button
                             type="button"
                             onClick={addInput}
-                            className="btn btn-secondary"
+                            className="btn btn-secondary mt-3"
                           >
                             {t("Ajouter une couleur ou image")}
                           </button>
                         </div>
-                      </div>
-                    )}
-
-                    {withOptions && (
-                      <div className="col-6">
-                        {" "}
-                        {/* Change this to col-12 for full width */}
-                        <div className="form-group">
-                          {inputs.map((input, index) => (
-                            <div key={index} className="mb-3">
-                              {" "}
-                              {/* Add margin bottom for spacing */}
-                              {withOptions ? (
-                                <div className="mb-3">
-                                  {" "}
-                                  {/* Separate div for color input */}
-                                  <label>{t("Prix")}</label>
-                                  <input
-                                    type="Number"
-                                    className="form-control"
-                                  />
-                                </div>
-                              ) : null}
-                              <div className="mb-3">
-                                {" "}
-                                {/* Separate div for file input */}
-                                <label>{t("Stock")}</label>
-                                <input type="Number" className="form-control" />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     {/* Go Back Button */}
                     <Modal.Footer>
