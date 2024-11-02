@@ -124,15 +124,15 @@ function TableVendeurs() {
                       <>
                       <tr>
                         <td>{t("Nom")}</td>
-                        <td>Alex</td>
+                        <td>{item.nomFamille}</td>
                       </tr>
                       <tr>
                         <td>{t("Pseudo")}</td>
-                        <td>vehi</td>
+                        <td>{item.pseudo}</td>
                       </tr>
                       <tr>
                         <td>{t("Date inscription")}</td>
-                        <td>20202020</td>
+                        <td>{item.createdAt}</td>
                       </tr>
                       <tr>
                         <td>{t("Produits déposés dans boutique")}</td>
@@ -184,10 +184,11 @@ function TableVendeurs() {
                       </tr>
                     </thead>
                     <tbody>
+                    {vendeurs && vendeurs.map((item)=>(
                       <tr>
-                        <td>Alex</td>
-                        <td>vehi</td>
-                        <td>20202020</td>
+                        <td>{item.nomFamille}</td>
+                        <td>{item.pseudo}</td>
+                        <td>{item.createdAt}</td>
                         <td>1</td>
                         <td>1</td>
                         <td>
@@ -202,6 +203,7 @@ function TableVendeurs() {
                           <i onClick={handleUnblockClick} className="fa-solid fa-unlock"></i>
                         </td>
                       </tr>
+                    ))}
                     </tbody>
                   </table>
                 )}
