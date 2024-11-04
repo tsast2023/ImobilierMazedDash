@@ -98,13 +98,13 @@ const ProdCreate = () => {
   };
 
   const handleWithColorChange = (e) => {
-    const value = e.target.value === "yes"; // Convert "yes" to true and "no" to false
+    const value = e.target.value === "yes"; 
     setWithColor(value);
     setInputs([{ color: "", image: "" }]); // Reset inputs when changing the option
   };
 
   const handleFormChange = (e) => {
-    setFormData({
+    setFormData({   
       ...formData,
       [e.target.name]: e.target.value,
     });
@@ -163,7 +163,7 @@ const ProdCreate = () => {
         </a>
       </header>
       <div className="col-md-12">
-        <div className="card">
+      <form onSubmit={handleSubmit} className="card">
           <div className="card-header">
             <h2 className="new-price">{t("Ajouter un nouveau produit")}</h2>
           </div>
@@ -525,9 +525,10 @@ const ProdCreate = () => {
               </form>
             </div>
           </div>
+          </form>
         </div>
       </div>
-    </div>
+ 
   );
 };
 
