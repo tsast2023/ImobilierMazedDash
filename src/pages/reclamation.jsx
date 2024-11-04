@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Button, Form } from "react-bootstrap";
+import { GlobalState } from "../GlobalState";
+import ReactPaginate from "react-paginate";
+
 
 function Reclamation() {
   const { t } = useTranslation();
@@ -8,6 +11,20 @@ function Reclamation() {
   const [showModal1, setShowModal1] = useState(false);
   const [showModal2, setShowModal2] = useState(false);
   const [reclamationText, setReclamationText] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const state = useContext(GlobalState);
+  const reclamation = state.reclamation;
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -43,8 +60,35 @@ function Reclamation() {
           <div className="row" id="table-contexual">
             <div className="col-12">
               <div className="card">
-                <div className="card-header">
+                <div
+                  className="card-header"
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
                   <h2 className="new-price">{t("Tableau de Réclamation")}</h2>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <label
+                      htmlFor="itemsPerPage"
+                      style={{ marginRight: "10px" }}
+                    >
+                      <h6>{t("Items par page:")}</h6>
+                    </label>
+                    <select
+                      className="itemsPerPage"
+                      id="itemsPerPage"
+                      value={itemsPerPage}
+                      onChange={handleItemsPerPageChange}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={15}>15</option>
+                      <option value={20}>20</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="card-content">
                   <div className="table-responsive">
@@ -66,7 +110,9 @@ function Reclamation() {
                           <tr>
                             <td>{t("Statut")}</td>
                             <td>
-                              <span className="badge bg-secondary">{t("Ouverte")}</span>
+                              <span className="badge bg-secondary">
+                                {t("Ouverte")}
+                              </span>
                             </td>
                           </tr>
                           <tr>
@@ -82,7 +128,9 @@ function Reclamation() {
                             </td>
                           </tr>
                           <tr>
-                            <td colSpan="2"><hr /></td>
+                            <td colSpan="2">
+                              <hr />
+                            </td>
                           </tr>
                           <tr>
                             <td>{t("Date")}</td>
@@ -99,7 +147,9 @@ function Reclamation() {
                           <tr>
                             <td>{t("Statut")}</td>
                             <td>
-                              <span className="badge bg-danger">{t("Fermée")}</span>
+                              <span className="badge bg-danger">
+                                {t("Fermée")}
+                              </span>
                             </td>
                           </tr>
                           <tr>
@@ -131,9 +181,13 @@ function Reclamation() {
                           <tr>
                             <td className="text-bold-500">10/10/2024</td>
                             <td>{t("Lorem Lorem")}</td>
-                            <td className="text-bold-500">{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
                             <td>
-                              <span className="badge bg-secondary">{t("Ouverte")}</span>
+                              <span className="badge bg-secondary">
+                                {t("Ouverte")}
+                              </span>
                             </td>
                             <td>
                               <button
@@ -148,9 +202,13 @@ function Reclamation() {
                           <tr>
                             <td className="text-bold-500">10/10/2024</td>
                             <td>{t("Lorem Lorem")}</td>
-                            <td className="text-bold-500">{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
                             <td>
-                              <span className="badge bg-danger">{t("Fermée")}</span>
+                              <span className="badge bg-danger">
+                                {t("Fermée")}
+                              </span>
                             </td>
                             <td>
                               <button
@@ -167,6 +225,18 @@ function Reclamation() {
                     )}
                   </div>
                 </div>
+                <ReactPaginate
+                  previousLabel={"← Previous"}
+                  nextLabel={"Next →"}
+                  breakLabel={"..."}
+                  pageCount={pageCount}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={3}
+                  onPageChange={handlePageChange}
+                  containerClassName={"pagination"}
+                  activeClassName={"active"}
+                  className="react-paginate"
+                />
               </div>
             </div>
           </div>
@@ -176,7 +246,7 @@ function Reclamation() {
       {/* Modals */}
       <Modal show={showModal1} onHide={() => setShowModal1(false)}>
         <Modal.Header closeButton>
-        <Modal.Title>{t("Réclamation")}</Modal.Title>
+          <Modal.Title>{t("Réclamation")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>Please provide details of your reclamation.</p>

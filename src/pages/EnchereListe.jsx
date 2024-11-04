@@ -3,10 +3,24 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import { Table } from "react-bootstrap";
+import ReactPaginate from "react-paginate";
+
 
 function EnchereListe() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -64,6 +78,27 @@ function EnchereListe() {
           <div className="card">
             <div style={{ display: "flex", justifyContent: "space-between" }} className="card-header">
               <h2 className="new-price">{t("Liste d'enchére")}</h2>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                  <h6>{t("Items par page:")}</h6>
+                </label>
+                <select
+                  className="itemsPerPage"
+                  id="itemsPerPage"
+                  value={itemsPerPage}
+                  onChange={handleItemsPerPageChange}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={15}>15</option>
+                  <option value={20}>20</option>
+                </select>
+              </div>
             </div>
             <div className="card-body">
               <div className="row ">
@@ -255,6 +290,18 @@ function EnchereListe() {
                 </Table>
               )}
             </div>
+            <ReactPaginate
+              previousLabel={"← Previous"}
+              nextLabel={"Next →"}
+              breakLabel={"..."}
+              pageCount={pageCount}
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={3}
+              onPageChange={handlePageChange}
+              containerClassName={"pagination"}
+              activeClassName={"active"}
+              className="react-paginate"
+            />
           </div>
         </section>
       </div>

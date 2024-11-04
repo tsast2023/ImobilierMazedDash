@@ -3,17 +3,38 @@ import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { GlobalState } from "../GlobalState";
 import axios from "axios";
-import Cookies from 'js-cookie'
+import Cookies from "js-cookie";
+import ReactPaginate from "react-paginate";
+
 function QuestionList() {
-  const token = Cookies.get('token')
-  const { t , i18n } = useTranslation();
+  const token = Cookies.get("token");
+  const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [modalType, setModalType] = useState('');
-  const [question , setQuestion]= useState({question:"" ,questionAr:"",questionEn:"", reponse:"" , reponseAr:"" ,reponseEn:"" })
+  const [modalType, setModalType] = useState("");
+  const [question, setQuestion] = useState({
+    question: "",
+    questionAr: "",
+    questionEn: "",
+    reponse: "",
+    reponseAr: "",
+    reponseEn: "",
+  });
   const state = useContext(GlobalState);
-  const questions = state.Questions
-  console.log(questions)
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
+  const questions = state.Questions;
+  console.log(questions);
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212);
@@ -27,40 +48,48 @@ function QuestionList() {
     // Clean up the event listener on component unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  useEffect(()=>{
-
-  },[i18n.language])
+  useEffect(() => {}, [i18n.language]);
   const getQuestionName = (cat) => {
     switch (i18n.language) {
-      case 'ar':
-        return cat.questionAr || '';
-      case 'en':
-        return cat.questionEn || '';
-      case 'fr':
+      case "ar":
+        return cat.questionAr || "";
+      case "en":
+        return cat.questionEn || "";
+      case "fr":
       default:
-        return cat.question || '';
+        return cat.question || "";
     }
   };
   const getReponseName = (cat) => {
     switch (i18n.language) {
-      case 'ar':
-        return cat.reponseAr || '';
-      case 'en':
-        return cat.reponseEn || '';
-      case 'fr':
+      case "ar":
+        return cat.reponseAr || "";
+      case "en":
+        return cat.reponseEn || "";
+      case "fr":
       default:
-        return cat.reponse || '';
+        return cat.reponse || "";
     }
   };
   const openModal = (type, item) => {
     setModalType(type);
     setCurrentItem(item);
-    setQuestion({...question , question:item.question ,questionAr:item.questionAr,questionEn:item.questionEn, reponse:item.reponse , reponseAr:item.reponseAr ,reponseEn:item.reponseEn })
+    setQuestion({
+      ...question,
+      question: item.question,
+      questionAr: item.questionAr,
+      questionEn: item.questionEn,
+      reponse: item.reponse,
+      reponseAr: item.reponseAr,
+      reponseEn: item.reponseEn,
+    });
   };
-  const handleDelete =  (id) => {
+  const handleDelete = (id) => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
-      text: t("Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"),
+      text: t(
+        "Une fois supprimé(e), vous ne pourrez pas récupérer cet élément !"
+      ),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#DD6B55",
@@ -71,110 +100,169 @@ function QuestionList() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         await deleteItem(id);
-        console.log("fffffffffffffffffffffff")
-        Swal.fire({   title: "Supprimer",
+        console.log("fffffffffffffffffffffff");
+        Swal.fire({
+          title: "Supprimer",
           text: "Votre élément est Supprimer:)",
           icon: "Succes",
           confirmButtonColor: "#b0210e",
-        });      } else {
-          Swal.fire({   title: "Annulé",
-            text: "Votre élément est en sécurité :)",
-            icon: "error",
-            confirmButtonColor: "#b0210e",
-          });            }
+        });
+      } else {
+        Swal.fire({
+          title: "Annulé",
+          text: "Votre élément est en sécurité :)",
+          icon: "error",
+          confirmButtonColor: "#b0210e",
+        });
+      }
     });
   };
 
-  const deleteItem = async(id) => {
+  const deleteItem = async (id) => {
     try {
-      const res = await axios.delete(`http://192.168.0.112:8081/api/questions/${id}` , {headers : {Authorization: `Bearer ${token}`}});
-      console.log(res.data)
+      const res = await axios.delete(
+        `http://192.168.0.112:8081/api/questions/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log(res.data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
-const updateQuestion = async(e , id) =>{
-  e.preventDefault();
-  try {
-    const res = await axios.put(`http://192.168.0.112:8081/api/questions/${id}` , question , {headers : {Authorization: `Bearer ${token}`}});
-    console.log(res.data)
+  const updateQuestion = async (e, id) => {
+    e.preventDefault();
+    try {
+      const res = await axios.put(
+        `http://192.168.0.112:8081/api/questions/${id}`,
+        question,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log(res.data);
     } catch (error) {
-    console.log(error)
-  }
-}
+      console.log(error);
+    }
+  };
   return (
     <div className="content-container">
       <div id="main">
         <div className="page-heading">
           <section className="section">
             <div className="card">
-              <div className="card-header">
+              <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
                 <h2 className="new-price">{t("Liste des questions")}</h2>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                    <h6>{t("Items par page:")}</h6>
+                  </label>
+                  <select
+                    className="itemsPerPage"
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={15}>15</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
               </div>
               <div className="card-body">
                 <div className="table-responsive">
                   {isMobile ? (
                     <table className="table" id="table1">
                       <tbody>
-                       {questions&& questions.map((item)=>(
-                        <>
-                         <tr>
-                          <td>{t("La question")}</td>
-                          <td>{getQuestionName(item)}</td>
-                        </tr>
-                        <tr>
-                          <td>{t("Date de création")}</td>
-                          <td>{t("05/05/2024")}</td>
-                        </tr>
-                        <tr>
-                          <td>{t("Voir")}</td>
-                          <td>
-                            <i className="fa-solid fa-eye" data-bs-toggle="modal" data-bs-target="#viewModal" ></i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>{t("Editer")}</td>
-                          <td>
-                            <i className="fa-solid fa-pen-to-square" data-bs-toggle="modal" data-bs-target="#editModal"></i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>{t("Supprimer")}</td>
-                          <td>
-                            <i onClick={handleDelete} className="fa-solid fa-trash"></i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td colSpan="2"><hr /></td>
-                        </tr>
-                        <tr>
-                          <td>{t("La question")}</td>
-                          <td>{t("Lorem Lorem")}</td>
-                        </tr>
-                        <tr>
-                          <td>{t("Date de création")}</td>
-                          <td>{t("05/05/2024")}</td>
-                        </tr>
-                        <tr>
-                          <td>{t("Voir")}</td>
-                          <td>
-                            <i className="fa-solid fa-eye" data-bs-toggle="modal" data-bs-target="#viewModal" onClick={() => openModal('view', item)}></i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>{t("Editer")}</td>
-                          <td>
-                            <i className="fa-solid fa-pen-to-square" data-bs-toggle="modal" data-bs-target="#editModal"  onClick={() => openModal('edit', item)}></i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>{t("Supprimer")}</td>
-                          <td>
-                            <i onClick={handleDelete} className="fa-solid fa-trash"></i>
-                          </td>
-                        </tr>
-                        </>
-                       ))}
+                        {questions &&
+                          questions.map((item) => (
+                            <>
+                              <tr>
+                                <td>{t("La question")}</td>
+                                <td>{getQuestionName(item)}</td>
+                              </tr>
+                              <tr>
+                                <td>{t("Date de création")}</td>
+                                <td>{t("05/05/2024")}</td>
+                              </tr>
+                              <tr>
+                                <td>{t("Voir")}</td>
+                                <td>
+                                  <i
+                                    className="fa-solid fa-eye"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#viewModal"
+                                  ></i>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>{t("Editer")}</td>
+                                <td>
+                                  <i
+                                    className="fa-solid fa-pen-to-square"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editModal"
+                                  ></i>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>{t("Supprimer")}</td>
+                                <td>
+                                  <i
+                                    onClick={handleDelete}
+                                    className="fa-solid fa-trash"
+                                  ></i>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td colSpan="2">
+                                  <hr />
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>{t("La question")}</td>
+                                <td>{t("Lorem Lorem")}</td>
+                              </tr>
+                              <tr>
+                                <td>{t("Date de création")}</td>
+                                <td>{t("05/05/2024")}</td>
+                              </tr>
+                              <tr>
+                                <td>{t("Voir")}</td>
+                                <td>
+                                  <i
+                                    className="fa-solid fa-eye"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#viewModal"
+                                    onClick={() => openModal("view", item)}
+                                  ></i>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>{t("Editer")}</td>
+                                <td>
+                                  <i
+                                    className="fa-solid fa-pen-to-square"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editModal"
+                                    onClick={() => openModal("edit", item)}
+                                  ></i>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>{t("Supprimer")}</td>
+                                <td>
+                                  <i
+                                    onClick={handleDelete}
+                                    className="fa-solid fa-trash"
+                                  ></i>
+                                </td>
+                              </tr>
+                            </>
+                          ))}
                       </tbody>
                     </table>
                   ) : (
@@ -189,99 +277,243 @@ const updateQuestion = async(e , id) =>{
                         </tr>
                       </thead>
                       <tbody>
-                        {questions && questions.map((item)=>(
-                          <tr>
-                            <td>{getQuestionName(item)}</td>
-                            <td>{item.updatedAt.split("T")[0]}</td>
-                            <th>
-                              <i className="fa-solid fa-eye" data-bs-toggle="modal" data-bs-target="#viewModal" onClick={() => openModal('view', item)}></i>
-                            </th>
-                            <th>
-                              <i className="fa-solid fa-pen-to-square" data-bs-toggle="modal" data-bs-target="#editModal" onClick={() => openModal('edit', item)}></i>
-                            </th>
-                            <th>
-                              <i onClick={()=>handleDelete(item.id)} className="fa-solid fa-trash"></i>
-                            </th>
-                          </tr>
-                        ))}
-                       
-                      
+                        {questions &&
+                          questions.map((item) => (
+                            <tr>
+                              <td>{getQuestionName(item)}</td>
+                              <td>{item.updatedAt.split("T")[0]}</td>
+                              <th>
+                                <i
+                                  className="fa-solid fa-eye"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#viewModal"
+                                  onClick={() => openModal("view", item)}
+                                ></i>
+                              </th>
+                              <th>
+                                <i
+                                  className="fa-solid fa-pen-to-square"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#editModal"
+                                  onClick={() => openModal("edit", item)}
+                                ></i>
+                              </th>
+                              <th>
+                                <i
+                                  onClick={() => handleDelete(item.id)}
+                                  className="fa-solid fa-trash"
+                                ></i>
+                              </th>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   )}
                 </div>
               </div>
+              <ReactPaginate
+                previousLabel={"← Previous"}
+                nextLabel={"Next →"}
+                breakLabel={"..."}
+                pageCount={pageCount}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={3}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                activeClassName={"active"}
+                className="react-paginate"
+              />
             </div>
           </section>
         </div>
       </div>
 
       {/* View Modal */}
-      <div className="modal fade" id="viewModal" tabIndex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+      <div
+        className="modal fade"
+        id="viewModal"
+        tabIndex="-1"
+        aria-labelledby="viewModalLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="viewModalLabel">{t("Détail de Question")}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 className="modal-title" id="viewModalLabel">
+                {t("Détail de Question")}
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
             <div className="modal-body">
               <h6>la reponse :</h6>
-              <p>{currentItem?getReponseName(currentItem):""}</p>
+              <p>{currentItem ? getReponseName(currentItem) : ""}</p>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">{t("Fermer")}</button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                {t("Fermer")}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Edit Modal */}
-      <div className="modal fade" id="editModal" tabIndex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div
+        className="modal fade"
+        id="editModal"
+        tabIndex="-1"
+        aria-labelledby="editModalLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="editModalLabel">{t("Éditer Question")}</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 className="modal-title" id="editModalLabel">
+                {t("Éditer Question")}
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
             <div className="modal-body">
-              <form onSubmit={e=>updateQuestion(e , currentItem.id)} className="form form-vertical">
+              <form
+                onSubmit={(e) => updateQuestion(e, currentItem.id)}
+                className="form form-vertical"
+              >
                 <div className="form-body">
                   <div className="row">
                     <div className="col-12">
                       <div className="form-group has-icon-left">
-                        <label htmlFor="question" className="form-label">{t("La question")}</label>
-                        <textarea value={question.question} onChange={e=>setQuestion({...question , question:e.target.value})} className="form-control" id="question" rows={3}></textarea>
+                        <label htmlFor="question" className="form-label">
+                          {t("La question")}
+                        </label>
+                        <textarea
+                          value={question.question}
+                          onChange={(e) =>
+                            setQuestion({
+                              ...question,
+                              question: e.target.value,
+                            })
+                          }
+                          className="form-control"
+                          id="question"
+                          rows={3}
+                        ></textarea>
                       </div>
                       <div className="form-group has-icon-left">
-                        <label htmlFor="answer" className="form-label">{t("La réponse")}</label>
-                        <textarea value={question.reponse} onChange={e=>setQuestion({...question , reponse:e.target.value})} className="form-control" id="answer" rows={3}></textarea>
+                        <label htmlFor="answer" className="form-label">
+                          {t("La réponse")}
+                        </label>
+                        <textarea
+                          value={question.reponse}
+                          onChange={(e) =>
+                            setQuestion({
+                              ...question,
+                              reponse: e.target.value,
+                            })
+                          }
+                          className="form-control"
+                          id="answer"
+                          rows={3}
+                        ></textarea>
                       </div>
                       <div className="form-group has-icon-left">
-                        <label htmlFor="answer" className="form-label">{t("La question(arabe)")}</label>
-                        <textarea value={question.questionAr} onChange={e=>setQuestion({...question , questionAr:e.target.value})} className="form-control" id="answer" rows={3}></textarea>
+                        <label htmlFor="answer" className="form-label">
+                          {t("La question(arabe)")}
+                        </label>
+                        <textarea
+                          value={question.questionAr}
+                          onChange={(e) =>
+                            setQuestion({
+                              ...question,
+                              questionAr: e.target.value,
+                            })
+                          }
+                          className="form-control"
+                          id="answer"
+                          rows={3}
+                        ></textarea>
                       </div>
                       <div className="form-group has-icon-left">
-                        <label htmlFor="answer" className="form-label">{t("La réponse(arabe)")}</label>
-                        <textarea value={question.reponseAr} onChange={e=>setQuestion({...question , reponseAr:e.target.value})} className="form-control" id="answer" rows={3}></textarea>
+                        <label htmlFor="answer" className="form-label">
+                          {t("La réponse(arabe)")}
+                        </label>
+                        <textarea
+                          value={question.reponseAr}
+                          onChange={(e) =>
+                            setQuestion({
+                              ...question,
+                              reponseAr: e.target.value,
+                            })
+                          }
+                          className="form-control"
+                          id="answer"
+                          rows={3}
+                        ></textarea>
                       </div>
                       <div className="form-group has-icon-left">
-                        <label htmlFor="answer" className="form-label">{t("La question(englais)")}</label>
-                        <textarea value={question.questionEn} onChange={e=>setQuestion({...question , questionEn:e.target.value})} className="form-control" id="answer" rows={3}></textarea>
+                        <label htmlFor="answer" className="form-label">
+                          {t("La question(englais)")}
+                        </label>
+                        <textarea
+                          value={question.questionEn}
+                          onChange={(e) =>
+                            setQuestion({
+                              ...question,
+                              questionEn: e.target.value,
+                            })
+                          }
+                          className="form-control"
+                          id="answer"
+                          rows={3}
+                        ></textarea>
                       </div>
                       <div className="form-group has-icon-left">
-                        <label htmlFor="answer" className="form-label">{t("La réponse(englais)")}</label>
-                        <textarea value={question.reponseEn} onChange={e=>setQuestion({...question , reponseEn:e.target.value})} className="form-control" id="answer" rows={3}></textarea>
+                        <label htmlFor="answer" className="form-label">
+                          {t("La réponse(englais)")}
+                        </label>
+                        <textarea
+                          value={question.reponseEn}
+                          onChange={(e) =>
+                            setQuestion({
+                              ...question,
+                              reponseEn: e.target.value,
+                            })
+                          }
+                          className="form-control"
+                          id="answer"
+                          rows={3}
+                        ></textarea>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">{t("Annuler")}</button>
-              <button type="submit" className="btn btn-primary">{t("Enregistrer")}</button>
-            </div>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    {t("Annuler")}
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {t("Enregistrer")}
+                  </button>
+                </div>
               </form>
             </div>
-           
           </div>
         </div>
       </div>

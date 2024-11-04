@@ -1,62 +1,108 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';  // Import axios for API call
+import React, { useState, useEffect, useContext } from "react";
+import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { GlobalState } from '../GlobalState';
+import { GlobalState } from "../GlobalState";
+import ReactPaginate from "react-paginate";
 
 function Commandes() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
   const state = useContext(GlobalState);
   const commande = state.Commandes;
-  console.log("commandes ==" , commande);
-  const [commandes, setCommandes] = useState([]); // State to hold commandes
+  console.log("commandes ==", commande);
+  const [commandes, setCommandes] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value));
+    setCurrentPage(0);
+  };
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1212); // Adjust this breakpoint as needed
+      setIsMobile(window.innerWidth < 1212);
     };
 
     window.addEventListener("resize", handleResize);
-
-    // Initial check
     handleResize();
 
-    // Clean up the event listener on component unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch commandes from the API
   useEffect(() => {
     const fetchCommandes = async () => {
       try {
-        const response = await axios.get('http://localhost:8082/api/commandes/getCommandeByUser');
-        setCommandes(response.data); // Update commandes state with API response
+        const response = await axios.get(
+          "http://localhost:8082/api/commandes/getCommandeByUser"
+        );
+        setCommandes(response.data);
       } catch (error) {
         console.error("Error fetching commandes:", error);
       }
     };
 
-    fetchCommandes(); // Call the function to fetch commandes
+    fetchCommandes();
   }, []);
 
+  const currentItems = commandes.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
+
+  const handlePageChange = ({ selected }) => {
+    setCurrentPage(selected);
+  };
+
   return (
-    <div className='content-container'>
+    <div className="content-container">
       <section className="section">
         <div className="row" id="table-contexual">
           <div className="col-12">
             <div className="card">
-              <div className="card-header">
+              <div
+                className="card-header"
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
                 <h2 className="new-price">{t("Tableau de Commandes")}</h2>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
+                    <h6>{t("Items par page:")}</h6>
+                  </label>
+                  <select
+                    className="itemsPerPage"
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={15}>15</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
               </div>
               <div className="card-content">
                 <div className="table-responsive">
                   {isMobile ? (
-                    <MobileTable commandes={commandes} />
+                    <MobileTable commandes={currentItems} />
                   ) : (
-                    <DesktopTable commandes={commandes} />
+                    <DesktopTable commandes={currentItems} />
                   )}
                 </div>
               </div>
+              <ReactPaginate
+                previousLabel={"← Previous"}
+                nextLabel={"Next →"}
+                breakLabel={"..."}
+                pageCount={Math.ceil(commandes.length / itemsPerPage)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={5}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                activeClassName={"active"}
+                className="react-paginate"
+              />
             </div>
           </div>
         </div>
@@ -86,15 +132,31 @@ function DesktopTable({ commandes }) {
       <tbody>
         {commandes.map((commande) => (
           <tr className="table" key={commande.id}>
-            <td><img className='imgtable' src={commande.image} alt="img" /></td>
+            <td>
+              <img className="imgtable" src={commande.image} alt="img" />
+            </td>
             <td className="text-bold-500">{commande.numCommande}</td>
             <td>{commande.produit}</td>
             <td>{commande.prixProduit}</td>
             <td>{commande.quantite}</td>
             <td>{commande.prixTotal}</td>
             <td>{new Date(commande.dateCommande).toLocaleDateString()}</td>
-            <td><span className={`badge ${commande.statut === 'Terminé' ? 'bg-secondary' : 'bg-warning'}`}>{t(commande.statut)}</span></td>
-            <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
+            <td>
+              <span
+                className={`badge ${
+                  commande.statut === "Terminé" ? "bg-secondary" : "bg-warning"
+                }`}
+              >
+                {t(commande.statut)}
+              </span>
+            </td>
+            <td>
+              <i
+                className="fa-solid fa-sliders"
+                data-bs-toggle="modal"
+                data-bs-target="#statusModal"
+              ></i>
+            </td>
           </tr>
         ))}
       </tbody>
@@ -119,7 +181,9 @@ function MobileTable({ commandes }) {
             </tr>
             <tr>
               <td>{t("Image Produit")}</td>
-              <td><img className='imgtable' src={commande.image} alt="img" /></td>
+              <td>
+                <img className="imgtable" src={commande.image} alt="img" />
+              </td>
             </tr>
             <tr>
               <td>{t("Prix Produit")}</td>
@@ -139,14 +203,32 @@ function MobileTable({ commandes }) {
             </tr>
             <tr>
               <td>{t("Statut")}</td>
-              <td><span className={`badge ${commande.statut === 'Terminé' ? 'bg-secondary' : 'bg-warning'}`}>{t(commande.statut)}</span></td>
+              <td>
+                <span
+                  className={`badge ${
+                    commande.statut === "Terminé"
+                      ? "bg-secondary"
+                      : "bg-warning"
+                  }`}
+                >
+                  {t(commande.statut)}
+                </span>
+              </td>
             </tr>
             <tr>
               <td>{t("Changer Statut")}</td>
-              <td><i className="fa-solid fa-sliders" data-bs-toggle="modal" data-bs-target="#statusModal"></i></td>
+              <td>
+                <i
+                  className="fa-solid fa-sliders"
+                  data-bs-toggle="modal"
+                  data-bs-target="#statusModal"
+                ></i>
+              </td>
             </tr>
             <tr>
-              <td colSpan="2"><hr /></td>
+              <td colSpan="2">
+                <hr />
+              </td>
             </tr>
           </React.Fragment>
         ))}
@@ -158,12 +240,25 @@ function MobileTable({ commandes }) {
 function StatusModal() {
   const { t } = useTranslation();
   return (
-    <div className="modal fade" id="statusModal" tabIndex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div
+      className="modal fade"
+      id="statusModal"
+      tabIndex="-1"
+      aria-labelledby="statusModalLabel"
+      aria-hidden="true"
+    >
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title" id="statusModalLabel">{t("Changer Statut")}</h5>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 className="modal-title" id="statusModalLabel">
+              {t("Changer Statut")}
+            </h5>
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
           </div>
           <div className="modal-body">
             <form>
@@ -177,8 +272,16 @@ function StatusModal() {
             </form>
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">{t("Fermer")}</button>
-            <button type="button" className="btn btn-primary">{t("Enregistrer")}</button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              {t("Fermer")}
+            </button>
+            <button type="button" className="btn btn-primary">
+              {t("Sauvegarder")}
+            </button>
           </div>
         </div>
       </div>

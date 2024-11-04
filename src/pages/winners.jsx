@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Modal, Button, Form } from "react-bootstrap";
+import ReactPaginate from "react-paginate";
+
 
 function Winners() {
   const { t } = useTranslation();
@@ -14,6 +16,18 @@ function Winners() {
     montantRestant: "",
     montantChaqueMois: "",
   });
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage.selected); // Update current page
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value)); // Update items per page
+    setCurrentPage(0); // Reset to first page when items per page changes
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -84,8 +98,35 @@ function Winners() {
           <div className="row" id="table-contexual">
             <div className="col-12">
               <div className="card">
-                <div className="card-header">
+                <div
+                  className="card-header"
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
                   <h2 className="new-price">{t("Liste des gagnants")}</h2>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <label
+                      htmlFor="itemsPerPage"
+                      style={{ marginRight: "10px" }}
+                    >
+                      <h6>{t("Items par page:")}</h6>
+                    </label>
+                    <select
+                      className="itemsPerPage"
+                      id="itemsPerPage"
+                      value={itemsPerPage}
+                      onChange={handleItemsPerPageChange}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={15}>15</option>
+                      <option value={20}>20</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="card-content">
                   <div className="table-responsive">
@@ -194,15 +235,27 @@ function Winners() {
                             </td> */}
                             <td>
                               <Link to="/Echéance">
-                              <i className="fa-solid fa-eye"></i>
+                                <i className="fa-solid fa-eye"></i>
                               </Link>
-                              </td>
+                            </td>
                           </tr>
                         </tbody>
                       </table>
                     )}
                   </div>
                 </div>
+                <ReactPaginate
+                  previousLabel={"← Previous"}
+                  nextLabel={"Next →"}
+                  breakLabel={"..."}
+                  pageCount={pageCount}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={3}
+                  onPageChange={handlePageChange}
+                  containerClassName={"pagination"}
+                  activeClassName={"active"}
+                  className="react-paginate"
+                />
               </div>
             </div>
           </div>
