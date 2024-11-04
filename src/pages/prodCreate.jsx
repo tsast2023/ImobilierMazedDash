@@ -339,6 +339,20 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
+                    <div className="col-12">
+                      <div className="form-group">
+                        <label htmlFor="libelleAnglais">
+                          {t("Valeur Promotion")}
+                        </label>
+                        <div className="position-relative">
+                          <input
+                            type="text"
+                            name="libelleAnglais"
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+                    </div>
                     <div className="row">
                       <div className="col-6">
                         <div className="form-group">

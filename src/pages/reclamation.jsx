@@ -1,80 +1,101 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal, Button, Form } from "react-bootstrap";
 import { GlobalState } from "../GlobalState";
 import ReactPaginate from "react-paginate";
 
-
 function Reclamation() {
   const { t } = useTranslation();
-  const [isMobile, setIsMobile] = useState(false);
+  const state = useContext(GlobalState);
+
+  // Sample data based on your provided structure
+  const reclamations = [
+    {
+      date: "10/10/2024",
+      utilisateur: t("Lorem Lorem"),
+      sujet: t("Lorem Lorem"),
+      statut: "Ouverte",
+      id: 1, // Added an ID for tracking purposes
+    },
+    {
+      date: "10/10/2024",
+      utilisateur: t("Lorem Lorem"),
+      sujet: t("Lorem Lorem"),
+      statut: "Fermée",
+      id: 2, // Added an ID for tracking purposes
+    },
+    {
+      date: "10/10/2024",
+      utilisateur: t("Lorem Lorem"),
+      sujet: t("Lorem Lorem"),
+      statut: "Fermée",
+      id: 2, // Added an ID for tracking purposes
+    },
+    // Y
+    {
+      date: "10/10/2024",
+      utilisateur: t("Lorem Lorem"),
+      sujet: t("Lorem Lorem"),
+      statut: "Fermée",
+      id: 2, // Added an ID for tracking purposes
+    },
+    // Y
+    {
+      date: "10/10/2024",
+      utilisateur: t("Lorem Lorem"),
+      sujet: t("Lorem Lorem"),
+      statut: "Fermée",
+      id: 2, // Added an ID for tracking purposes
+    },
+    // Y
+    
+    // You can add more entries here as needed
+  ];
+
+  const [selectedReclamation, setSelectedReclamation] = useState(null);
   const [showModal1, setShowModal1] = useState(false);
   const [showModal2, setShowModal2] = useState(false);
-  const [reclamationText, setReclamationText] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageCount, setPageCount] = useState(0);
-  const state = useContext(GlobalState);
-  const reclamation = state.reclamation;
+  const [pageCount, setPageCount] = useState(Math.ceil(reclamations.length / itemsPerPage));
+  const [response, setResponse] = useState(""); // State for textarea input
+
+  useEffect(() => {
+    setPageCount(Math.ceil(reclamations.length / itemsPerPage));
+  }, [itemsPerPage, reclamations]);
 
   const handlePageChange = (selectedPage) => {
-    setCurrentPage(selectedPage.selected); // Update current page
+    setCurrentPage(selectedPage.selected);
   };
 
   const handleItemsPerPageChange = (event) => {
-    setItemsPerPage(Number(event.target.value)); // Update items per page
-    setCurrentPage(0); // Reset to first page when items per page changes
+    setItemsPerPage(Number(event.target.value));
+    setCurrentPage(0);
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1212);
-    };
+  const startIndex = currentPage * itemsPerPage;
+  const displayedReclamations = reclamations.slice(startIndex, startIndex + itemsPerPage);
 
-    window.addEventListener("resize", handleResize);
-
-    // Initial check
-    handleResize();
-
-    // Clean up the event listener on component unmount
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const handleSendReclamation = () => {
-    // Handle sending reclamation text here
-    console.log("Sending reclamation:", reclamationText);
-
-    // Close modal after sending
-    setShowModal1(false);
+  const handleModalOpen = (rec) => {
+    setSelectedReclamation(rec);
+    setResponse(""); // Clear previous response
+    if (rec.statut === "Ouverte") {
+      setShowModal1(true);
+    } else {
+      setShowModal2(true);
+    }
   };
 
   return (
     <div className="content-container">
-      <div id="main">
-        <header className="mb-3">
-          <a href="#" className="burger-btn d-block d-xl-none">
-            <i className="bi bi-justify fs-3"></i>
-          </a>
-        </header>
+      <div id="main" className={showModal1 || showModal2 ? "blur-background" : ""}>
         <section className="section">
-          <div className="row" id="table-contexual">
+          <div className="row" id="table-context">
             <div className="col-12">
               <div className="card">
-                <div
-                  className="card-header"
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <h2 className="new-price">{t("Tableau de Réclamation")}</h2>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <label
-                      htmlFor="itemsPerPage"
-                      style={{ marginRight: "10px" }}
-                    >
+                <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <h2 className="new-price">{t("Liste Reclamation")}</h2>
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <label htmlFor="itemsPerPage" style={{ marginRight: "10px" }}>
                       <h6>{t("Items par page:")}</h6>
                     </label>
                     <select
@@ -92,137 +113,40 @@ function Reclamation() {
                 </div>
                 <div className="card-content">
                   <div className="table-responsive">
-                    {isMobile ? (
-                      <table className="table">
-                        <tbody>
-                          <tr>
-                            <td>{t("Date")}</td>
-                            <td>10/10/2024</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Utilisateur")}</td>
-                            <td>{t("Lorem Lorem")}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Sujet")}</td>
-                            <td>{t("Lorem Lorem")}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Statut")}</td>
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>{t("Date")}</th>
+                          <th>{t("Utilisateur")}</th>
+                          <th>{t("Sujet")}</th>
+                          <th>{t("Statut")}</th>
+                          <th>{t("Détail")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {displayedReclamations.map((rec, index) => (
+                          <tr key={index}>
+                            <td className="text-bold-500">{rec.date}</td>
+                            <td>{rec.utilisateur}</td>
+                            <td className="text-bold-500">{rec.sujet}</td>
                             <td>
-                              <span className="badge bg-secondary">
-                                {t("Ouverte")}
-                              </span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>{t("Détail")}</td>
-                            <td>
-                              <button
-                                type="button"
-                                className="btn btn-outline block"
-                                onClick={() => setShowModal1(true)}
-                              >
-                                <i className="fa-solid fa-eye font-medium-1"></i>
-                              </button>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td colSpan="2">
-                              <hr />
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>{t("Date")}</td>
-                            <td>10/10/2024</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Utilisateur")}</td>
-                            <td>{t("Lorem Lorem")}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Sujet")}</td>
-                            <td>{t("Lorem Lorem")}</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Statut")}</td>
-                            <td>
-                              <span className="badge bg-danger">
-                                {t("Fermée")}
-                              </span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>{t("Détail")}</td>
-                            <td>
-                              <button
-                                type="button"
-                                className="btn btn-outline block"
-                                onClick={() => setShowModal2(true)}
-                              >
-                                <i className="fa-solid fa-eye font-medium-1"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    ) : (
-                      <table className="table">
-                        <thead>
-                          <tr>
-                            <th>{t("Date")}</th>
-                            <th>{t("Utilisateur")}</th>
-                            <th>{t("Sujet")}</th>
-                            <th>{t("Statut")}</th>
-                            <th>{t("Détail")}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td className="text-bold-500">10/10/2024</td>
-                            <td>{t("Lorem Lorem")}</td>
-                            <td className="text-bold-500">
-                              {t("Lorem Lorem")}
-                            </td>
-                            <td>
-                              <span className="badge bg-secondary">
-                                {t("Ouverte")}
+                              <span className={`badge ${rec.statut === "Ouverte" ? "bg-secondary" : "bg-danger"}`}>
+                                {t(rec.statut)}
                               </span>
                             </td>
                             <td>
                               <button
                                 type="button"
                                 className="btn btn-outline block"
-                                onClick={() => setShowModal1(true)}
+                                onClick={() => handleModalOpen(rec)}
                               >
                                 <i className="fa-solid fa-eye font-medium-1"></i>
                               </button>
                             </td>
                           </tr>
-                          <tr>
-                            <td className="text-bold-500">10/10/2024</td>
-                            <td>{t("Lorem Lorem")}</td>
-                            <td className="text-bold-500">
-                              {t("Lorem Lorem")}
-                            </td>
-                            <td>
-                              <span className="badge bg-danger">
-                                {t("Fermée")}
-                              </span>
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className="btn btn-outline block"
-                                onClick={() => setShowModal2(true)}
-                              >
-                                <i className="fa-solid fa-eye font-medium-1"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    )}
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
                 <ReactPaginate
@@ -241,49 +165,84 @@ function Reclamation() {
             </div>
           </div>
         </section>
+
+        {/* Modal for the first type of reclamation */}
+        {showModal1 && (
+          <div
+            className={`modal fade ${showModal1 ? "show" : ""}`}
+            style={{ display: showModal1 ? "block" : "none" }}
+            aria-modal={showModal1 ? "true" : "false"}
+            role="dialog"
+          >
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">{t("Détails de la Réclamation Ouverte")}</h5>
+                  <button type="button" className="close" onClick={() => setShowModal1(false)}>
+                    <span>&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <p>{t("Détails supplémentaires pour la réclamation ouverte.")}</p>
+                  <textarea
+                    value={response}
+                    onChange={(e) => setResponse(e.target.value)}
+                    placeholder={t("Répondre à cette réclamation...")}
+                    rows={4}
+                    className="form-control"
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal1(false)}>
+                    {t("Fermer")}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      // Handle response submission
+                      console.log(`Response to reclamation ${selectedReclamation?.id}: ${response}`);
+                      setShowModal1(false);
+                    }}
+                  >
+                    {t("Envoyer")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal for the second type of reclamation */}
+        {showModal2 && (
+          <div
+            className={`modal fade ${showModal2 ? "show" : ""}`}
+            style={{ display: showModal2 ? "block" : "none" }}
+            aria-modal={showModal2 ? "true" : "false"}
+            role="dialog"
+          >
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">{t("Détails de la Réclamation Fermée")}</h5>
+                  <button type="button" className="close" onClick={() => setShowModal2(false)}>
+                    <span>&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <p>{t("Détails supplémentaires pour la réclamation fermée.")}</p>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal2(false)}>
+                    {t("Fermer")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Modals */}
-      <Modal show={showModal1} onHide={() => setShowModal1(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t("Réclamation")}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Please provide details of your reclamation.</p>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            value={reclamationText}
-            onChange={(e) => setReclamationText(e.target.value)}
-            placeholder={t("Enter your reclamation here")}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleSendReclamation}>
-            {t("Envoyer")}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showModal2} onHide={() => setShowModal2(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t("Réclamation")}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Please provide details of your reclamation.</p>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            value={reclamationText}
-            onChange={(e) => setReclamationText(e.target.value)}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleSendReclamation}>
-            {t("Envoyer")}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {(showModal1 || showModal2) && <div className="modal-backdrop fade show"></div>}
     </div>
   );
 }
