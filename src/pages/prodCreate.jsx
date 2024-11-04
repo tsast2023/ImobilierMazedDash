@@ -129,12 +129,12 @@ const ProdCreate = () => {
 
   const handleSubmit = async () => {
     const data = new FormData();
-    data.append("libelle", formData.libelle);
-    data.append("libelleAnglais", formData.libelleAnglais);
-    data.append("libelleArab", formData.libelleArab);
+    data.append("libelleProductAr", formData.libelleProductAr);
+    data.append("libelleProductFr", formData.libelleProductFr);
+    data.append("libelleProductEn", formData.libelleProductEn);
     data.append("reference", formData.reference);
-    data.append("description", formData.description);
-    data.append("descriptionAnglais", formData.descriptionAnglais);
+    data.append("descriptionFr", formData.descriptionFr);
+    data.append("descriptionEn", formData.descriptionEn);
     data.append("descriptionArab", formData.descriptionArab);
     data.append("parentCategoryId", formData.parentCategoryId);
     data.append("categoriesFille", formData.selectedCategoriesFille);
