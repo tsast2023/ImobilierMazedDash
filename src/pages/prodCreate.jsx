@@ -189,7 +189,6 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
-
                     {/* Other Inputs ... */}
                     <div className="col-12">
                       <div className="form-group">
@@ -207,7 +206,6 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-12">
                       <div className="form-group">
                         <label htmlFor="libelleArab">
@@ -224,7 +222,6 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-12">
                       <div className="form-group">
                         <label htmlFor="reference">{t("Référence")}</label>
@@ -239,7 +236,6 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-12">
                       <div className="form-group">
                         <label htmlFor="description">{t("Description")}</label>
@@ -253,7 +249,6 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-12">
                       <div className="form-group">
                         <label htmlFor="descriptionAnglais">
@@ -269,7 +264,6 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-12">
                       <div className="form-group">
                         <label htmlFor="descriptionArab">
@@ -285,7 +279,6 @@ const ProdCreate = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-12">
                       <div className="form-group">
                         <label htmlFor="parentCategory">
@@ -307,8 +300,6 @@ const ProdCreate = () => {
                         </select>
                       </div>
                     </div>
-
-                    {/* Categories Fille (Child Categories) Dropdown */}
                     <div className="col-12">
                       <div className="form-group">
                         <label htmlFor="categoriesFille">
@@ -334,8 +325,20 @@ const ProdCreate = () => {
                         </select>
                       </div>
                     </div>
-
-                    {/* Handle Color and Options Inputs */}
+                    <div className="col-12">
+                      <div className="form-group">
+                        <label htmlFor="libelleAnglais">
+                          {t("Promotion")}
+                        </label>
+                        <div className="position-relative">
+                          <input
+                            type="text"
+                            name="libelleAnglais"
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+                    </div>
                     <div className="row">
                       <div className="col-6">
                         <div className="form-group">
@@ -376,7 +379,6 @@ const ProdCreate = () => {
                           </div>
                         </div>
                       </div>
-
                       <div className="col-6">
                         <div className="form-group">
                           <label>{t("Avec options ?")}</label>
@@ -452,7 +454,7 @@ const ProdCreate = () => {
                                     className="form-control"
                                   />
                                 </div>
-                                {withOptions === "yes" && ( // Only show if withOptions is "yes"
+                                {withOptions === "no" && ( // Only show if withOptions is "yes"
                                   <>
                                     <div className="me-4 mb-3">
                                       {" "}
