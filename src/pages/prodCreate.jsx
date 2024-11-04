@@ -417,82 +417,57 @@ const ProdCreate = () => {
                           </div>
                         </div>
                       </div>
-
                       {/* Conditionally Render Inputs Based on States */}
                       {withColor !== null && (
                         <div className="col-12">
-                          <div className="form-group row align-items-center">
-                            {inputs.map((input, index) => (
-                              <div
-                                key={index}
-                                className="d-flex align-items-center mb-3"
-                              >
-                                {withColor && (
-                                  <div className="mr-4 mb-3">
-                                    {" "}
-                                    {/* Added mb-3 for spacing */}
-                                    <label>{t("Couleur")}</label>
-                                    <input
-                                      type="color"
-                                      value={input.color}
-                                      onChange={(e) =>
-                                        handleColorChange(e, index)
-                                      }
-                                      className="form-control form-control-color"
-                                    />
-                                  </div>
-                                )}
-                                <div className="mr-4 mb-3">
-                                  {" "}
-                                  {/* Added mb-3 for spacing */}
-                                  <label>{t("Image")}</label>
-                                  <input
-                                    type="file"
-                                    onChange={(e) =>
-                                      handleImageChange(e, index)
-                                    }
-                                    className="form-control"
-                                  />
-                                </div>
-                                {withOptions === "yes" && ( // Only show if withOptions is "yes"
-                                  <>
-                                    <div className="mr-4 mb-3">
-                                      {" "}
-                                      {/* Added mb-3 for spacing */}
-                                      <label>{t("Prix")}</label>
-                                      <input
-                                        type="number"
-                                        className="form-control"
-                                      />
-                                    </div>
-                                    <div className="mb-3">
-                                      {" "}
-                                      {/* Added mb-3 for spacing */}
-                                      <label>{t("Stock")}</label>
-                                      <input
-                                        type="number"
-                                        className="form-control"
-                                        Ensure
-                                        you
-                                        handle
-                                        stock
-                                        change
-                                        correctly
-                                      />
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={addInput}
-                            className="btn btn-secondary mt-3"
-                          >
-                            {t("Ajouter une couleur ou image")}
-                          </button>
-                        </div>
+  <div className="form-group row align-items-center">
+    {inputs.map((input, index) => (
+      <div key={index} className="d-flex align-items-center mb-4"> {/* Increased bottom margin for the entire row */}
+        {withColor && (
+          <div className="me-4 mb-3"> {/* Margin to the right for color input */}
+            <label>{t("Couleur")}</label>
+            <input
+              type="color"
+              value={input.color}
+              onChange={(e) => handleColorChange(e, index)}
+              className="form-control form-control-color"
+            />
+          </div>
+        )}
+        
+        <div className="me-4 mb-3"> {/* Margin to the right for image input */}
+          <label>{t("Image")}</label>
+          <input
+            type="file"
+            onChange={(e) => handleImageChange(e, index)}
+            className="form-control"
+          />
+        </div>
+
+        {withOptions === "yes" && (
+          <>
+            <div className="me-4 mb-3"> {/* Margin to the right for price input */}
+              <label>{t("Prix")}</label>
+              <input
+                type="number"
+                className="form-control"
+              />
+            </div>
+            <div className="mb-3"> {/* Margin below for stock input */}
+              <label>{t("Stock")}</label>
+              <input
+                type="number"
+                className="form-control"
+                // Ensure you handle stock change correctly
+              />
+            </div>
+          </>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
                       )}
                     </div>
 
