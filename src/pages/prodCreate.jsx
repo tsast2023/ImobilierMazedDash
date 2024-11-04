@@ -315,7 +315,6 @@ const ProdCreate = () => {
                           {t("Catégorie Fille")}
                         </label>
                         <select
-                          multiple
                           className="form-control"
                           onChange={handleCategoryFilleChange}
                           id="categoriesFille"
