@@ -6,13 +6,27 @@ import ReactPaginate from "react-paginate";
 function Echeance() {
   const { t } = useTranslation();
   const state = useContext(GlobalState);
-  const echeance = state.echeance || []; // Ensure echeance is an array even if undefined initially
+  
+  // Sample data to represent echeance
+  const echeance = [
+    { date: "2024-11-01", montantAPayer: 100, montantRestant: 50, montantChaqueMois: 25 },
+    { date: "2024-11-02", montantAPayer: 200, montantRestant: 150, montantChaqueMois: 50 },
+    { date: "2024-11-03", montantAPayer: 300, montantRestant: 250, montantChaqueMois: 75 },
+    { date: "2024-11-04", montantAPayer: 400, montantRestant: 350, montantChaqueMois: 100 },
+    { date: "2024-11-05", montantAPayer: 500, montantRestant: 450, montantChaqueMois: 125 },
+    { date: "2024-11-06", montantAPayer: 600, montantRestant: 550, montantChaqueMois: 150 },
+    { date: "2024-11-07", montantAPayer: 700, montantRestant: 650, montantChaqueMois: 175 },
+    { date: "2024-11-08", montantAPayer: 800, montantRestant: 750, montantChaqueMois: 200 },
+    { date: "2024-11-09", montantAPayer: 900, montantRestant: 850, montantChaqueMois: 225 },
+    { date: "2024-11-10", montantAPayer: 1000, montantRestant: 950, montantChaqueMois: 250 }
+  ];
+
   const [isMobile, setIsMobile] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null); // State to hold selected row data
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
   const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageCount, setPageCount] = useState(0);
+  const [pageCount, setPageCount] = useState(Math.ceil(echeance.length / itemsPerPage));
 
   const handlePageChange = (selectedPage) => {
     setCurrentPage(selectedPage.selected); // Update current page
@@ -29,11 +43,15 @@ function Echeance() {
     };
 
     window.addEventListener("resize", handleResize);
-
     handleResize(); // Initial check
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Calculate pageCount whenever itemsPerPage or echeance changes
+  useEffect(() => {
+    setPageCount(Math.ceil(echeance.length / itemsPerPage));
+  }, [itemsPerPage, echeance]);
 
   // Function to handle the click on the modify icon
   const handleModifyClick = (rowData) => {
@@ -48,6 +66,10 @@ function Echeance() {
     setSelectedRow(null);
     document.body.classList.remove("modal-open"); // Remove class when modal is closed
   };
+
+  // Calculate the items to display on the current page
+  const startIndex = currentPage * itemsPerPage;
+  const currentItems = echeance.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="content-container">
@@ -96,39 +118,21 @@ function Echeance() {
                     {isMobile ? (
                       <table className="table">
                         <tbody>
-                          <tr>
-                            <td>{t("Date paiement")}</td>
-                            <td>Lorem</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Montant à payer")}</td>
-                            <td>Lorem</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Montant restant")}</td>
-                            <td>Lorem Lorem</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Montant à payer chaque mois")}</td>
-                            <td>Lorem Lorem</td>
-                          </tr>
-                          <tr>
-                            <td>{t("Modifier")}</td>
-                            <td>
-                              <i
-                                className="fa-solid fa-pen-to-square"
-                                onClick={() =>
-                                  handleModifyClick({
-                                    date: "Lorem",
-                                    montantAPayer: "Lorem",
-                                    montantRestant: "Lorem Lorem",
-                                    montantChaqueMois: "Lorem Lorem",
-                                  })
-                                }
-                              ></i>
-                            </td>
-                          </tr>
-                          <td colSpan="2">
+                          {currentItems.map((item, index) => (
+                            <tr key={index}>
+                              <td>{item.date}</td>
+                              <td>{item.montantAPayer}</td>
+                              <td>{item.montantRestant}</td>
+                              <td>{item.montantChaqueMois}</td>
+                              <td>
+                                <i
+                                  className="fa-solid fa-pen-to-square"
+                                  onClick={() => handleModifyClick(item)}
+                                ></i>
+                              </td>
+                            </tr>
+                          ))}
+                          <td colSpan="5">
                             <hr />
                           </td>
                         </tbody>
@@ -145,27 +149,20 @@ function Echeance() {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>Lorem</td>
-                            <td> Lorem Lorem </td>
-                            <td className="text-bold-500">
-                              {t("Lorem Lorem")}
-                            </td>
-                            <td>Lorem Lorem</td>
-                            <td>
-                              <i
-                                className="fa-solid fa-pen-to-square"
-                                onClick={() =>
-                                  handleModifyClick({
-                                    date: "Lorem",
-                                    montantAPayer: "Lorem",
-                                    montantRestant: "Lorem Lorem",
-                                    montantChaqueMois: "Lorem Lorem",
-                                  })
-                                }
-                              ></i>
-                            </td>
-                          </tr>
+                          {currentItems.map((item, index) => (
+                            <tr key={index}>
+                              <td>{item.date}</td>
+                              <td>{item.montantAPayer}</td>
+                              <td className="text-bold-500">{item.montantRestant}</td>
+                              <td>{item.montantChaqueMois}</td>
+                              <td>
+                                <i
+                                  className="fa-solid fa-pen-to-square"
+                                  onClick={() => handleModifyClick(item)}
+                                ></i>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     )}
@@ -212,7 +209,7 @@ function Echeance() {
                 <div className="modal-body">
                   <form>
                     <div className="form-group">
-                      <label>{t("Date payement")}</label>
+                      <label>{t("Date paiement")}</label>
                       <input
                         type="text"
                         className="form-control"
@@ -254,7 +251,7 @@ function Echeance() {
                     {t("Fermer")}
                   </button>
                   <button type="button" className="btn btn-primary">
-                    {t("Enregistrer les modifications")}
+                    {t("Enregistrer")}
                   </button>
                 </div>
               </div>
@@ -262,8 +259,6 @@ function Echeance() {
           </div>
         )}
       </div>
-
-      {/* Background Blur or Dark Overlay */}
       {showModal && <div className="modal-backdrop fade show"></div>}
     </div>
   );

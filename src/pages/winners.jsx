@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { Modal, Button, Form } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 
-
 function Winners() {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
@@ -20,6 +19,7 @@ function Winners() {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(0);
 
+  
   const handlePageChange = (selectedPage) => {
     setCurrentPage(selectedPage.selected); // Update current page
   };
@@ -176,15 +176,6 @@ function Winners() {
                             <td>{t("Type de payement")}</td>
                             <td>type de payement</td>
                           </tr>
-                          {/* <tr>
-                            <td>{t("Echéance")}</td>
-                            <td>
-                              <i
-                                className="fa-solid fa-plus"
-                                onClick={() => setShowModal(true)}
-                              ></i>
-                            </td>
-                          </tr> */}
                           <td colSpan="2">
                             <hr />
                           </td>
@@ -227,12 +218,180 @@ function Winners() {
                               </Link>
                             </td>
                             <td>Payement</td>
-                            {/* <td>
-                              <i
-                                className="fa-solid fa-plus"
-                                onClick={() => setShowModal(true)}
-                              ></i>
-                            </td> */}
+                            <td>
+                              <Link to="/Echéance">
+                                <i className="fa-solid fa-eye"></i>
+                              </Link>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <img
+                                style={{ borderRadius: "50px" }}
+                                className="imgtable"
+                                src="./Mazed.jpg"
+                                alt="img"
+                              />
+                            </td>
+                            <td>{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
+                            <td>Lorem Lorem</td>
+                            <td>
+                              <Link
+                                to="/DetailEnchere"
+                                className="btn btn-outline block"
+                              >
+                                <i className="fa-solid fa-eye font-medium-1"></i>
+                              </Link>
+                            </td>
+                            <td>Payement</td>
+                            <td>
+                              <Link to="/Echéance">
+                                <i className="fa-solid fa-eye"></i>
+                              </Link>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <img
+                                style={{ borderRadius: "50px" }}
+                                className="imgtable"
+                                src="./Mazed.jpg"
+                                alt="img"
+                              />
+                            </td>
+                            <td>{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
+                            <td>Lorem Lorem</td>
+                            <td>
+                              <Link
+                                to="/DetailEnchere"
+                                className="btn btn-outline block"
+                              >
+                                <i className="fa-solid fa-eye font-medium-1"></i>
+                              </Link>
+                            </td>
+                            <td>Payement</td>
+                            <td>
+                              <Link to="/Echéance">
+                                <i className="fa-solid fa-eye"></i>
+                              </Link>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <img
+                                style={{ borderRadius: "50px" }}
+                                className="imgtable"
+                                src="./Mazed.jpg"
+                                alt="img"
+                              />
+                            </td>
+                            <td>{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
+                            <td>Lorem Lorem</td>
+                            <td>
+                              <Link
+                                to="/DetailEnchere"
+                                className="btn btn-outline block"
+                              >
+                                <i className="fa-solid fa-eye font-medium-1"></i>
+                              </Link>
+                            </td>
+                            <td>Payement</td>
+                            <td>
+                              <Link to="/Echéance">
+                                <i className="fa-solid fa-eye"></i>
+                              </Link>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <img
+                                style={{ borderRadius: "50px" }}
+                                className="imgtable"
+                                src="./Mazed.jpg"
+                                alt="img"
+                              />
+                            </td>
+                            <td>{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
+                            <td>Lorem Lorem</td>
+                            <td>
+                              <Link
+                                to="/DetailEnchere"
+                                className="btn btn-outline block"
+                              >
+                                <i className="fa-solid fa-eye font-medium-1"></i>
+                              </Link>
+                            </td>
+                            <td>Payement</td>
+                            <td>
+                              <Link to="/Echéance">
+                                <i className="fa-solid fa-eye"></i>
+                              </Link>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <img
+                                style={{ borderRadius: "50px" }}
+                                className="imgtable"
+                                src="./Mazed.jpg"
+                                alt="img"
+                              />
+                            </td>
+                            <td>{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
+                            <td>Lorem Lorem</td>
+                            <td>
+                              <Link
+                                to="/DetailEnchere"
+                                className="btn btn-outline block"
+                              >
+                                <i className="fa-solid fa-eye font-medium-1"></i>
+                              </Link>
+                            </td>
+                            <td>Payement</td>
+                            <td>
+                              <Link to="/Echéance">
+                                <i className="fa-solid fa-eye"></i>
+                              </Link>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <img
+                                style={{ borderRadius: "50px" }}
+                                className="imgtable"
+                                src="./Mazed.jpg"
+                                alt="img"
+                              />
+                            </td>
+                            <td>{t("Lorem Lorem")}</td>
+                            <td className="text-bold-500">
+                              {t("Lorem Lorem")}
+                            </td>
+                            <td>Lorem Lorem</td>
+                            <td>
+                              <Link
+                                to="/DetailEnchere"
+                                className="btn btn-outline block"
+                              >
+                                <i className="fa-solid fa-eye font-medium-1"></i>
+                              </Link>
+                            </td>
+                            <td>Payement</td>
                             <td>
                               <Link to="/Echéance">
                                 <i className="fa-solid fa-eye"></i>
