@@ -149,7 +149,7 @@ const handleSubmitProduct = async (e) => {
   });
   
   try {
-    const response = await axios.post("http://localhost:8082/api/products/create",formData, {
+    const response = await axios.post("http://localhost:8082/api/products/create", formData, {
       headers: {
       "Content-Type": "multipart/form-data",
       },
@@ -214,6 +214,7 @@ const handleFormChange = (e) => {
                       type="text"
                       name="libelleProductFr"
                       onChange={handleFormChange}
+                      value={data.libelleProductFr}
                       className="form-control"
                       id="first-name-icon"
                       maxLength="25"
@@ -229,6 +230,7 @@ const handleFormChange = (e) => {
                     <input
                       type="text"
                       name="libelleProductEn"
+                      value={data.libelleProductEn}
                       onChange={handleFormChange}
                       className="form-control"
                     />
@@ -243,6 +245,7 @@ const handleFormChange = (e) => {
                     <input
                       type="text"
                       name="libelleProductAr"
+                      value={data.libelleProductAr}
                       onChange={handleFormChange}
                       className="form-control"
                     />
@@ -257,6 +260,7 @@ const handleFormChange = (e) => {
                     <input
                       type="text"
                       name="reference"
+                      value={data.reference}
                       onChange={handleFormChange}
                       className="form-control"
                     />
@@ -270,6 +274,7 @@ const handleFormChange = (e) => {
                   <div className="position-relative">
                     <textarea
                       name="descriptionFr"
+                      value={data.descriptionFr}
                       onChange={handleFormChange}
                       className="form-control"
                     />
@@ -283,6 +288,7 @@ const handleFormChange = (e) => {
                   <div className="position-relative">
                     <textarea
                       name="descriptionEn"
+                      value={data.descriptionEn}
                       onChange={handleFormChange}
                       className="form-control"
                     />
@@ -296,6 +302,7 @@ const handleFormChange = (e) => {
                   <div className="position-relative">
                     <textarea
                       name="descriptionAr"
+                      value={data.descriptionAr}
                       onChange={handleFormChange}
                       className="form-control"
                     />
@@ -308,6 +315,7 @@ const handleFormChange = (e) => {
                   <label htmlFor="parentCategory">{t("Parent Category")}</label>
                   <select
                     className="form-control"
+                    value={data.libCategoryparente}
                     onChange={onParentCategoryChange}
                     id="parentCategory"
                   >
@@ -327,6 +335,7 @@ const handleFormChange = (e) => {
                   <select
                     className="form-control"
                     onChange={onFilleCategoryChange}
+                    value={data.libCategoryfille}
                     id="categoriesFille"
                   >
                     {filteredCategoriesFille.length > 0 ? (
@@ -348,6 +357,7 @@ const handleFormChange = (e) => {
                   <div className="position-relative">
                     <input
                       type="checkbox"
+                      value={data.promotion}
                       name="promtotion"
                       onChange={handleCheckboxChange}
                     />
@@ -362,6 +372,7 @@ const handleFormChange = (e) => {
                     <div className="position-relative">
                       <input
                         type="text"
+                        value={data.valeurPromotion}
                         name="valeurPromotion"
                         className="form-control"
                         onChange={handleFormChange}
@@ -380,9 +391,9 @@ const handleFormChange = (e) => {
                         <input
                           className="form-check-input"
                           type="radio"
+                          value={data.withColor}
                           name="withColor"
                           id="withColorYes"
-                          value="true"
                           onChange={handleWithColorChange}
                         />
                         <label className="form-check-label" htmlFor="withColorYes">
@@ -395,7 +406,7 @@ const handleFormChange = (e) => {
                           type="radio"
                           name="withColor"
                           id="withColorNo"
-                          value="false"
+                          value={data.withColor}
                           onChange={handleWithColorChange}
                         />
                         <label className="form-check-label" htmlFor="withColorNo">
@@ -416,7 +427,7 @@ const handleFormChange = (e) => {
                           type="radio"
                           name="withOptions"
                           id="withOptionsYes"
-                          value="true"
+                          value={data.withOptions}
                           onChange={handleWithOptionsChange}
                         />
                         <label className="form-check-label" htmlFor="withOptionsYes">
@@ -429,7 +440,7 @@ const handleFormChange = (e) => {
                           type="radio"
                           name="withOptions"
                           id="withOptionsNo"
-                          value="false"
+                          value={data.withOptions}
                           onChange={handleWithOptionsChange}
                         />
                         <label className="form-check-label" htmlFor="withOptionsNo">
