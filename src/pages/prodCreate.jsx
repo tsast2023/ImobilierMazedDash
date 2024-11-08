@@ -119,6 +119,7 @@ const handleSubmitProduct = async (e) => {
   e.preventDefault();  
    console.log("data" , data)
   const formData = new FormData();
+
   formData.append('libelleProductFr', data.libelleProductFr);
   formData.append('libelleProductEn', data.libelleProductEn);
   formData.append('libelleProductAr', data.libelleProductAr);
@@ -149,12 +150,12 @@ const handleSubmitProduct = async (e) => {
   });
   
   try {
-    const response = await axios.post("http://localhost:8082/api/products/create", formData, {
-      headers: {
-      "Content-Type": "multipart/form-data",
-      },
-    });
-    console.log("response ========== " , response.data);
+    const res = await axios.post("http://localhost:8082/api/categories/create", formData, {
+        headers: {
+        "Content-Type": "multipart/form-data",
+        },
+      });
+    console.log("response ========== " , res.data);
     
     Swal.fire({
       icon: "success",
