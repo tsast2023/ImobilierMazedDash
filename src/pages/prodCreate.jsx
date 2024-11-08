@@ -16,7 +16,7 @@ const ProdCreate = () => {
   const [isPromotionChecked, setIsPromotionChecked] = useState(false);
   const { t } = useTranslation();
   const [withOptions, setWithOptions] = useState(null);
-  const [formData, setFormData] = useState({
+  const [data, setData] = useState({
     libelleProductAr : "",
     libelleProductFr :"", 
     libelleProductEn :"",
@@ -71,14 +71,14 @@ const ProdCreate = () => {
   const handleCheckboxChange = (event) => {
     const promotionvalue = event.target.value;
     setIsPromotionChecked(event.target.checked);
-    setFormData({ ...formData, promotion: promotionvalue });
+    setData({ ...data, promotion: promotionvalue });
 
   };
 
   const onParentCategoryChange = (e) => {
     const selectedParentId = e.target.value;
     setSelectedParentCategoryId(selectedParentId);
-    setFormData({ ...formData, libCategoryparente: selectedParentId });
+    setData({ ...data, libCategoryparente: selectedParentId });
 
     const selectedParentCategory = parentCategories.find(
       (category) => category.id === selectedParentId
@@ -92,7 +92,7 @@ const ProdCreate = () => {
   };
   const onFilleCategoryChange = (e) => {
     const selectedParentId = e.target.value;
-    setFormData({ ...formData, libCategoryfille: selectedParentId });
+    setData({ ...data, libCategoryfille: selectedParentId });
   }
   const addInput = () => {
     setInputs([...inputs, { color: "", image: "" }]); // Add a new set of inputs
@@ -116,27 +116,24 @@ const ProdCreate = () => {
   };
   
 const handleSubmitProduct = async (e) => {
-  console.log("handleSubmitProduct")
-  e.preventDefault(); 
-  // Creating a FormData object to send form data as multipart/form-data
+  e.preventDefault();  
+   console.log("data" , data)
   const formData = new FormData();
-  formData.append('libelleProductFr', formData.libelleProductFr);
-  formData.append('libelleProductEn', formData.libelleProductEn);
-  formData.append('libelleProductAr', formData.libelleProductAr);
-  formData.append('reference', formData.reference);
-  formData.append('descriptionFr', formData.descriptionFr);
-  formData.append('descriptionEn', formData.descriptionEn);
-  formData.append('descriptionAr', formData.descriptionAr);
-  formData.append('libCategoryparente', formData.libCategoryparente);
-  formData.append('libCategoryfille', formData.libCategoryfille);  
-  formData.append('withColor', formData.withColor); 
-  formData.append('withOptions', formData.withOptions); 
-  formData.append('valeurPromotion', formData.valeurPromotion); 
-  formData.append('promotion', formData.promotion); 
+  formData.append('libelleProductFr', data.libelleProductFr);
+  formData.append('libelleProductEn', data.libelleProductEn);
+  formData.append('libelleProductAr', data.libelleProductAr);
+  formData.append('reference', data.reference);
+  formData.append('descriptionFr', data.descriptionFr);
+  formData.append('descriptionEn', data.descriptionEn);
+  formData.append('descriptionAr', data.descriptionAr);
+  formData.append('libCategoryparente', data.libCategoryparente);
+  formData.append('libCategoryfille', data.libCategoryfille);  
+  formData.append('withColor', data.withColor); 
+  formData.append('withOptions', data.withOptions); 
+  formData.append('valeurPromotion', data.valeurPromotion); 
+  formData.append('promotion', data.promotion); 
   console.log("withColor ===" , withColor);
   console.log("withOptions ===" , withOptions);
-  console.log("formData ===" , formData);
-
   inputs.forEach((input, index) => {
     if (withColor) {
       formData.append(`color[${index}]`, input.color);
@@ -154,7 +151,6 @@ const handleSubmitProduct = async (e) => {
   try {
     const response = await axios.post("http://localhost:8082/api/products/create",formData, {
       headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "multipart/form-data",
       },
     });
@@ -184,7 +180,7 @@ const handleSubmitProduct = async (e) => {
 };
 const handleFormChange = (e) => {
   const { name, value } = e.target;
-  setFormData((prevData) => ({
+  setData((prevData) => ({
     ...prevData,
     [name]: value,
   }));
@@ -193,7 +189,7 @@ const handleFormChange = (e) => {
 
   return (
     <div id="main">
-  <form onSubmit={handleSubmitProduct} className="card">
+  <form  onSubmit={handleSubmitProduct} className="card">
       <header className="mb-3">
         <a href="#" className="burger-btn d-block d-xl-none">
           <i className="bi bi-justify fs-3"></i>
