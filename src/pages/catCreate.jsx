@@ -40,7 +40,6 @@ const CatCreate = () => {
     e.preventDefault();
     const formData = new FormData();
     console.log(data);
-    // Append basic category data
     formData.append("libCategorie", data.libCategorie);
     formData.append("libCategorieAR", data.libCategorieAR);
     formData.append("libCategorieEN", data.libCategorieEN);
