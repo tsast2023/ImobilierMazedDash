@@ -2,43 +2,52 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios"; // Import axios for API calls
 import { useTranslation } from "react-i18next";
 import { Modal } from "react-bootstrap";
-import { GlobalState } from "../GlobalState";
-import { Link, useNavigate } from "react-router-dom";
-
+import Swal from "sweetalert2";
+import Cookies from "js-cookie";
 const ProdCreate = () => {
+  const token = Cookies.get("token");
   const [withColor, setWithColor] = useState(null);
   const [inputs, setInputs] = useState([{ color: "", image: "" }]);
   const [parentCategories, setParentCategories] = useState([]);
   const [selectedParentCategoryId, setSelectedParentCategoryId] =
     useState(null);
   const [filteredCategoriesFille, setFilteredCategoriesFille] = useState([]);
+  const [selectedParentCategory, setSelectedParentCategory] = useState("");
+  const [selectedCategoryFille, setSelectedCategoryFille] = useState("");
+  const [isPromotionChecked, setIsPromotionChecked] = useState(false);
   const { t } = useTranslation();
-  const state = useContext(GlobalState);
   const [withOptions, setWithOptions] = useState(null);
-  const [formData, setFormData] = useState({
-    libelle: "",
-    libelleAnglais: "",
-    libelleArab: "",
+  const [data, setData] = useState({
+    libelleProductAr: "",
+    libelleProductFr: "",
+    libelleProductEn: "",
     reference: "",
-    prix: "",
-    stock: "",
-    description: "",
-    descriptionAnglais: "",
-    descriptionArab: "",
-    parentCategoryNames: "",
-    selectedCategoriesFille: [],
+    withColor: false,
+    color: [],
+    galerieWithoutColor: [],
+    galerieWithColor: [],
+    prixPrincipale: 0,
+    stockWithColorWithoutOptions: [],
+    prixWithColorWithoutOptions: [],
+    stockWithoutColorWithoutOptions: 0,
+    prixWithoutColorWithoutOptions: 0,
+    codeABarre: "",
+    qrCode: "",
+    typeProduct: "",
+    visiteMagasin: "", // Store visit
+    publicationDate: "", // Date of publication
+    productType: "",
+    libCategoryfille: "",
+    libCategoryparente: "",
+    alaUne: "",
+    descriptionAr: "",
+    descriptionFr: "",
+    descriptionEn: "",
+    prixMazedOnline: "",
+    promotion: false,
+    valeurPromotion: "",
+    withOptions: false,
   });
-
-  // Function to pass data when pressing 'Suivant'
-  const handleNextClick = () => {
-    // Ensure you have the necessary data in formData and inputs
-    console.log("Passing form data:", formData);
-    console.log("Passing inputs:", inputs);
-  };
-
-  const goBack = () => {
-    window.history.back();
-  };
 
   // Fetching parent categories from backend
   useEffect(() => {
@@ -60,37 +69,30 @@ const ProdCreate = () => {
     const value = e.target.value;
     setWithOptions(value);
   };
+  // const handleCheckboxChange = (event) => {
+  //   const promotionvalue = event.target.value;
+  //   setIsPromotionChecked(event.target.checked);
+  //   setData({ ...data, promotion: promotionvalue });
+
+  // };
 
   const onParentCategoryChange = (e) => {
     const selectedParentId = e.target.value;
     setSelectedParentCategoryId(selectedParentId);
 
     const selectedParentCategory = parentCategories.find(
-      (category) => category.id === selectedParentId
+      (category) => category.libCategorie === selectedParentId
     );
+    setData({
+      ...data,
+      libCategoryparente: selectedParentCategory.libCategorie,
+    });
 
     if (selectedParentCategory && selectedParentCategory.categoriesFille) {
       setFilteredCategoriesFille(selectedParentCategory.categoriesFille);
     } else {
       setFilteredCategoriesFille([]);
     }
-
-    // Debugging log
-    console.log("Selected Parent Category:", selectedParentCategory);
-    console.log("Filtered Categories Fille:", filteredCategoriesFille);
-  };
-
-  const handleImageChange = (e, index) => {
-    const files = e.target.files;
-    const newInputs = [...inputs];
-    newInputs[index].image = files[0]; // Assign the uploaded image to the corresponding index
-    setInputs(newInputs);
-  };
-
-  const handleColorChange = (e, index) => {
-    const newInputs = [...inputs];
-    newInputs[index].color = e.target.value; // Assign the selected color to the corresponding index
-    setInputs(newInputs);
   };
 
   const addInput = () => {
@@ -98,449 +100,430 @@ const ProdCreate = () => {
   };
 
   const handleWithColorChange = (e) => {
-    const value = e.target.value === "yes";
+    const value = e.target.value; // Convert "yes" to true and "no" to false
     setWithColor(value);
     setInputs([{ color: "", image: "" }]); // Reset inputs when changing the option
   };
 
-  const handleFormChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+  const handleSubmitProduct = async (e) => {
+    e.preventDefault();
+    console.log("data", data);
+
+    const formData = new FormData();
+
+    // Append all product data
+    Object.keys(data).forEach((key) => {
+      formData.append(key, data[key]);
     });
-  };
 
-  const handleCategoryFilleChange = (e) => {
-    const selected = Array.from(e.target.selectedOptions).map(
-      (option) => option.value
-    );
-    setFormData({
-      ...formData,
-      selectedCategoriesFille: selected,
-    });
-  };
-
-  const handleSelectChange = (e) => {
-    setFormData({
-      ...formData,
-      parentCategoryId: e.target.value, // Set the selected parent category ID
-    });
-  };
-
-  const handleSubmit = async () => {
-    const data = new FormData();
-    data.append("libelleProductAr", formData.libelleProductAr);
-    data.append("libelleProductFr", formData.libelleProductFr);
-    data.append("libelleProductEn", formData.libelleProductEn);
-    data.append("reference", formData.reference);
-    data.append("descriptionFr", formData.descriptionFr);
-    data.append("descriptionEn", formData.descriptionEn);
-    data.append("descriptionArab", formData.descriptionArab);
-    data.append("parentCategoryId", formData.parentCategoryId);
-    data.append("categoriesFille", formData.selectedCategoriesFille);
-
+    // Handle color and options if applicable
     inputs.forEach((input, index) => {
-      data.append(`colors[${index}]`, input.color);
-      data.append(`images[${index}]`, input.image);
+      if (data.withColor) {
+        formData.append(`color[${index}]`, input.color);
+        formData.append(`galerieWithColor[${index}]`, input.image);
+      }
+      if (!data.withColor) {
+        formData.append(`galerieWithoutColor[${index}]`, input.image);
+      }
+      if (!data.withOptions) {
+        formData.append(`prixWithColorWithoutOptions[${index}]`, input.price);
+        formData.append(`stockWithColorWithoutOptions[${index}]`, input.stock);
+      }
     });
 
     try {
-      const response = await axios.post(
+      const res = await axios.post(
         "http://localhost:8082/api/products/create",
-        data
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
-      console.log("Product created successfully:", response.data);
+      console.log("response ========== ", res.data);
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Product created successfully!",
+      });
+
+      if (res.status === 201) {
+        alert("Product Created: " + res.data);
+      }
     } catch (error) {
-      console.error("Error creating product:", error);
+      if (error.response) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text:
+            error.response.data.message ||
+            "An error occurred while creating the product.",
+        });
+      } else {
+        console.error("Error:", error.message);
+      }
     }
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: checked,
+    }));
+  };
+
+  const handleRadioChange = (e) => {
+    const { name, value } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: value === "true",
+    }));
+  };
+
+  // Handle color input change
+  const handleColorChange = (e, index) => {
+    const updatedInputs = [...inputs];
+    updatedInputs[index].color = e.target.value;
+    setInputs(updatedInputs);
+  };
+
+  // Handle image input change
+  const handleImageChange = (e, index) => {
+    const updatedInputs = [...inputs];
+    updatedInputs[index].image = e.target.files[0];
+    setInputs(updatedInputs);
+  };
+
+  // Handling dynamic category options
+  // const onParentCategoryChange = (e) => {
+  //   const selectedParentCategory = e.target.value;
+  //   setData({
+  //     ...data,
+  //     libCategoryparente: selectedParentCategory,
+  //   });
+  //   if (selectedParentCategory && selectedParentCategory.categoriesFille) {
+  //         setFilteredCategoriesFille(selectedParentCategory.categoriesFille);
+  //       } else {
+  //         setFilteredCategoriesFille([]);
+  //       }
+  // };
+
+  const onFilleCategoryChange = (e) => {
+    setData({
+      ...data,
+      libCategoryfille: e.target.value,
+    });
   };
 
   return (
     <div id="main">
-      <header className="mb-3">
-        <a href="#" className="burger-btn d-block d-xl-none">
-          <i className="bi bi-justify fs-3"></i>
-        </a>
-      </header>
-      <div className="col-md-12">
-        <form onSubmit={handleSubmit} className="card">
+      <form onSubmit={handleSubmitProduct} className="card">
+        <header className="mb-3">
+          <a href="#" className="burger-btn d-block d-xl-none">
+            <i className="bi bi-justify fs-3"></i>
+          </a>
+        </header>
+        <div className="col-md-12">
           <div className="card-header">
             <h2 className="new-price">{t("Ajouter un nouveau produit")}</h2>
           </div>
           <div className="card-content">
             <div className="card-body">
-              <form className="form form-vertical">
-                <div className="form-body">
-                  <div className="row">
-                    {/* Original Inputs */}
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="first-name-icon">{t("Libellé")}</label>
-                        <div className="position-relative">
-                          <input
-                            type="text"
-                            name="libelle"
-                            value={formData.libelle}
-                            onChange={handleFormChange}
-                            className="form-control"
-                            id="first-name-icon"
-                            maxLength="25"
-                          />
-                        </div>
-                      </div>
+              <div className="form-body">
+                <div className="row">
+                  {/* Product input fields */}
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="reference">{t("Référence")}</label>
+                      <input
+                        type="text"
+                        name="reference"
+                        value={data.reference}
+                        onChange={handleFormChange}
+                        className="form-control"
+                      />
                     </div>
-                    {/* Other Inputs ... */}
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="libelleAnglais">
-                          {t("Libellé Anglais")}
-                        </label>
-                        <div className="position-relative">
-                          <input
-                            type="text"
-                            name="libelleAnglais"
-                            value={formData.libelleAnglais}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
+                  </div>
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="libelleProductFr">{t("Libellé")}</label>
+                      <input
+                        type="text"
+                        name="libelleProductFr"
+                        value={data.libelleProductFr}
+                        onChange={handleFormChange}
+                        className="form-control"
+                      />
                     </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="libelleArab">
-                          {t("Libellé Arabe")}
-                        </label>
-                        <div className="position-relative">
-                          <input
-                            type="text"
-                            name="libelleArab"
-                            value={formData.libelleArab}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
+                  </div>
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="libelleProductFr">
+                        {t("Libellé Anglais")}
+                      </label>
+                      <input
+                        type="text"
+                        name="libelleProductEn"
+                        value={data.libelleProductEn}
+                        onChange={handleFormChange}
+                        className="form-control"
+                      />
                     </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="reference">{t("Référence")}</label>
-                        <div className="position-relative">
-                          <input
-                            type="text"
-                            name="reference"
-                            value={formData.reference}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
+                  </div>
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="libelleProductAr">
+                        {t("Libellé Arabe")}
+                      </label>
+                      <input
+                        type="text"
+                        name="libelleProductAr"
+                        value={data.libelleProductAr}
+                        onChange={handleFormChange}
+                        className="form-control"
+                      />
                     </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="description">{t("Description")}</label>
-                        <div className="position-relative">
-                          <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="descriptionAnglais">
-                          {t("Description Anglaise")}
-                        </label>
-                        <div className="position-relative">
-                          <textarea
-                            name="descriptionAnglais"
-                            value={formData.descriptionAnglais}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="descriptionArab">
-                          {t("Description Arabe")}
-                        </label>
-                        <div className="position-relative">
-                          <textarea
-                            name="descriptionArab"
-                            value={formData.descriptionArab}
-                            onChange={handleFormChange}
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="parentCategory">
-                          {t("Parent Category")}
-                        </label>
-                        <select
-                          className="form-control"
-                          onChange={onParentCategoryChange}
-                          id="parentCategory"
-                        >
-                          <option value="">
-                            {t("Select Parent Category")}
+                  </div>
+
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="parentCategory">
+                        {t("Parent Category")}
+                      </label>
+                      <select
+                        className="form-control"
+                        value={data.libCategoryparente}
+                        onChange={onParentCategoryChange}
+                        id="parentCategory"
+                      >
+                        <option value="">{t("Select Parent Category")}</option>
+                        {parentCategories.map((category) => (
+                          <option
+                            key={category.id}
+                            value={category.libCategorie}
+                          >
+                            {category.libCategorie}
                           </option>
-                          {parentCategories.map((category) => (
-                            <option key={category.id} value={category.id}>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="categoriesFille">
+                        {t("Catégorie Fille")}
+                      </label>
+                      <select
+                        className="form-control"
+                        onChange={onFilleCategoryChange}
+                        value={data.libCategoryfille}
+                        id="categoriesFille"
+                      >
+                        {filteredCategoriesFille.length > 0 ? (
+                          filteredCategoriesFille.map((category) => (
+                            <option
+                              key={category.id}
+                              value={category.libCategorie}
+                            >
                               {category.libCategorie}
                             </option>
-                          ))}
-                        </select>
-                      </div>
+                          ))
+                        ) : (
+                          <option value="">
+                            {t("No child categories found")}
+                          </option>
+                        )}
+                      </select>
                     </div>
+                  </div>
+
+                  {/* Add other input fields here similarly */}
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="promotion">{t("Promotion")}</label>
+                      <input
+                        type="checkbox"
+                        name="promotion"
+                        checked={data.promotion}
+                        onChange={handleCheckboxChange}
+                      />
+                    </div>
+                  </div>
+
+                  {data.promotion && (
                     <div className="col-12">
                       <div className="form-group">
-                        <label htmlFor="categoriesFille">
-                          {t("Catégorie Fille")}
-                        </label>
-                        <select
-                          className="form-control"
-                          onChange={handleCategoryFilleChange}
-                          id="categoriesFille"
-                        >
-                          {/* Display filtered child categories */}
-                          {filteredCategoriesFille.length > 0 ? (
-                            filteredCategoriesFille.map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.libCategorie}
-                              </option>
-                            ))
-                          ) : (
-                            <option value="">
-                              {t("No child categories found")}
-                            </option>
-                          )}
-                        </select>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="libelleAnglais">{t("Promotion")}</label>
-                        <div className="position-relative">
-                          <input
-                            type="text"
-                            name="libelleAnglais"
-                            className="form-control"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="libelleAnglais">
+                        <label htmlFor="valeurPromotion">
                           {t("Valeur Promotion")}
                         </label>
-                        <div className="position-relative">
-                          <input
-                            type="text"
-                            name="libelleAnglais"
-                            className="form-control"
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          name="valeurPromotion"
+                          value={data.valeurPromotion}
+                          onChange={handleFormChange}
+                          className="form-control"
+                        />
                       </div>
                     </div>
-                    <div className="row">
-                      <div className="col-6">
-                        <div className="form-group">
-                          <label>{t("Avec couleurs ?")}</label>
-                          <div>
-                            <div className="form-check form-check-inline">
-                              <input
-                                className="form-check-input"
-                                type="radio"
-                                name="withColor"
-                                id="withColorYes"
-                                value="yes"
-                                onChange={handleWithColorChange}
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor="withColorYes"
-                              >
-                                {t("Oui")}
-                              </label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                              <input
-                                className="form-check-input"
-                                type="radio"
-                                name="withColor"
-                                id="withColorNo"
-                                value="no"
-                                onChange={handleWithColorChange}
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor="withColorNo"
-                              >
-                                {t("Non")}
-                              </label>
-                            </div>
+                  )}
+
+                  <div className="row">
+                    <div className="col-6">
+                      <div className="form-group">
+                        <label>{t("Avec couleurs ?")}</label>
+                        <div>
+                          <div className="form-check form-check-inline">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              value={data.withColor}
+                              name="withColor"
+                              id="withColorYes"
+                              onChange={handleWithColorChange}
+                            />
+                            <label
+                              className="form-check-label"
+                              htmlFor="withColorYes"
+                            >
+                              {t("Oui")}
+                            </label>
+                          </div>
+                          <div className="form-check form-check-inline">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="withColor"
+                              id="withColorNo"
+                              value={data.withColor}
+                              onChange={handleWithColorChange}
+                            />
+                            <label
+                              className="form-check-label"
+                              htmlFor="withColorNo"
+                            >
+                              {t("Non")}
+                            </label>
                           </div>
                         </div>
                       </div>
-                      <div className="col-6">
-                        <div className="form-group">
-                          <label>{t("Avec options ?")}</label>
-                          <div>
-                            <div className="form-check form-check-inline">
-                              <input
-                                className="form-check-input"
-                                type="radio"
-                                name="withOptions"
-                                id="withOptionsYes"
-                                value="yes"
-                                onChange={handleWithOptionsChange}
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor="withOptionsYes"
-                              >
-                                {t("Oui")}
-                              </label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                              <input
-                                className="form-check-input"
-                                type="radio"
-                                name="withOptions"
-                                id="withOptionsNo"
-                                value="no"
-                                onChange={handleWithOptionsChange}
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor="withOptionsNo"
-                              >
-                                {t("Non")}
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Conditionally Render Inputs Based on States */}
-                      {withColor !== null && (
-                        <div className="col-12">
-                          <div className="form-group row align-items-center">
-                            {inputs.map((input, index) => (
-                              <div
-                                key={index}
-                                className="d-flex align-items-center mb-3"
-                              >
-                                {withColor && (
-                                  <div className="me-4 mb-3">
-                                    {" "}
-                                    {/* Added mb-3 for spacing */}
-                                    <label>{t("Couleur")}</label>
-                                    <input
-                                      type="color"
-                                      value={input.color}
-                                      onChange={(e) =>
-                                        handleColorChange(e, index)
-                                      }
-                                      className="form-control form-control-color"
-                                    />
-                                  </div>
-                                )}
-                                <div className="me-4 mb-3">
-                                  {" "}
-                                  {/* Added mb-3 for spacing */}
-                                  <label>{t("Image")}</label>
-                                  <input
-                                    type="file"
-                                    onChange={(e) =>
-                                      handleImageChange(e, index)
-                                    }
-                                    className="form-control"
-                                  />
-                                </div>
-                                {withOptions === "no" && ( // Only show if withOptions is "yes"
-                                  <>
-                                    <div className="me-4 mb-3">
-                                      {" "}
-                                      {/* Added mb-3 for spacing */}
-                                      <label>{t("Prix")}</label>
-                                      <input
-                                        type="number"
-                                        className="form-control"
-                                      />
-                                    </div>
-                                    <div className="mb-3">
-                                      {" "}
-                                      {/* Added mb-3 for spacing */}
-                                      <label>{t("Stock")}</label>
-                                      <input
-                                        type="number"
-                                        className="form-control"
-                                        Ensure
-                                        you
-                                        handle
-                                        stock
-                                        change
-                                        correctly
-                                      />
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={addInput}
-                            className="btn btn-secondary mt-3"
-                          >
-                            {t("Ajouter une couleur ou image")}
-                          </button>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Go Back Button */}
-                    <Modal.Footer>
-                      <div className="col-12 d-flex justify-content-end">
-                        <button
-                          type="button"
-                          onClick={goBack}
-                          className="btn btn-secondary me-3"
-                        >
-                          {t("Retour")}
-                        </button>
-                        <Link
-                          to={{
-                            pathname: "/ProdAction",
-                            state: { formData, inputs },
-                          }}
-                        >
-                          <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={handleNextClick}
-                          >
-                            {t("Suivant")}
-                          </button>
-                        </Link>
+                    <div className="col-6">
+                      <div className="form-group">
+                        <label>{t("Avec options ?")}</label>
+                        <div>
+                          <div className="form-check form-check-inline">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="withOptions"
+                              id="withOptionsYes"
+                              value={data.withOptions}
+                              onChange={handleWithOptionsChange}
+                            />
+                            <label
+                              className="form-check-label"
+                              htmlFor="withOptionsYes"
+                            >
+                              {t("Oui")}
+                            </label>
+                          </div>
+                          <div className="form-check form-check-inline">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="withOptions"
+                              id="withOptionsNo"
+                              value={data.withOptions}
+                              onChange={handleWithOptionsChange}
+                            />
+                            <label
+                              className="form-check-label"
+                              htmlFor="withOptionsNo"
+                            >
+                              {t("Non")}
+                            </label>
+                          </div>
+                        </div>
                       </div>
-                    </Modal.Footer>
+                    </div>
+
+                    {withColor !== null && (
+                      <div className="col-12">
+                        <div className="form-group row align-items-center">
+                          {inputs.map((input, index) => (
+                            <div
+                              key={index}
+                              className="d-flex align-items-center mb-3"
+                            >
+                              {withColor && (
+                                <div className="me-4 mb-3">
+                                  <label>{t("Couleur")}</label>
+                                  <input
+                                    type="color"
+                                    value={input.color}
+                                    onChange={(e) =>
+                                      handleColorChange(e, index)
+                                    }
+                                    className="form-control form-control-color"
+                                  />
+                                </div>
+                              )}
+                              <div className="me-4 mb-3">
+                                <label>{t("Image")}</label>
+                                <input
+                                  type="file"
+                                  onChange={(e) => handleImageChange(e, index)}
+                                  className="form-control"
+                                />
+                              </div>
+
+                              {withOptions === "false" && (
+                                <>
+                                  <div className="me-4 mb-3">
+                                    <label>{t("Prix")}</label>
+                                    <input
+                                      type="number"
+                                      className="form-control"
+                                      name="price"
+                                    />
+                                  </div>
+                                  <div className="mb-3">
+                                    <label>{t("Stock")}</label>
+                                    <input
+                                      type="number"
+                                      className="form-control"
+                                      name="stock"
+                                    />
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </form>
+              </div>
+              <button type="submit" className="btn btn-primary">
+                {t("Submit")}
+              </button>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };
