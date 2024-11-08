@@ -57,14 +57,14 @@ function Echeance() {
   const handleModifyClick = (rowData) => {
     setSelectedRow(rowData);
     setShowModal(true);
-    document.body.classList.add("modal-open"); // Add class to blur or darken background
+    document.body.classList.add("modal-open");
   };
 
   // Function to handle modal close
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedRow(null);
-    document.body.classList.remove("modal-open"); // Remove class when modal is closed
+    document.body.classList.remove("modal-open"); 
   };
 
   // Calculate the items to display on the current page

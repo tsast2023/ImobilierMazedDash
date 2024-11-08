@@ -1,0 +1,111 @@
+/* Conteneur du formulaire */
+form {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Titre du formulaire */
+  form h4 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  /* Labels */
+  form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+  }
+  
+  /* Champs d'entrée */
+  form input[type="text"],
+  form input[type="number"],
+  form input[type="date"],
+  form textarea,
+  form input[type="file"],
+  form input[type="checkbox"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  /* Champs de fichier */
+  form input[type="file"] {
+    padding: 3px;
+  }
+  
+  /* Bouton de soumission */
+  form button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  form button[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Boutons d'action pour les couleurs */
+  form button[type="button"] {
+    padding: 5px 10px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s ease;
+    margin-top: 8px;
+  }
+  
+  form button[type="button"]:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Section de couleurs */
+  .color-section {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    background-color: #fafafa;
+  }
+  
+  /* Style pour le champ dynamique de couleur */
+  .color-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .color-input-group input[type="text"],
+  .color-input-group input[type="number"] {
+    flex: 1;
+  }
+  
+  /* Espacement entre les champs de couleur */
+  .color-section h4 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #333;
+  }
+  

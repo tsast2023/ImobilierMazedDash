@@ -68,6 +68,7 @@ import DemandeCatAdmin from './pages/DemandeCatAdmin';
 import Winners from './pages/winners';
 import Echeance from './pages/echeance';
 import NotificationP from './pages/Notification';
+import ProductForm from './pages/ProductForm';
 import './App.css';
 import './i18n';
 import { useTranslation } from "react-i18next";
@@ -162,6 +163,7 @@ const App = () => {
               <Route path='/Tutoriel' element={<Tutoriel />} />
               <Route path='/Transferts' element={<Transferts />} />
               <Route path='/CreationProd' element={<Produits />} />
+              {/* <Route path='/CreationProd' element={<ProductForm />} /> */}
               <Route path='/CreationPart' element={<Participants />} />
               <Route path='/ProdListe' element={<ProduitsListe />} />
               <Route path='/catdetail/:id' element={<DataTable/>}/>
