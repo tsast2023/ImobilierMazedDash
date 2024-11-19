@@ -68,32 +68,29 @@ const ProdCreate = () => {
     const value = e.target.value;
     setWithOptions(value);
   };
-  const handleCheckboxChange = (event) => {
-    const promotionvalue = event.target.value;
-    setIsPromotionChecked(event.target.checked);
-    setData({ ...data, promotion: promotionvalue });
+  // const handleCheckboxChange = (event) => {
+  //   const promotionvalue = event.target.value;
+  //   setIsPromotionChecked(event.target.checked);
+  //   setData({ ...data, promotion: promotionvalue });
 
-  };
+  // };
 
-  const onParentCategoryChange = (e) => {
-    const selectedParentId = e.target.value;
-    setSelectedParentCategoryId(selectedParentId);
-    setData({ ...data, libCategoryparente: selectedParentId });
+  // const onParentCategoryChange = (e) => {
+  //   const selectedParentId = e.target.value;
+  //   setSelectedParentCategoryId(selectedParentId);
+  //   setData({ ...data, libCategoryparente: selectedParentId });
 
-    const selectedParentCategory = parentCategories.find(
-      (category) => category.id === selectedParentId
-    );
+  //   const selectedParentCategory = parentCategories.find(
+  //     (category) => category.id === selectedParentId
+  //   );
 
-    if (selectedParentCategory && selectedParentCategory.categoriesFille) {
-      setFilteredCategoriesFille(selectedParentCategory.categoriesFille);
-    } else {
-      setFilteredCategoriesFille([]);
-    }
-  };
-  const onFilleCategoryChange = (e) => {
-    const selectedParentId = e.target.value;
-    setData({ ...data, libCategoryfille: selectedParentId });
-  }
+  //   if (selectedParentCategory && selectedParentCategory.categoriesFille) {
+  //     setFilteredCategoriesFille(selectedParentCategory.categoriesFille);
+  //   } else {
+  //     setFilteredCategoriesFille([]);
+  //   }
+  // };
+
   const addInput = () => {
     setInputs([...inputs, { color: "", image: "" }]); // Add a new set of inputs
   };
@@ -103,423 +100,242 @@ const ProdCreate = () => {
     setWithColor(value);
     setInputs([{ color: "", image: "" }]); // Reset inputs when changing the option
   };
+
+  
+  const handleSubmitProduct = async (e) => {
+    e.preventDefault();
+    console.log("data", data);
+  
+    const formData = new FormData();
+  
+    // Append all product data
+    Object.keys(data).forEach((key) => {
+      formData.append(key, data[key]);
+    });
+  
+    // Handle color and options if applicable
+    inputs.forEach((input, index) => {
+      if (data.withColor) {
+        formData.append(`color[${index}]`, input.color);
+        formData.append(`galerieWithColor[${index}]`, input.image);
+      }
+      if (!data.withColor) {
+        formData.append(`galerieWithoutColor[${index}]`, input.image);
+      }
+      if (!data.withOptions) {
+        formData.append(`prixWithColorWithoutOptions[${index}]`, input.price);
+        formData.append(`stockWithColorWithoutOptions[${index}]`, input.stock);
+      }
+    });
+  
+    try {
+      const res = await axios.post("http://localhost:8082/api/products/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("response ========== ", res.data);
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Product created successfully!",
+      });
+  
+      if (res.status === 201) {
+        alert("Product Created: " + res.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: error.response.data.message || "An error occurred while creating the product.",
+        });
+      } else {
+        console.error("Error:", error.message);
+      }
+    }
+  };
+  
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+  
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: checked,
+    }));
+  };
+  
+  const handleRadioChange = (e) => {
+    const { name, value } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: value === "true",
+    }));
+  };
+  
+  // Handle color input change
   const handleColorChange = (e, index) => {
     const updatedInputs = [...inputs];
     updatedInputs[index].color = e.target.value;
     setInputs(updatedInputs);
   };
   
+  // Handle image input change
   const handleImageChange = (e, index) => {
     const updatedInputs = [...inputs];
     updatedInputs[index].image = e.target.files[0];
     setInputs(updatedInputs);
   };
   
-const handleSubmitProduct = async (e) => {
-  e.preventDefault();  
-   console.log("data" , data)
-  const formData = new FormData();
-
-  formData.append('libelleProductFr', data.libelleProductFr);
-  formData.append('libelleProductEn', data.libelleProductEn);
-  formData.append('libelleProductAr', data.libelleProductAr);
-  formData.append('reference', data.reference);
-  formData.append('descriptionFr', data.descriptionFr);
-  formData.append('descriptionEn', data.descriptionEn);
-  formData.append('descriptionAr', data.descriptionAr);
-  formData.append('libCategoryparente', data.libCategoryparente);
-  formData.append('libCategoryfille', data.libCategoryfille);  
-  formData.append('withColor', data.withColor); 
-  formData.append('withOptions', data.withOptions); 
-  formData.append('valeurPromotion', data.valeurPromotion); 
-  formData.append('promotion', data.promotion); 
-  console.log("withColor ===" , withColor);
-  console.log("withOptions ===" , withOptions);
-  inputs.forEach((input, index) => {
-    if (withColor) {
-      formData.append(`color[${index}]`, input.color);
-      formData.append(`galerieWithColor[${index}]`, input.image);
-    }
-    if (withColor === false) {
-      formData.append(`galerieWithoutColor[${index}]`, input.image);
-    }
-    if (withOptions === 'false') {
-      formData.append(`prixWithColorWithoutOptions[${index}]`, input.price);
-      formData.append(`stockWithColorWithoutOptions[${index}]`, input.stock);
-    }
-  });
-  
-  try {
-    const res = await axios.post("http://localhost:8082/api/categories/create", formData, {
-        headers: {
-        "Content-Type": "multipart/form-data",
-        },
-      });
-    console.log("response ========== " , res.data);
-    
-    Swal.fire({
-      icon: "success",
-      title: "Success!",
-      text: "Category created successfully!",
+  // Handling dynamic category options
+  const onParentCategoryChange = (e) => {
+    setData({
+      ...data,
+      libCategoryparente: e.target.value,
     });
-
-    if (response.status === 201) {
-      alert("Product Created: " + response.data);
-    }
-  } catch (error) {
-    // Handle errors
-    if (error.response) {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.response.data.message || "An error occurred while creating the category.",
-      });
-    } else {
-      console.error("Error:", error.message);
-    }
-  }
-};
-const handleFormChange = (e) => {
-  const { name, value } = e.target;
-  setData((prevData) => ({
-    ...prevData,
-    [name]: value,
-  }));
-};
-
-
+  };
+  
+  const onFilleCategoryChange = (e) => {
+    setData({
+      ...data,
+      libCategoryfille: e.target.value,
+    });
+  };
+  
   return (
     <div id="main">
-  <form  onSubmit={handleSubmitProduct} className="card">
-      <header className="mb-3">
-        <a href="#" className="burger-btn d-block d-xl-none">
-          <i className="bi bi-justify fs-3"></i>
-        </a>
-      </header>
-
-  <div className="col-md-12">
-    <div className="card-header">
-      <h2 className="new-price">{t("Ajouter un nouveau produit")}</h2>
-    </div>
-    <div className="card-content">
-      <div className="card-body">
-        <form className="form form-vertical">
-          <div className="form-body">
-            <div className="row">
-              {/* Original Inputs */}
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="first-name-icon">{t("Libellé")}</label>
-                  <div className="position-relative">
-                    <input
-                      type="text"
-                      name="libelleProductFr"
-                      onChange={handleFormChange}
-                      value={data.libelleProductFr}
-                      className="form-control"
-                      id="first-name-icon"
-                      maxLength="25"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="libelleAnglais">{t("Libellé Anglais")}</label>
-                  <div className="position-relative">
-                    <input
-                      type="text"
-                      name="libelleProductEn"
-                      value={data.libelleProductEn}
-                      onChange={handleFormChange}
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="libelleArab">{t("Libellé Arabe")}</label>
-                  <div className="position-relative">
-                    <input
-                      type="text"
-                      name="libelleProductAr"
-                      value={data.libelleProductAr}
-                      onChange={handleFormChange}
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="reference">{t("Référence")}</label>
-                  <div className="position-relative">
-                    <input
-                      type="text"
-                      name="reference"
-                      value={data.reference}
-                      onChange={handleFormChange}
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="description">{t("Description")}</label>
-                  <div className="position-relative">
-                    <textarea
-                      name="descriptionFr"
-                      value={data.descriptionFr}
-                      onChange={handleFormChange}
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="descriptionEn">{t("Description Anglaise")}</label>
-                  <div className="position-relative">
-                    <textarea
-                      name="descriptionEn"
-                      value={data.descriptionEn}
-                      onChange={handleFormChange}
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="descriptionArab">{t("Description Arabe")}</label>
-                  <div className="position-relative">
-                    <textarea
-                      name="descriptionAr"
-                      value={data.descriptionAr}
-                      onChange={handleFormChange}
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="parentCategory">{t("Parent Category")}</label>
-                  <select
-                    className="form-control"
-                    value={data.libCategoryparente}
-                    onChange={onParentCategoryChange}
-                    id="parentCategory"
-                  >
-                    <option value="">{t("Select Parent Category")}</option>
-                    {parentCategories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.libCategorie}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="categoriesFille">{t("Catégorie Fille")}</label>
-                  <select
-                    className="form-control"
-                    onChange={onFilleCategoryChange}
-                    value={data.libCategoryfille}
-                    id="categoriesFille"
-                  >
-                    {filteredCategoriesFille.length > 0 ? (
-                      filteredCategoriesFille.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.libCategorie}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">{t("No child categories found")}</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <div className="col-12">
-                <div className="form-group">
-                  <label htmlFor="libelleAnglais">{t("Promotion")}</label>
-                  <div className="position-relative">
-                    <input
-                      type="checkbox"
-                      value={data.promotion}
-                      name="promtotion"
-                      onChange={handleCheckboxChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {isPromotionChecked && (
-                <div className="col-12">
-                  <div className="form-group">
-                    <label htmlFor="valeurPromotion">{t("Valeur Promotion")}</label>
-                    <div className="position-relative">
+      <form onSubmit={handleSubmitProduct} className="card">
+        <header className="mb-3">
+          <a href="#" className="burger-btn d-block d-xl-none">
+            <i className="bi bi-justify fs-3"></i>
+          </a>
+        </header>
+        <div className="col-md-12">
+          <div className="card-header">
+            <h2 className="new-price">{t("Ajouter un nouveau produit")}</h2>
+          </div>
+          <div className="card-content">
+            <div className="card-body">
+              <div className="form-body">
+                <div className="row">
+                  {/* Product input fields */}
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label htmlFor="libelleProductFr">{t("Libellé")}</label>
                       <input
                         type="text"
-                        value={data.valeurPromotion}
-                        name="valeurPromotion"
-                        className="form-control"
+                        name="libelleProductFr"
+                        value={data.libelleProductFr}
                         onChange={handleFormChange}
+                        className="form-control"
                       />
                     </div>
                   </div>
-                </div>
-              )}
-
-              <div className="row">
-                <div className="col-6">
-                  <div className="form-group">
-                    <label>{t("Avec couleurs ?")}</label>
-                    <div>
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          value={data.withColor}
-                          name="withColor"
-                          id="withColorYes"
-                          onChange={handleWithColorChange}
-                        />
-                        <label className="form-check-label" htmlFor="withColorYes">
-                          {t("Oui")}
-                        </label>
-                      </div>
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="withColor"
-                          id="withColorNo"
-                          value={data.withColor}
-                          onChange={handleWithColorChange}
-                        />
-                        <label className="form-check-label" htmlFor="withColorNo">
-                          {t("Non")}
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-6">
-                  <div className="form-group">
-                    <label>{t("Avec options ?")}</label>
-                    <div>
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="withOptions"
-                          id="withOptionsYes"
-                          value={data.withOptions}
-                          onChange={handleWithOptionsChange}
-                        />
-                        <label className="form-check-label" htmlFor="withOptionsYes">
-                          {t("Oui")}
-                        </label>
-                      </div>
-                      <div className="form-check form-check-inline">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="withOptions"
-                          id="withOptionsNo"
-                          value={data.withOptions}
-                          onChange={handleWithOptionsChange}
-                        />
-                        <label className="form-check-label" htmlFor="withOptionsNo">
-                          {t("Non")}
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* {withColor !== null && (
+                  {/* Add other input fields here similarly */}
                   <div className="col-12">
-                    <div className="form-group row align-items-center">
-                      {inputs.map((input, index) => (
-                        <div key={index} className="d-flex align-items-center mb-3">
-                          {withColor && (
-                            <div className="me-4 mb-3">
-                              <label>{t("Couleur")}</label>
-                              <input
-                                type="color"
-                                value={input.color}
-                                onChange={(e) => handleColorChange(e, index)}
-                                className="form-control form-control-color"
-                              />
-                            </div>
-                          )}
-                          <div className="me-4 mb-3">
-                            <label>{t("Image")}</label>
-                            <input
-                              type="file"
-                              onChange={(e) => handleImageChange(e, index)}
-                              className="form-control"
-                            />
-                          </div>
-
-                          {withOptions === "false" && (
-                            <>
-                              <div className="me-4 mb-3">
-                                <label>{t("Prix")}</label>
-                                <input
-                                  type="number"
-                                  className="form-control"
-                                  name="price"
-                                />
-                              </div>
-                              <div className="mb-3">
-                                <label>{t("Stock")}</label>
-                                <input
-                                  type="number"
-                                  className="form-control"
-                                  name="stock"
-                                />
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ))}
+                    <div className="form-group">
+                      <label htmlFor="promotion">{t("Promotion")}</label>
+                      <input
+                        type="checkbox"
+                        name="promotion"
+                        checked={data.promotion}
+                        onChange={handleCheckboxChange}
+                      />
                     </div>
                   </div>
-                )} */}
+  
+                  {data.promotion && (
+                    <div className="col-12">
+                      <div className="form-group">
+                        <label htmlFor="valeurPromotion">{t("Valeur Promotion")}</label>
+                        <input
+                          type="text"
+                          name="valeurPromotion"
+                          value={data.valeurPromotion}
+                          onChange={handleFormChange}
+                          className="form-control"
+                        />
+                      </div>
+                    </div>
+                  )}
+  
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label>{t("Avec couleurs ?")}</label>
+                      <div>
+                        <input
+                          type="radio"
+                          value="true"
+                          name="withColor"
+                          checked={data.withColor}
+                          onChange={handleRadioChange}
+                        />
+                        {t("Oui")}
+                        <input
+                          type="radio"
+                          value="false"
+                          name="withColor"
+                          checked={!data.withColor}
+                          onChange={handleRadioChange}
+                        />
+                        {t("Non")}
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label>{t("Avec options ?")}</label>
+                      <div>
+                        <input
+                          type="radio"
+                          value="true"
+                          name="withOptions"
+                          checked={data.withOptions}
+                          onChange={handleRadioChange}
+                        />
+                        {t("Oui")}
+                        <input
+                          type="radio"
+                          value="false"
+                          name="withOptions"
+                          checked={!data.withOptions}
+                          onChange={handleRadioChange}
+                        />
+                        {t("Non")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Color & image inputs */}
+                {data.withColor && (
+                  <div className="col-12">
+                    <div className="form-group">
+                      <label>{t("Color and Images")}</label>
+                      {/* Color & image input logic here */}
+                    </div>
+                  </div>
+                )}
               </div>
+              <button type="submit" className="btn btn-primary">
+                {t("Submit")}
+              </button>
             </div>
           </div>
-
-          <div className="card-footer d-flex justify-content-end">
-            <button type="submit" className="btn btn-primary">
-              {t("Ajouter Produit")}
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
-  </div>
-</form>
-
-      </div>
- 
   );
+  
 };
 
 export default ProdCreate;
