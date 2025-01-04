@@ -124,7 +124,7 @@ const Playground = () => {
         }}
       >
         <div className="header">
-          <img className="logo" src="./log-mazed.png" alt="logo" />
+          <img className="logo" src="./logo_Bidor.svg" alt="logo" />
         </div>
         <div
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
@@ -181,7 +181,7 @@ const Playground = () => {
                 label={t("Demande")}
                 icon={<i className="fa-solid fa-bookmark"></i>}
               >
-                <SubMenu label={t("Demande Vendeur")}>
+                {/* <SubMenu label={t("Demande Vendeur")}>
                   <MenuItem
                     component={<Link to="/DemandeVendeurCreation" />}
                     onClick={() => setActiveLink("/DemandeVendeurCreation")}
@@ -204,8 +204,7 @@ const Playground = () => {
                   >
                     {t("Demande Produit")}
                   </MenuItem>
-                </SubMenu>
-                <SubMenu label={t("Demande Administrateur")}>
+                </SubMenu> */}
                   <MenuItem
                     component={<Link to="/DemandeProduitAdmin" />}
                     onClick={() => setActiveLink("/DemandeProduitAdmin")}
@@ -239,6 +238,15 @@ const Playground = () => {
                   >
                     {t("Demande Catégorie")}
                   </MenuItem>
+                  <MenuItem
+                  component={<Link to="/demandeAds" />}
+                  onClick={() => setActiveLink("/demandeAds")}
+                  style={
+                    activeLink === "/demandeAds" ? menuItemStyles.active : null
+                  }
+                >
+                  {t("Demande annonce")}
+                </MenuItem>
                   {/* <MenuItem
                     component={<Link to="/ListeAdministrateur" />}
                     onClick={() => setActiveLink("/ListeAdministrateur")}
@@ -249,9 +257,8 @@ const Playground = () => {
                     }
                   >
                     {t("Demande Transfert de Solde")}
-                  </MenuItem> */}
+                  < /MenuItem> */}
                 </SubMenu>
-              </SubMenu>
 
               <SubMenu
                 label={t("Catégories")}
@@ -326,31 +333,6 @@ const Playground = () => {
                   }
                 >
                   {t("Liste de enchère")}
-                </MenuItem>
-              </SubMenu>
-              <SubMenu
-                label={t("Vendeurs")}
-                icon={<i className="fa-solid fa-user-clock"></i>}
-              >
-                <MenuItem
-                  component={<Link to="/VendeurForm" />}
-                  onClick={() => setActiveLink("/VendeurForm")}
-                  style={
-                    activeLink === "/VendeurForm" ? menuItemStyles.active : null
-                  }
-                >
-                  {t("Création d'un vendeur")}
-                </MenuItem>
-                <MenuItem
-                  component={<Link to="/TableVendeurs" />}
-                  onClick={() => setActiveLink("/TableVendeurs")}
-                  style={
-                    activeLink === "/TableVendeurs"
-                      ? menuItemStyles.active
-                      : null
-                  }
-                >
-                  {t("Liste des vendeurs")}
                 </MenuItem>
               </SubMenu>
               <SubMenu
@@ -430,7 +412,7 @@ const Playground = () => {
                   {t("Liste des questions")}
                 </MenuItem>
               </SubMenu>
-              <SubMenu
+              {/* <SubMenu
                 label={t("Termes et conditions")}
                 icon={<i className="fa-solid fa-clipboard"></i>}
               >
@@ -452,11 +434,11 @@ const Playground = () => {
                 >
                   {t("Termes et conditions")}
                 </MenuItem>
-              </SubMenu>
+              </SubMenu> */}
             </Menu>
 
             <Menu menuItemStyles={menuItemStyles}>
-              <MenuItem
+              {/* <MenuItem
                 component={<Link to="/Réclamations" />}
                 icon={<i className="fa-solid fa-circle-exclamation"></i>}
                 onClick={() => setActiveLink("/Réclamations")}
@@ -465,7 +447,7 @@ const Playground = () => {
                 }
               >
                 {t("Réclamations")}
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem
                 component={<Link to="/Winners" />}
                 icon={<i className="fa-solid fa-trophy"></i>}
@@ -473,14 +455,6 @@ const Playground = () => {
                 style={activeLink === "/Winners" ? menuItemStyles.active : null}
               >
                 {t("Liste des gagnants")}
-              </MenuItem>
-              <MenuItem
-                component={<Link to="/Echéance" />}
-                icon={<i className="fa-solid fa-hand-holding-dollar"></i>}
-                onClick={() => setActiveLink("/Echéance")}
-                style={activeLink === "/Echéance" ? menuItemStyles.active : null}
-              >
-                {t("Liste echéance")}
               </MenuItem>
               <MenuItem
                 component={<Link to="/Transferts" />}

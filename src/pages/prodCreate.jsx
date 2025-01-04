@@ -164,16 +164,16 @@ const handleSubmitProduct = async (e) => {
       text: "Category created successfully!",
     });
 
-    if (response.status === 201) {
-      alert("Product Created: " + response.data);
+    if (res.status === 201) {
+      alert("Product Created: " + res.data);
     }
   } catch (error) {
     // Handle errors
-    if (error.response) {
+    if (error.res) {
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: error.response.data.message || "An error occurred while creating the category.",
+        text: error.res.data.message || "An error occurred while creating the category.",
       });
     } else {
       console.error("Error:", error.message);
@@ -360,7 +360,7 @@ const handleFormChange = (e) => {
                       type="checkbox"
                       value={data.promotion}
                       name="promtotion"
-                      onChange={handleCheckboxChange}
+                      // onChange={handleCheckboxChange}
                     />
                   </div>
                 </div>

@@ -490,8 +490,8 @@ function CategoryList() {
                         onChange={(e) => setFilterEtat(e.target.value)}
                       >
                         <option value="">{t("Choisissez l'état")}</option>
-                        <option value="BON">{t("Bon")}</option>
-                        <option value="MAUVAIS">{t("Mauvais")}</option>
+                        <option value="BROUILLON">{t("Brouillon")}</option>
+                        <option value="PUBLIER">{t("Publier")}</option>
                       </select>
                     </fieldset>
                   </div>

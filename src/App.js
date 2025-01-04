@@ -7,6 +7,7 @@ import Sidebar from './components/sidebar';
 import Navbar from './components/navbar';
 import Home from './pages/Home';
 import Categories from './pages/catCreate';
+import DemandeAds from './pages/DemandeAds';
 import ListeCategories from './pages/catList';
 import Réclamations from './pages/reclamation';
 import Cartes from './pages/recharges';
@@ -135,7 +136,6 @@ const App = () => {
               <Route path='/EnchereListe' element={<EnchereListe/>}/>
               <Route path='/ModificationDetailsEnchere' element={<ModificationDetailsEnchere/>}/>
               <Route path='/DetailEnchere' element={<DetailEnchere/>}/>
-              <Route path='/VendeurForm' element={<VendeurForm/>}/>
               <Route path='/VendeurDetails' element={<VendeurDetails/>}/>
               <Route path='/UtilisateurForm' element={<UtilisateurForm/>}/>
               <Route path='/TableUtilisateur' element={<TableUtilisateur/>}/>
@@ -153,7 +153,6 @@ const App = () => {
               <Route path='/CreationRole' element={<CreationRole/>}/>
               <Route path='/ListeAdministrateur' element={<ListeAdministrateur/>}/>
               <Route path='/CreationAdministrateur' element={<CreationAdministrateur/>}/>
-              <Route path='/TableVendeurs' element={<TableVendeurs/>}/>
               <Route path='/ParticipantForm' element={<ParticipantForm/>}/>
               <Route path='/configuration' element={<Configuration/>}/>
               <Route path='/CreationCat' element={<Categories />} />
@@ -163,6 +162,7 @@ const App = () => {
               <Route path='/Tutoriel' element={<Tutoriel />} />
               <Route path='/Transferts' element={<Transferts />} />
               <Route path='/CreationProd' element={<Produits />} />
+              <Route path='/demandeAds' element={<DemandeAds/>}/>
               {/* <Route path='/CreationProd' element={<ProductForm />} /> */}
               <Route path='/CreationPart' element={<Participants />} />
               <Route path='/ProdListe' element={<ProduitsListe />} />
@@ -189,7 +189,6 @@ const App = () => {
               <Route path='/DemandeEnchereAdmin' element={<DemandeEnchereAdmin />} />
               <Route path='/DemandeCatAdmin' element={<DemandeCatAdmin />} />
               <Route path='/Winners' element={<Winners />} />
-              <Route path='/Echéance' element={<Echeance />} />
               <Route path='/notification' element={<NotificationP/>}/>
             </Routes>
           </div>

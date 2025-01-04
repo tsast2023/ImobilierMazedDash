@@ -4,11 +4,10 @@ import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 import { GlobalState } from "../GlobalState";
 import axios from "axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie"
+import ReactPaginate from 'react-paginate';
 
-
-
-function AdsList() {
+function DemandeAds() {
   const token = Cookies.get('token')
   const { t, i18n } = useTranslation();
   const [showImageModal, setShowImageModal] = useState(false);
@@ -20,8 +19,23 @@ function AdsList() {
   const [selectedItem, setselectedItem] = useState("");
   const [uploadInputs, setUploadInputs] = useState([]);
   const state = useContext(GlobalState);
-  const annonces = state.Annonces;
-  console.log("annonces ===" , annonces)
+  const annonces = state.Annonces?.content;
+  const {
+    pseudoAds,
+    setpseudoAds,
+    numTelAds,
+    setnumTelAds,
+    actionAnnonceAds,
+    setactionAnnonceAds,
+    pageAds,
+    setpageAds
+  } = useContext(GlobalState)
+  const filteredAnnonces = annonces?.filter(annonce => annonce.statusDemande === "EN_ATTENTE");
+  const showDetail = (item) =>{
+    console.log(item)
+    setShowImageModal(true)
+    setselectedItem(item)
+   }
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212);
@@ -35,14 +49,11 @@ function AdsList() {
     // Clean up the event listener on component unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
- const showDetail = (item) =>{
-  console.log(item)
-  setShowImageModal(true)
-  setselectedItem(item)
- }
-
-  const handleDelete = (id) => {
+  const handlePageChange = (selectedPage) => {
+    setpageAds(selectedPage.selected);
+    console.log(pageAds) // React Paginate is 0-indexed, so we add 1
+  };
+  const handleTraiterAccept = (id , status) => {
     Swal.fire({
       title: t("Êtes-vous sûr(e) ?"),
       text: t(
@@ -55,16 +66,14 @@ function AdsList() {
       cancelButtonText: t("Non, annuler !"),
       closeOnConfirm: false,
       closeOnCancel: false,
-    }).then((result) => {
+    }).then(async(result) => {
       if (result.isConfirmed) {
-        deleteItem(id);
+        await traiterAnnonce(id , status);
         Swal.fire({
           title: "Supprimer",
           text: "Votre élément est Supprimer:)",
           icon: "Succes",
           confirmButtonColor: "#b0210e",
-        }).then(() => {
-          window.location.reload(); // Reload after the alert is confirmed
         });
       } else {
         Swal.fire({
@@ -77,9 +86,9 @@ function AdsList() {
     });
   };
 
-  const deleteItem = async (id) => {
+  const traiterAnnonce = async (id , status) => {
     try {
-      const res = await axios.delete(`http://localhost:8081/api/annonce/deleteAnnonce?id=${id}` , {headers : {Authorization: `Bearer ${token}`}} );
+      const res = await axios.post(`http://localhost:8081/api/annonce/traiter?id=${id}&statusDemande=${status}` , {} , {headers : {Authorization: `Bearer ${token}`} } );
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -116,6 +125,46 @@ function AdsList() {
     closeEditModal(); // Example: Close modal after save
   };
 
+  const handleTraiter = (id , status) => {
+    Swal.fire({
+      title: t("Êtes-vous sûr(e) ?"),
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: t("Oui"),
+      cancelButtonText: t("Non, annuler !"),
+      closeOnConfirm: false,
+      closeOnCancel: false,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        if (status === "APPROUVER") {
+          await traiterAnnonce(id , status);
+          Swal.fire({
+            title: "Valider",
+            text: "Votre élément est validé :)",
+            icon: "success",
+            confirmButtonColor: "#8c111b",
+          });
+        } else {
+          await traiterAnnonce(id , status);
+          Swal.fire({
+            title: "Refuser",
+            text: "Votre élément est refusé :)",
+            icon: "error",
+            confirmButtonColor: "#8c111b",
+          });
+        }
+      } else {
+        Swal.fire({
+          title: "Annulé",
+          text: "Votre élément est en sécurité :)",
+          icon: "error",
+          confirmButtonColor: "#8c111b",
+        });
+      }
+    });
+  };
+
   return (
     <div className="content-container">
       <section className="section">
@@ -125,31 +174,83 @@ function AdsList() {
           </div>
           <div className="card-body">
             <div className="table-responsive">
+            <div className="row ">
+                <div className="col-6">
+                  <div className="form-group">
+                    <label htmlFor="recherche">
+                      <h6>{t("Numéro de téléphone")}</h6>
+                    </label>
+                    <input required value={numTelAds} onChange={e=>setnumTelAds(e.target.value)} id="recherche" className="form-control" />
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="form-group">
+                    <label htmlFor="recherche">
+                      <h6>{t("Pseudo")}</h6>
+                    </label>
+                    <input required value={pseudoAds} onChange={e=>setpseudoAds(e.target.value)} id="recherche" className="form-control" />
+                  </div>
+                </div>
+                <div className="col-6 form-group">
+                  <h6>{t("Action")}</h6>
+                  <select value={actionAnnonceAds} onChange={e=>setactionAnnonceAds(e.target.value)} className="choices form-select">
+                  <option value="" selected></option>
+                    <option value="Modification">{t("Modification")}</option>
+                    <option value="Création">{t("Création")}</option>
+                  </select>
+                </div>
+                <div className="col-6 form-group">
+                  <h6>{t("Statut")}</h6>
+                  <select className="choices form-select">
+                  <option value="" disabled selected></option>
+                    <option value="square">{t("Approuver")}</option>
+                    <option value="rectangle">{t("En attente")}</option>
+                    <option value="rectangle">{t("Refuser")}</option>
+                  </select>
+                </div>
+                <ReactPaginate
+        previousLabel={"← Previous"}
+        nextLabel={"Next →"}
+        breakLabel={"..."}
+        pageCount={3} // Total number of pages
+        marginPagesDisplayed={2}
+        pageRangeDisplayed={3}
+        onPageChange={handlePageChange}
+        containerClassName={"pagination"}
+        activeClassName={"active"}
+        className="react-paginate"
+      />
+              </div>
               {isMobile ? (
                 <table className="table" id="table1">
                   <tbody>
-                  {annonces &&
-                      annonces.content?.map((item) => (
+                  {filteredAnnonces &&
+                      filteredAnnonces.map((item) => (
                         <>
+                   
                     <tr>
-                      <td>{t("Date de création")}</td>
-                      <td>{item.createdAt?.split("T")[0]}</td>
+                    <th>{t("Nom")}</th>
+                    <td>{item.user.nomFamille}</td>
                     </tr>
                     <tr>
-                      <td>{t("Date de publication")}</td>
-                      <td>{item.datePublication}</td>
+                    <th>{t("Prénom")}</th>
+                    <td>{item.user.prenom}</td>
                     </tr>
                     <tr>
-                    <th>{t("Nombre de j'aime")}</th>
-                    <td>{item.likedByUsers?.length}</td>
+                    <th>{t("Pseudo")}</th>
+                    <td>{item.user.pseudo}</td>
                     </tr>
                     <tr>
-                    <th>{t("Nombre de Commentaire")}</th>
-                      <td>{item.nbCommentaire}</td>
+                    <th>{t("Numéro de téléphone")}</th>
+                    <td>{item.user.numTel}</td>
                     </tr>
                     <tr>
-                      <td>{t("Type")}</td>
-                      <td>{item.type}</td>
+                    <th>{t("Type")}</th>
+                    <td>{item.type}</td>
+                    </tr>
+                    <tr>
+                    <th>{t("Action")}</th>
+                    <td>{item.actionAnnonce}</td>
                     </tr>
                     <tr>
                       <td>{t("Voir")}</td>
@@ -162,46 +263,61 @@ function AdsList() {
                         </Button>
                       </td>
                     </tr>
-                    <tr>
-                      <td>{t("Supprimer")}</td>
-                      <td>
-                        <i
-                          className="fa-solid fa-trash deleteIcon"
-                          onClick={()=>handleDelete(item.id)}
-                        ></i>
-                      </td>
-                    </tr>
+                  
+                  <tr>
+                    <td>{t("Valider")}</td>
+                    <td>
+                      <i
+                        className="fa-solid fa-circle-check text-success"
+                        onClick={() => handleTraiter(item.id , "APPROUVER")}
+                      ></i>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>{t("Refuser")}</td>
+                    <td>
+                      <i
+                        className="fa-solid fa-circle-xmark text-danger"
+                        onClick={() => handleTraiter(item.id ,"REFUSER")}
+                      ></i>
+                    </td>
+                  </tr>
                     <tr>
                       <td colSpan="2">
                         <hr />
                       </td>
                     </tr>
                     </>
-                    ))}
+                  ))}
                   </tbody>
                 </table>
               ) : (
                 <table className="table" id="table1">
                   <thead>
                     <tr>
-                      <th>{t("Date de création")}</th>
-                      <th>{t("Date de publication")}</th>
-                      <th>{t("Nombre de j'aime")}</th>
-                      <th>{t("Nombre de Commentaire")}</th>
+                      
+                      <th>{t("Nom")}</th>
+                      <th>{t("Prénom")}</th>
+                      <th>{t("Pseudo")}</th>
+                      <th>{t("Numéro de téléphone")}</th>
                       <th>{t("Type")}</th>
+                      <th>{t("Action")}</th>
                       <th>{t("Voir")}</th>
-                      <th>{t("Supprimer")}</th>
+                      <th>{t("Accepter")}</th>
+                      <th>{t("Refuser")}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {annonces &&
-                      annonces?.content?.map((item) => (
+                    {filteredAnnonces &&
+                      filteredAnnonces.map((item) => (
                         <tr>
-                          <td>{item.createdAt?.split("T")[0]}</td>
-                          <td>{item.datePublication}</td>
-                          <td>{item.likedByUsers?.length}</td>
-                          <td>{item.nbCommentaire}</td>
+                         
+                          <td>{item.user.nomFamille}</td>
+                          <td>{item.user.prenom}</td>
+                          <td>{item.user.pseudo}</td>
+                          <td>{item.user.numTel}</td>
                           <td>{item.type}</td>
+                          <td>{item.actionAnnonce}</td>
                           <td>
                             <Button
                               className="btn"
@@ -211,11 +327,17 @@ function AdsList() {
                             </Button>
                           </td>
                           <td>
-                            <i
-                              className="fa-solid fa-trash deleteIcon"
-                              onClick={() => handleDelete(item.id)}
-                            ></i>
-                          </td>
+                      <i
+                        className="fa-solid fa-circle-check text-success"
+                        onClick={() =>handleTraiter(item.id , "APPROUVER")}
+                      ></i>
+                    </td>
+                    <td>
+                      <i
+                        className="fa-solid fa-circle-xmark text-danger"
+                        onClick={() =>  handleTraiter(item.id ,"REFUSER")}
+                      ></i>
+                    </td>
                         </tr>
                       ))}
                   </tbody>
@@ -281,8 +403,8 @@ function AdsList() {
           </Modal.Footer>
         </Modal>
 
-        {/* Other Modals (Image, Video, Carousel) */}
-        <Modal
+      {/* Other Modals (Image, Video, Carousel) */}
+      <Modal
           show={showImageModal}
           onHide={() => setShowImageModal(false)}
           centered
@@ -482,4 +604,5 @@ function AdsList() {
   );
 }
 
-export default AdsList;
+export default DemandeAds;
+
