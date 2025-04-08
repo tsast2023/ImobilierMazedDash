@@ -170,7 +170,7 @@ const App = () => {
               <Route path='/catmodif' element={<CatEdit/>}/>
               <Route path='/PartListe' element={<ParticipantsListe/>}/>
               <Route path='/partdetail' element={<ParticipantDetail/>}/>
-              <Route path='/prodDétail' element={<ProductDetail/>} />
+              <Route path='/prodDétail/:id' element={<ProductDetail/>} />
               <Route path='/prodEdit' element={<ProductEditForm/>} />
               <Route path='/CreationAd' element={<AnnonceCreator/>} />
               <Route path='/ListeAds' element={<AnnonceList />} />

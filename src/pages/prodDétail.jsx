@@ -2,13 +2,39 @@ import React, { useState, useEffect } from "react";
 import "../css/prod-detail.css";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
+import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Table } from "react-bootstrap";
 
 const ProductDetail = () => {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
+    // Get the location object
+    const location = useLocation();
+  
+    // Access the cat object from the state
+    const product = location.state && location.state.product;
+    
+    useEffect(()=>{
+      console.log("product===" , location.state.product)
+    })
 
+    const [selectedColor, setSelectedColor] = useState(null);
+  const [mainImage, setMainImage] = useState(null);
+
+  // Si la couleur est sélectionnée, on récupère la galerie pour cette couleur
+  const handleColorSelect = (colorCode) => {
+    setSelectedColor(colorCode);
+
+    // Récupérer la première image de la galerie pour la couleur sélectionnée
+    const selectedGalerie = product.couleurDetails[colorCode]?.galerie || [];
+    setMainImage(selectedGalerie[0]);  // Afficher la première image de la galerie
+  };
+
+  // Si aucune couleur n'est sélectionnée, on utilise la galerie par défaut
+  const galerieImages = selectedColor
+    ? product.couleurDetails[selectedColor]?.galerie || []
+    : product.galerie || []; 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1212);
@@ -26,21 +52,9 @@ const ProductDetail = () => {
   const deleteItem = () => {
     // Implement your delete logic here
   };
-  const product = {
-    title: "Sample Product",
-    description:
-      "This is a sample product description. It provides details about the product features and benefits.",
-    price: 99.99,
-    stock: 20,
-    images: [
-      "https://via.placeholder.com/600x400",
-      "https://via.placeholder.com/600x400/ff7f7f",
-      "https://via.placeholder.com/600x400/7f7fff",
-      "https://via.placeholder.com/600x400/7fff7f",
-    ],
-  };
 
-  const [mainImage, setMainImage] = useState(product.images[0]);
+
+
 
   const confirmAction = (actionType) => {
     Swal.fire({
@@ -79,27 +93,62 @@ const ProductDetail = () => {
     <>
     <div className="content-container">
     <div className="product-detail">
+      
+      <div className="product-images">
+  
+
       <div className="product-images">
         <div className="main-image">
-          <img src={mainImage} alt="Product" />
+          <img src={mainImage || "default-image.jpg"} alt="Product" />
         </div>
         <div className="thumbnail-images">
-          {product.images.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Thumbnail ${index + 1}`}
-              onClick={() => setMainImage(image)}
-            />
-          ))}
+          {galerieImages.length > 0 ? (
+            galerieImages.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`Thumbnail ${index + 1}`}
+                onClick={() => setMainImage(image)}
+              />
+            ))
+          ) : (
+            <p>Aucune image disponible pour cette couleur</p>
+          )}
         </div>
       </div>
+    </div>
       <div className="product-info">
-        <h1>{product.title}</h1>
-        <p>{product.description}</p>
+        <h1>{product.libelleProductFr}</h1>
+        {product && product.withColor && product.couleurDetails && (
+  <div className="product-colors">
+    <strong>Couleurs disponibles:</strong>
+    <div className="color-list d-flex">
+      {Object.keys(product.couleurDetails).map((colorCode, index) => (
+        <div
+          key={index}
+          className="color-box"
+          style={{
+            backgroundColor: colorCode,
+            width: "30px",
+            height: "30px",
+            borderRadius: "50%",
+            margin: "5px",
+            border: selectedColor === colorCode ? "2px solid #000" : "1px solid #ccc"
+          }}
+          onClick={() => handleColorSelect(colorCode)}
+          title={`Couleur: ${colorCode}`}
+        ></div>
+      ))}
+    </div>
+  </div>
+)}
+
+
         <p>
-          <strong>Price:</strong> ${product.price}
+          <strong>Fournisseur:</strong> {product.fournisseur}
         </p>
+        <p>{product.descriptionFR}</p>
+       
         <p>
           <strong>In Stock:</strong> {product.stock}
         </p>

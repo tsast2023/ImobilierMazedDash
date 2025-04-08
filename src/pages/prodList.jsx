@@ -3,11 +3,13 @@ import Swal from "sweetalert2";
 import { Table, Modal, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import ReactPaginate from "react-paginate";
 
 const ProdList = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
   const [starClicked, setStarClicked] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -42,6 +44,7 @@ const ProdList = () => {
       try {
         const response = await axios.get("http://localhost:8082/api/products/all");
         setProducts(response.data);
+        console.log("products ===" , response.data)
         setPageCount(Math.ceil(response.data.length / itemsPerPage));
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -237,13 +240,17 @@ const ProdList = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td>{t("Détail")}</td>
-                      <td>
-                        <Link to="/prodDétail" className="btn btn-outline block">
-                          <i className="fa-solid fa-eye font-medium-1"></i>
-                        </Link>
-                      </td>
-                    </tr>
+                <td>{t("Détail")}</td>
+                <td>
+                  <a
+                    onClick={() =>
+                      navigate(`/prodDétail/${product.id}`, { state: { product } })
+                    }
+                  >
+                    <i className="fa-solid fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
                     <tr>
                       <td>{t("Modifier")}</td>
                       <td>
@@ -316,10 +323,14 @@ const ProdList = () => {
                         <button className="btn btn-secondary">{t("Publié")}</button>
                       </td>
                       <td>
-                        <Link to="/prodDétail" className="btn btn-outline block">
-                          <i className="fa-solid fa-eye font-medium-1"></i>
-                        </Link>
-                      </td>
+                <a
+                  onClick={() =>
+                    navigate(`/prodDétail/${product.id}`, { state: { product } })
+                  }
+                >
+                  <i className="fa-solid fa-eye"></i>
+                </a>
+              </td>
                       <td>
                         <button className="btn btn-outline block" onClick={() => handleEditClick(product)}>
                           <i className="fa-solid fa-pen-to-square font-medium-1"></i>

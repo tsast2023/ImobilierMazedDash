@@ -11,8 +11,8 @@
 }
 
 .main-image img {
-  width: 100%;
-  height: auto;
+  width: 450px;
+  height: 450px;
   border: 1px solid #ccc;
 }
 
