@@ -41,7 +41,7 @@ const Navbar = ({ username }) => {
     i18n.changeLanguage(lng);
     setIsLangMenuOpen(false);
     try {
-      const res = await axios.put(`http://localhost:8081/admin/language?newLanguage=${lng.toUpperCase()}` , {} , { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.put(`http://localhost:8082/admin/language?newLanguage=${lng.toUpperCase()}` , {} , { headers: { Authorization: `Bearer ${token}` } });
       console.log(res.data)
       window.location.reload();
     } catch (error) {

@@ -9,7 +9,7 @@ function CategoryList() {
   // Access the cat object from the state
   const cat = location.state && location.state.cat;
   useEffect(()=>{
-    console.log(location.state.cat)
+    console.log("cat===" , location.state.cat)
   })
   const handleDelete = () => {
     // Show SweetAlert confirmation dialog
@@ -106,9 +106,9 @@ function CategoryList() {
                           </tr>
                         </thead>
                         <tbody>
-                          {cat && cat.categories? cat.categories.map((item)=>(
+                          {cat && cat.categoriesFille? cat.categoriesFille.map((item)=>(
                             <tr>
-                            <td className="text-bold-500">{item?.libeléCategorie}</td>
+                            <td className="text-bold-500">{item?.libCategorie}</td>
                             <th><button class="btn btn-secondary">{item?.status}</button></th>
                             <td>
                               <i
@@ -116,6 +116,7 @@ function CategoryList() {
                                 onClick={handleBan}
                               ></i>
                             </td>
+                            
                             <td>
                               <i
                                 className="fa-solid fa-trash deleteIcon"

@@ -13,6 +13,7 @@ const CatCreate = () => {
 
   const [inputs, setInputs] = useState([{ criteresNames: "", criteresNamesEn: "", criteresNamesAr: "" }]);
   const [icon, setIcon] = useState(null);
+  const [img, setImg] = useState(null);
   const [parentCategories, setParentCategories] = useState([]);
   const state = useContext(GlobalState);
 
@@ -62,6 +63,9 @@ const CatCreate = () => {
     if (icon) {
       formData.append("icon", icon);
     }
+    if(img){
+      formData.append("img" , img)
+    }
 
     try {
       const res = await axios.post("http://localhost:8082/api/categories/create", formData, {
@@ -92,6 +96,9 @@ const CatCreate = () => {
 
   // Handle icon change
   const handleIconChange = (e) => {
+    setIcon(e.target.files[0]);
+  };
+  const handleImgChange = (e) => {
     setIcon(e.target.files[0]);
   };
 
@@ -207,6 +214,16 @@ const CatCreate = () => {
                   className="form-control"
                   id="iconInput"
                   onChange={handleIconChange}
+                />
+              </div>
+              
+              <div className="form-group" style={{ marginTop: "15px" }}>
+                <label htmlFor="iconInput">Image</label>
+                <input
+                  type="file"
+                  className="form-control"
+                  id="iconInput"
+                  onChange={handleImgChange}
                 />
               </div>
             </div>

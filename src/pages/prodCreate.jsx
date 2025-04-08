@@ -45,7 +45,7 @@ const ProdCreate = () => {
     descriptionEn: "",
     prixMazedOnline: "",
     promotion: false,
-    valeurPromotion: "",
+    valeurPromotion: 0,
     withOptions: false,
   });
 
@@ -136,27 +136,30 @@ const handleSubmitProduct = async (e) => {
   formData.append('promotion', data.promotion); 
   console.log("withColor ===" , withColor);
   console.log("withOptions ===" , withOptions);
-  inputs.forEach((input, index) => {
-    if (withColor) {
-      formData.append(`color[${index}]`, input.color);
-      formData.append(`galerieWithColor[${index}]`, input.image);
-    }
-    if (withColor === false) {
-      formData.append(`galerieWithoutColor[${index}]`, input.image);
-    }
-    if (withOptions === 'false') {
-      formData.append(`prixWithColorWithoutOptions[${index}]`, input.price);
-      formData.append(`stockWithColorWithoutOptions[${index}]`, input.stock);
-    }
-  });
+  // inputs.forEach((input, index) => {
+  //   if (withColor) {
+  //     formData.append(`color[${index}]`, input.color);
+  //     formData.append(`galerieWithColor[${index}]`, input.image);
+  //   }
+  //   if (withColor === false) {
+  //     formData.append(`galerieWithoutColor[${index}]`, input.image);
+  //   }
+  //   if (withOptions === 'false') {
+  //     formData.append(`prixWithColorWithoutOptions[${index}]`, input.price);
+  //     formData.append(`stockWithColorWithoutOptions[${index}]`, input.stock);
+  //   }
+  // });
   
   try {
-    const res = await axios.post("http://localhost:8082/api/categories/create", formData, {
+    console.log("token ===" ,token)
+    const res = await axios.post("http://localhost:8082/api/products/create",formData, {
         headers: {
         "Content-Type": "multipart/form-data",
+         Authorization: `Bearer ${token}`, 
         },
       });
-    console.log("response ========== " , res.data);
+    console.log("response ========== " , res);
+    console.log("token ===" ,token)
     
     Swal.fire({
       icon: "success",
@@ -168,18 +171,17 @@ const handleSubmitProduct = async (e) => {
       alert("Product Created: " + res.data);
     }
   } catch (error) {
-    // Handle errors
-    if (error.res) {
+    if (error.response) { // Correction ici
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: error.res.data.message || "An error occurred while creating the category.",
+        text: error.response.data.message || "An error occurred while creating the product.",
       });
     } else {
       console.error("Error:", error.message);
     }
   }
-};
+}
 const handleFormChange = (e) => {
   const { name, value } = e.target;
   setData((prevData) => ({

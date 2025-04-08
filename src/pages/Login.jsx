@@ -29,7 +29,7 @@ const Login = () => {
     <div className="container-fluid">
       <div className="row">
       <div className="col-lg-6 image-container">
-          <img src="./Mazed.png" alt="login" className="img-fluid" />
+          <img src="./logo_Bidor.svg" alt="login" className="img-fluid" />
         </div>
         <div className="col-lg-6 login-container">
           <div className="card-log">
