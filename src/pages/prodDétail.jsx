@@ -9,8 +9,13 @@ import { Table } from "react-bootstrap";
 const ProductDetail = () => {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState({});
     // Get the location object
     const location = useLocation();
+
+    useEffect(()=> {
+      console.log("selectedColor" , selectedColor
+     ) })
   
     // Access the cat object from the state
     const product = location.state && location.state.product;
@@ -18,7 +23,7 @@ const ProductDetail = () => {
     useEffect(()=>{
       console.log("product===" , location.state.product)
     })
-
+    const [options , setOptions] = useState({})
     const [selectedColor, setSelectedColor] = useState(null);
   const [mainImage, setMainImage] = useState(null);
 
@@ -26,9 +31,23 @@ const ProductDetail = () => {
   const handleColorSelect = (colorCode) => {
     setSelectedColor(colorCode);
 
-    // Récupérer la première image de la galerie pour la couleur sélectionnée
+    // Reset selected option when color changes
+    setSelectedOptions(null);
+
+    // Set the first image from the gallery for the selected color
     const selectedGalerie = product.couleurDetails[colorCode]?.galerie || [];
-    setMainImage(selectedGalerie[0]);  // Afficher la première image de la galerie
+    setMainImage(selectedGalerie[0]);
+    setOptions(product.couleurDetails[colorCode]?.optionsColor || []);
+  };
+
+  const handleOptionSelect = (optionName, optionValue) => {
+    setSelectedOptions((prevState) => ({
+      ...prevState,
+      [optionName]: optionValue,
+    }));
+
+    // Update selected option and show price and stock details
+    setSelectedOptions(optionValue);
   };
 
   // Si aucune couleur n'est sélectionnée, on utilise la galerie par défaut
@@ -52,6 +71,7 @@ const ProductDetail = () => {
   const deleteItem = () => {
     // Implement your delete logic here
   };
+
 
 
 
@@ -93,78 +113,129 @@ const ProductDetail = () => {
     <>
     <div className="content-container">
     <div className="product-detail">
-      
-      <div className="product-images">
-  
+  <div className="product-images">
+    <div className="main-image">
+      <img src={mainImage || "default-image.jpg"} alt="Product" />
+    </div>
+    <div className="thumbnail-images">
+      {galerieImages.length > 0 ? (
+        galerieImages.map((image, index) => (
+          <img
+            key={index}
+            src={image}
+            alt={`Thumbnail ${index + 1}`}
+            onClick={() => setMainImage(image)}
+          />
+        ))
+      ) : (
+        <p>Aucune image disponible pour cette couleur</p>
+      )}
+    </div>
+  </div>
 
-      <div className="product-images">
-        <div className="main-image">
-          <img src={mainImage || "default-image.jpg"} alt="Product" />
-        </div>
-        <div className="thumbnail-images">
-          {galerieImages.length > 0 ? (
-            galerieImages.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Thumbnail ${index + 1}`}
-                onClick={() => setMainImage(image)}
-              />
-            ))
-          ) : (
-            <p>Aucune image disponible pour cette couleur</p>
-          )}
+  <div className="product-info">
+    <h1>{product.libelleProductFr}</h1>
+    <p>
+      <strong>Fournisseur:</strong> {product.fournisseur}
+    </p>
+    <p>{product.descriptionFR}</p>
+
+    {/* Handle Color Selection */}
+    {product.withColor && product.couleurDetails && (
+      <div className="product-colors">
+        <strong>Couleurs disponibles:</strong>
+        <div className="color-list d-flex">
+          {Object.keys(product.couleurDetails).map((colorCode, index) => (
+            <div
+              key={index}
+              className="color-box"
+              style={{
+                backgroundColor: colorCode,
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                margin: "5px",
+                border: selectedColor === colorCode ? "2px solid #000" : "1px solid #ccc"
+              }}
+              onClick={() => handleColorSelect(colorCode)}
+              title={`Couleur: ${colorCode}`}
+            ></div>
+          ))}
         </div>
       </div>
-    </div>
-      <div className="product-info">
-        <h1>{product.libelleProductFr}</h1>
-        {product && product.withColor && product.couleurDetails && (
-  <div className="product-colors">
-    <strong>Couleurs disponibles:</strong>
-    <div className="color-list d-flex">
-      {Object.keys(product.couleurDetails).map((colorCode, index) => (
-        <div
-          key={index}
-          className="color-box"
-          style={{
-            backgroundColor: colorCode,
-            width: "30px",
-            height: "30px",
-            borderRadius: "50%",
-            margin: "5px",
-            border: selectedColor === colorCode ? "2px solid #000" : "1px solid #ccc"
-          }}
-          onClick={() => handleColorSelect(colorCode)}
-          title={`Couleur: ${colorCode}`}
-        ></div>
-      ))}
+    )}
+{product.withOptions && selectedColor && (
+  <div className="product-options">
+    <strong className="options-title">Options disponibles:</strong>
+    <div className="options-list d-flex">
+      {product.couleurDetails[selectedColor]?.optionsColor &&
+        Object.keys(product.couleurDetails[selectedColor].optionsColor).length > 0 ? (
+        Object.keys(product.couleurDetails[selectedColor].optionsColor).map((optionKey, index) => {
+          const sizes = product.couleurDetails[selectedColor].optionsColor[optionKey];
+          return (
+            <div key={index} className="option-box">
+              <h4 className="option-title">{optionKey}</h4>
+              <div className="size-options d-flex">
+                {Object.keys(sizes).map((sizeKey, sizeIndex) => {
+                  const size = sizes[sizeKey][0];  // Assuming each size array has a single object with stock and price data
+                  return (
+                    <div
+                      key={sizeIndex}
+                      className="size-option d-flex"
+                      onClick={() => handleOptionSelect(optionKey, size)}
+                    >
+                      <div className="size-info">
+                        <p className="size-name"><strong>{sizeKey}</strong></p>
+                     
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <p>Aucune option disponible pour cette couleur</p>
+      )}
     </div>
   </div>
 )}
 
+  {selectedOptions && (
+              <div className="selected-option-details">
+                <p><strong>Prix:</strong> {selectedOptions.prix}€</p>
+                <p><strong>Stock actuel:</strong> {selectedOptions.stockActuel}</p>
+                <p><strong>Stock actuel:</strong> {selectedOptions.stockInitiale}</p>
+              </div>
+            )}
 
-        <p>
-          <strong>Fournisseur:</strong> {product.fournisseur}
-        </p>
-        <p>{product.descriptionFR}</p>
-       
-        <p>
-          <strong>In Stock:</strong> {product.stock}
-        </p>
-        <div className="product-buttons">
-          <button className="btn" onClick={() => confirmAction("Désactiver")}>
-            {t("Désactiver")}
-          </button>
-          <button className="btn" onClick={() => confirmAction("Supprimé")}>
-            {t("Supprimer")}
-          </button>
-          <Link to="/EnchèreCreation">
-            <button className="btn">{t("Ajouter une enchère")}</button>
-          </Link>
-        </div>
-      </div>
+
+
+    {/* <p>
+      <strong>Fournisseur:</strong> {product.fournisseur}
+    </p>
+    <p>{product.descriptionFR}</p> */}
+
+    {/* Handle Stock Display */}
+  
+
+    {/* Action Buttons */}
+    <div className="product-buttons">
+      <button className="btn" onClick={() => confirmAction("Désactiver")}>
+        {t("Désactiver")}
+      </button>
+      <button className="btn" onClick={() => confirmAction("Supprimé")}>
+        {t("Supprimer")}
+      </button>
+      
+      <Link to="/EnchèreCreation">
+        <button className="btn">{t("Ajouter une enchère")}</button>
+      </Link>
     </div>
+  </div>
+</div>
+
     <section className="section">
         <div className="card">
           <div

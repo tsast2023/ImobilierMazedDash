@@ -56,6 +56,43 @@ gap: 1rem;
 .product-buttons button:hover {
   background-color: #b0210e;
 }
+/* Ensures that the options display in a horizontal line */
+.size-options {
+  display: flex;
+  flex-wrap: wrap; /* Allows items to wrap if they overflow */
+}
+
+/* Style the individual option box */
+.size-option {
+  display: flex;
+  align-items: center; /* Centers the content inside the option box */
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 20px; /* Adds 20px space to the right of each option */
+  margin-bottom: 10px; /* Adds space below each option */
+}
+
+/* Add some hover effect */
+.size-option:hover {
+  background-color: #f0f0f0;
+}
+
+/* Add some spacing for the option info */
+.size-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Optional: Add some spacing for the size name */
+.size-name {
+  margin-bottom: 5px;
+}
+
 
 @media (max-width: 768px) {
   .product-detail {
